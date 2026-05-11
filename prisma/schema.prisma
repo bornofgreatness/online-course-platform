@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+
 }
 
 model User {
@@ -16,8 +17,10 @@ model User {
   password  String
   name      String
   role      String   @default("STUDENT")
+  emailVerifiedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
 
   enrollments Enrollment[]
   subscriptions Subscription[]
@@ -28,6 +31,7 @@ model User {
   affiliateCommissions AffiliateCommission[]
   referrals Referral[]
   passwordResetTokens PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
 }
 
 model Category {
@@ -158,6 +162,16 @@ model Referral {
   createdAt       DateTime @default(now())
 }
 
+model EmailVerificationToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  used        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
 model PasswordResetToken {
   id         String   @id @default(cuid())
   userId     String
@@ -167,5 +181,6 @@ model PasswordResetToken {
   used        Boolean  @default(false)
   createdAt   DateTime @default(now())
 }
+
 
 

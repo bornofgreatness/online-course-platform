@@ -15,23 +15,42 @@ export const authOptions: AuthOptions = {
         if (!credentials?.email || !credentials?.password) {
           return null
         }
+
         const prisma = getPrisma()
-        const user = await prisma.user.findUnique({
+        let user = await prisma.user.findUnique({
           where: { email: credentials.email }
         })
+
+        // Do not auto-create users during credential authorization.
+        // This prevents inconsistent auth behavior across different DATABASE_URLs.
+
+
         if (!user) {
           return null
         }
+
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
         if (!isPasswordValid) {
           return null
         }
+
+        // Block sign-in for unverified users (except admins)
+        const role = (user.role ?? '').toString().trim().toUpperCase()
+        const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN'
+        const emailVerifiedAt = (user as any).emailVerifiedAt as Date | null | undefined
+        if (!isAdmin && !emailVerifiedAt) {
+          return null
+        }
+
+
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role
         }
+
       }
     })
   ],

@@ -1,15 +1,26 @@
-# Online Course Platform — Completion Tracker
+# TODO
 
-## Authentication System
-- [ ] Student registration (API/UI) — exists
-- [ ] Student login (NextAuth credentials) — exists
-- [ ] Password recovery via email — **partial** (API + UI routes added, Prisma model missing)
-- [ ] Email verification — not started
-- [ ] Role-based access control (Student/Affiliate/Admin/SuperAdmin) — partial (ADMIN/SUPER_ADMIN gating exists)
+## Step 1 — Fix build/runtime blockers
+- [ ] Ensure `next build` succeeds in this environment.
+  - [ ] Add Suspense boundary / refactor pages using `useSearchParams` in:
+    - [ ] `app/auth/verify-email/page.tsx`
+    - [ ] `app/auth/reset-password/page.tsx`
+  - [ ] Ensure Prisma/API routes don’t crash static export due to missing DB connection.
 
-## Student Area
-- [ ] Dashboard sections (active subscription, payments, certificates, completion summary, affiliate earnings) — **partial** (API fields extended, UI mostly still “enrolled courses”)
+## Step 2 — Email verification requirement
+- [ ] Verify `POST /api/auth/confirm-email` implementation end-to-end:
+  - [ ] token lookup + expiry + used checks
+  - [ ] mark `user.emailVerifiedAt`
+  - [ ] mark token `used=true`
 
-## Next
-- [ ] Add Prisma PasswordResetToken model + run migration/push
+## Step 3 — Update checklist
+- [ ] Update `TODO_REQUIREMENTS.md` checkboxes based on what now works.
+
+## Step 4 — Continue implementing remaining missing requirements
+- [ ] Affiliate flows
+- [ ] Student dashboard sections
+- [ ] Quizzes + certificates + verification
+- [ ] Subscriptions/payment integrations
+- [ ] Access control guards
+- [ ] SEO/perf/security items
 

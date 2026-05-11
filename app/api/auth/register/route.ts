@@ -25,9 +25,24 @@ export async function POST(request: NextRequest) {
     data: {
       email,
       password: hashedPassword,
-      name
+      name,
     }
   })
+
+  // Send email verification (best-effort)
+  try {
+    const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL || 'http://localhost:3000'}/api/auth/send-verification-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+    if (!verifyRes.ok) {
+      // ignore to not block registration
+    }
+  } catch {
+    // ignore
+  }
+
 
   return NextResponse.json({ user: { id: user.id, email: user.email, name: user.name } })
 }

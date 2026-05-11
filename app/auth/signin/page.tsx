@@ -51,9 +51,15 @@ export default function SignIn() {
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
           Sign In
         </button>
-        <p className="mt-4 text-center">
-          Do not have an account? <Link href="/auth/signup" className="text-blue-500">Sign Up</Link>
-        </p>
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <Link href="/auth/forgot-password" className="text-blue-500 hover:underline text-sm">
+            Forgot password?
+          </Link>
+          <p className="text-center text-sm">
+            Do not have an account? <Link href="/auth/signup" className="text-blue-500 hover:underline">Sign Up</Link>
+          </p>
+        </div>
+
       </form>
     </div>
   )

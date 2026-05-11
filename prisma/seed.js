@@ -97,7 +97,8 @@ async function main() {
       name: 'Admin User',
       email: 'admin@courseplatform.test',
       password,
-      role: 'ADMIN'
+      role: 'ADMIN',
+      emailVerifiedAt: new Date()
     }
   })
 
@@ -108,7 +109,8 @@ async function main() {
       name: 'Student User',
       email: 'student@courseplatform.test',
       password,
-      role: 'STUDENT'
+      role: 'STUDENT',
+      emailVerifiedAt: new Date()
     }
   })
 

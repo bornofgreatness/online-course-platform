@@ -15,13 +15,14 @@
   - [x] `POST /api/auth/reset-password`
   - [x] UI pages `/auth/forgot-password` and `/auth/reset-password`
   - [x] Prisma model `PasswordResetToken`
-- [ ] Email verification
-  - [ ] Generate verification token
-  - [ ] Send verification email
-  - [ ] Verify token + mark user verified
+- [x] Email verification
+  - [x] Generate verification token
+  - [x] Send verification email
+  - [x] Verify token + mark user verified
   - [ ] Block sign-in for unverified users (optional)
-- [ ] Secure session management (completed via NextAuth)
-- [ ] JWT/auth-based auth (completed via NextAuth JWT)
+
+- [x] Secure session management (completed via NextAuth)
+- [x] JWT/auth-based auth (completed via NextAuth JWT)
 - [ ] Role-based access control (Student/Affiliate/Admin/Super Admin)
   - [x] Admin gating helpers exist (ADMIN/SUPER_ADMIN)
   - [ ] Affiliate role flows + permissions

@@ -22,6 +22,7 @@ export default function SignUp() {
     } else {
       alert('Registration failed')
     }
+
   }
 
   return (
@@ -61,9 +62,15 @@ export default function SignUp() {
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
           Sign Up
         </button>
-        <p className="mt-4 text-center">
-          Already have an account? <Link href="/auth/signin" className="text-blue-500">Sign In</Link>
-        </p>
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <p className="text-center text-sm">
+            Already have an account? <Link href="/auth/signin" className="text-blue-500 hover:underline">Sign In</Link>
+          </p>
+          <Link href="/auth/forgot-password" className="text-blue-500 hover:underline text-sm">
+            Forgot password?
+          </Link>
+        </div>
+
       </form>
     </div>
   )
