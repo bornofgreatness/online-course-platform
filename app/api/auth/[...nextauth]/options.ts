@@ -39,7 +39,7 @@ export const authOptions: AuthOptions = {
         const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN'
         const emailVerifiedAt = (user as any).emailVerifiedAt as Date | null | undefined
         if (!isAdmin && !emailVerifiedAt) {
-          return null
+          throw new Error('Email not verified')
         }
 
 

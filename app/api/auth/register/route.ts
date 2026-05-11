@@ -29,6 +29,8 @@ export async function POST(request: NextRequest) {
     }
   })
 
+  let verifyUrl: string | null = null
+
   // Send email verification (best-effort)
   try {
     const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL || 'http://localhost:3000'}/api/auth/send-verification-email`, {
@@ -36,13 +38,17 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     })
-    if (!verifyRes.ok) {
-      // ignore to not block registration
+
+    const verifyData = await verifyRes.json().catch(() => null)
+    if (verifyRes.ok && verifyData?.verifyUrl) {
+      verifyUrl = verifyData.verifyUrl
     }
   } catch {
-    // ignore
+    // ignore to not block registration
   }
 
-
-  return NextResponse.json({ user: { id: user.id, email: user.email, name: user.name } })
+  return NextResponse.json({
+    user: { id: user.id, email: user.email, name: user.name },
+    verifyUrl,
+  })
 }

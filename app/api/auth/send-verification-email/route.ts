@@ -16,11 +16,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    const resendApiKey = process.env.RESEND_API_KEY
-    if (!resendApiKey) {
-      return NextResponse.json({ error: 'RESEND_API_KEY is not configured' }, { status: 500 })
-    }
-
     const prisma = getPrisma()
 
     const user = await prisma.user.findUnique({ where: { email } })
@@ -45,7 +40,12 @@ export async function POST(request: NextRequest) {
     const urlBase = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`
     const verifyUrl = `${urlBase}/auth/verify-email?token=${encodeURIComponent(token)}`
 
+    const resendApiKey = process.env.RESEND_API_KEY
     const from = process.env.RESEND_FROM_EMAIL || 'no-reply@example.com'
+
+    if (!resendApiKey) {
+      return NextResponse.json({ success: true, verifyUrl })
+    }
 
     // Send verification email using Resend REST API without requiring the SDK.
     const resendResponse = await fetch('https://api.resend.com/emails', {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       throw new Error(`Failed to send verification email via Resend (${resendResponse.status}): ${text}`)
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, verifyUrl: process.env.NODE_ENV === 'development' ? verifyUrl : undefined })
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'Failed to send verification email' }, { status: 500 })
   }

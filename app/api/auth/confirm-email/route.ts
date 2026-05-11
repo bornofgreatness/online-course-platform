@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
 
     const prisma = getPrisma()
 
-    // IMPORTANT: token is stored as a hash, so we validate against the earliest un-used token.
-    const candidate = await prisma.emailVerificationToken.findFirst({
+    // IMPORTANT: token is stored as a hash, so validate it against active tokens.
+    const candidates = await prisma.emailVerificationToken.findMany({
       where: {
         used: false,
         expiresAt: { gt: new Date() },
@@ -21,12 +21,15 @@ export async function POST(request: NextRequest) {
       orderBy: { expiresAt: 'asc' },
     })
 
-    if (!candidate) {
-      return NextResponse.json({ error: 'Verification token is invalid or expired' }, { status: 400 })
+    let candidate = null
+    for (const item of candidates) {
+      if (await bcrypt.compare(token, item.tokenHash)) {
+        candidate = item
+        break
+      }
     }
 
-    const matches = await bcrypt.compare(token, candidate.tokenHash)
-    if (!matches) {
+    if (!candidate) {
       return NextResponse.json({ error: 'Verification token is invalid or expired' }, { status: 400 })
     }
 

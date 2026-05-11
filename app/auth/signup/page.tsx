@@ -8,19 +8,29 @@ export default function SignUp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [verifyUrl, setVerifyUrl] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setMessage(null)
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name })
     })
+
+    const data = await res.json().catch(() => null)
     if (res.ok) {
-      router.push('/auth/signin')
+      if (data?.verifyUrl) {
+        setVerifyUrl(data.verifyUrl)
+        setMessage('Registration succeeded. Use the verification link below to verify your email.')
+      } else {
+        router.push('/auth/signin')
+      }
     } else {
-      alert('Registration failed')
+      setMessage(data?.error || 'Registration failed')
     }
 
   }
@@ -62,6 +72,18 @@ export default function SignUp() {
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
           Sign Up
         </button>
+        {message && (
+          <div className="mt-4 rounded-lg bg-gray-50 p-4 text-sm text-gray-700">
+            {message}
+            {verifyUrl && (
+              <div className="mt-2 break-words">
+                <a href={verifyUrl} className="text-blue-600 hover:underline">
+                  {verifyUrl}
+                </a>
+              </div>
+            )}
+          </div>
+        )}
         <div className="mt-4 flex flex-col items-center gap-2">
           <p className="text-center text-sm">
             Already have an account? <Link href="/auth/signin" className="text-blue-500 hover:underline">Sign In</Link>

@@ -11,52 +11,63 @@ export default function Header() {
   }
 
   return (
-    <header className="flex flex-col gap-4 p-4 bg-white shadow md:flex-row md:items-center md:justify-between">
-      <div className="text-lg font-semibold">
-        <Link href="/" className="hover:text-blue-600">
-          Online Course Platform
-        </Link>
-      </div>
-      <nav className="flex flex-wrap items-center gap-4">
-        <Link href="/courses" className="text-blue-500 hover:underline">
-          Courses
-        </Link>
-
-        {status === 'loading' ? (
-          <span className="text-gray-500">Loading...</span>
-        ) : session ? (
-          // Logged in navigation
-          <>
-            <Link href="/dashboard" className="text-blue-500 hover:underline">
-              Dashboard
-            </Link>
-            <Link href="/certificates" className="text-blue-500 hover:underline">
-              Certificates
-            </Link>
-            {(session.user as any)?.role === 'ADMIN' && (
-              <Link href="/admin" className="text-blue-500 hover:underline">
-                Admin
-              </Link>
-            )}
+    <header className="bg-white shadow">
+      <div className="flex items-center justify-between gap-4 px-4 py-4">
+        <div className="text-lg font-semibold">
+          <Link href="/" className="hover:text-blue-600">
+            Online Course Platform
+          </Link>
+        </div>
+        <div className="flex items-center gap-3">
+          {status === 'loading' ? (
+            <span className="text-gray-500">Loading...</span>
+          ) : session ? (
             <button
               onClick={handleLogout}
-              className="text-red-500 hover:underline"
+              className="rounded-lg border border-red-500 px-4 py-2 text-red-500 transition hover:bg-red-50"
             >
               Logout
             </button>
-          </>
-        ) : (
-          // Not logged in navigation
-          <>
-            <Link href="/auth/signin" className="text-blue-500 hover:underline">
-              Sign In
-            </Link>
-            <Link href="/auth/signup" className="text-blue-500 hover:underline">
-              Sign Up
-            </Link>
-          </>
-        )}
-      </nav>
+          ) : (
+            <>
+              <Link
+                href="/auth/signin"
+                className="rounded-lg border border-blue-500 px-4 py-2 text-blue-500 transition hover:bg-blue-50"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="border-t border-gray-200 px-4 py-3">
+        <nav className="flex flex-wrap items-center gap-4">
+          <Link href="/courses" className="text-blue-500 hover:underline">
+            Courses
+          </Link>
+          {status === 'loading' ? null : session ? (
+            <>
+              <Link href="/dashboard" className="text-blue-500 hover:underline">
+                Dashboard
+              </Link>
+              <Link href="/certificates" className="text-blue-500 hover:underline">
+                Certificates
+              </Link>
+              {(session.user as any)?.role === 'ADMIN' && (
+                <Link href="/admin" className="text-blue-500 hover:underline">
+                  Admin
+                </Link>
+              )}
+            </>
+          ) : null}
+        </nav>
+      </div>
     </header>
   )
 }
