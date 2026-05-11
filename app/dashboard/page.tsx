@@ -24,6 +24,11 @@ export default function Dashboard() {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([])
   const [loading, setLoading] = useState(true)
 
+  const [activeSubscription, setActiveSubscription] = useState<any>(null)
+  const [payments, setPayments] = useState<any[]>([])
+  const [certificates, setCertificates] = useState<any[]>([])
+  const [completionPercent, setCompletionPercent] = useState<number>(0)
+
   useEffect(() => {
     if (status === 'loading') return
     if (!session) {
@@ -32,12 +37,17 @@ export default function Dashboard() {
     }
 
     fetch('/api/dashboard')
-      .then((res) => res.json())
+.then((res) => res.json())
       .then((data) => {
         setEnrollments(data.enrollments || [])
+        setActiveSubscription(data.activeSubscription || null)
+        setPayments(data.payments || [])
+        setCertificates(data.certificates || [])
+        setCompletionPercent(data.completionPercent || 0)
       })
       .finally(() => setLoading(false))
   }, [session, status, router])
+
 
   if (status === 'loading' || loading) {
     return (

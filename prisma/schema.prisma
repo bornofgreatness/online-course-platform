@@ -149,10 +149,21 @@ model AffiliateCommission {
 }
 
 model Referral {
-  id          String   @id @default(cuid())
-  affiliateId String
-  affiliate   Affiliate @relation(fields: [affiliateId], references: [id])
-  referredUserId String
-  referredUser User     @relation(fields: [referredUserId], references: [id])
-  createdAt    DateTime @default(now())
+  id              String   @id @default(cuid())
+  affiliateId     String
+  affiliate       Affiliate @relation(fields: [affiliateId], references: [id])
+  referredUserId  String
+  referredUser    User     @relation(fields: [referredUserId], references: [id])
+  createdAt       DateTime @default(now())
 }
+
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  used        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+} 
+
