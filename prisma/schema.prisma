@@ -1,0 +1,158 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("STUDENT")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  enrollments Enrollment[]
+  subscriptions Subscription[]
+  payments Payment[]
+  certificates Certificate[]
+  quizAttempts QuizAttempt[]
+  affiliate Affiliate?
+  affiliateCommissions AffiliateCommission[]
+  referrals Referral[]
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  courses   Course[]
+  createdAt DateTime @default(now())
+}
+
+model Course {
+  id             String       @id @default(cuid())
+  title          String
+  description    String
+  categoryId     String
+  category       Category     @relation(fields: [categoryId], references: [id])
+  pdfUrl         String
+  thumbnailUrl   String?
+  syllabus       String?
+  workloadHours  Int
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  enrollments Enrollment[]
+  certificates Certificate[]
+  quiz         Quiz?
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  enrolledAt DateTime @default(now())
+  progress  String?
+
+  @@unique([userId, courseId])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  plan      String
+  startDate DateTime
+  endDate   DateTime
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Float
+  currency  String   @default("usd")
+  status    String
+  stripeId  String?
+  createdAt DateTime @default(now())
+}
+
+model Certificate {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  courseId          String
+  course            Course   @relation(fields: [courseId], references: [id])
+  certificateNumber String   @unique
+  issuedAt          DateTime @default(now())
+  pdfUrl            String
+  qrCode            String
+
+  @@unique([userId, courseId])
+}
+
+model Quiz {
+  id        String        @id @default(cuid())
+  courseId  String       @unique
+  course    Course       @relation(fields: [courseId], references: [id])
+  questions String
+  createdAt DateTime     @default(now())
+
+  attempts QuizAttempt[]
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
+  answers   String
+  score     Int
+  passed    Boolean
+  attemptedAt DateTime @default(now())
+}
+
+model Affiliate {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  referralCode String   @unique
+  createdAt    DateTime @default(now())
+
+  commissions AffiliateCommission[]
+  referrals    Referral[]
+}
+
+model AffiliateCommission {
+  id            String   @id @default(cuid())
+  affiliateId   String
+  affiliate     Affiliate @relation(fields: [affiliateId], references: [id])
+  referredUserId String
+  referredUser  User     @relation(fields: [referredUserId], references: [id])
+  amount        Float
+  status        String @default("PENDING")
+  createdAt     DateTime @default(now())
+}
+
+model Referral {
+  id          String   @id @default(cuid())
+  affiliateId String
+  affiliate   Affiliate @relation(fields: [affiliateId], references: [id])
+  referredUserId String
+  referredUser User     @relation(fields: [referredUserId], references: [id])
+  createdAt    DateTime @default(now())
+}

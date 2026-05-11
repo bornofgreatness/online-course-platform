@@ -1,0 +1,39 @@
+{
+  "name": "online-course-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "prisma db push",
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1045.0",
+    "@prisma/client": "^4.16.0",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
+    "next": "^14.2.3",
+    "next-auth": "^4.24.14",
+    "pdfjs-dist": "^5.7.284",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.75.0",
+    "react-pdf": "^10.4.1",
+    "stripe": "^22.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.55.0",
+    "eslint-config-next": "^14.0.4",
+    "postcss": "^8.4.32",
+    "prisma": "^4.16.0",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.3"
+  }
+}
