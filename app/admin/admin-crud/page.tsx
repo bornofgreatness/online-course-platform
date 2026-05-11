@@ -4,6 +4,7 @@ import Header from '../../../components/Header'
 import { redirect } from 'next/navigation'
 import dynamic from 'next/dynamic'
 
+
 const ClientAdminCrud = dynamic(() => import('./ClientAdminCrud'), { ssr: false })
 
 export default async function AdminCrudPage() {
@@ -20,5 +21,7 @@ export default async function AdminCrudPage() {
       <ClientAdminCrud />
     </>
   )
+
+
 }
 

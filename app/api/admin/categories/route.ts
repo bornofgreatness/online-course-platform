@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
-import { requireAdmin } from '../../../../../lib/auth/admin'
-import { getPrisma } from '../../../../../lib/prisma'
+import { requireAdmin } from '@/lib/auth/admin'
+import { getPrisma } from '@/lib/prisma'
+
+
 
 
 export async function GET() {
