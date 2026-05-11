@@ -8,8 +8,20 @@ export function getPrisma() {
   }
 
   if (!prisma) {
-    prisma = new PrismaClient()
+    prisma = new PrismaClient({
+      log:
+        process.env.NODE_ENV === 'development'
+          ? ['query', 'error', 'warn']
+          : ['error']
+    })
   }
 
   return prisma
+}
+
+export async function closePrisma() {
+  if (prisma) {
+    await prisma.$disconnect()
+    prisma = null
+  }
 }
