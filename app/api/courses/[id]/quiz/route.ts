@@ -5,6 +5,7 @@ import { getPrisma } from '../../../../../lib/prisma'
 import { getActiveSubscription, isPrivilegedRole } from '../../../../../lib/subscription'
 import {
   gradeAnswers,
+  localizeQuizPayload,
   parseQuizQuestions,
   QUIZ_MAX_ATTEMPTS,
   QUIZ_PASS_SCORE,
@@ -13,7 +14,7 @@ import {
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
@@ -49,8 +50,10 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     orderBy: { attemptedAt: 'desc' },
   })
 
+  const language = new URL(request.url).searchParams.get('lang') === 'pt' ? 'pt' : 'en'
+
   return NextResponse.json({
-    quiz: stripAnswers(payload),
+    quiz: stripAnswers(localizeQuizPayload(payload, language)),
     attemptsUsed: attempts.length,
     maxAttempts: QUIZ_MAX_ATTEMPTS,
     bestScore: attempts.length ? Math.max(...attempts.map((a) => a.score)) : null,

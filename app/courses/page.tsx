@@ -7,6 +7,7 @@ import Header from '../../components/Header'
 import PageShell from '../../components/PageShell'
 import CourseListCard from '../../components/CourseListCard'
 import { CourseCategorySidebarIcon } from '../../components/CourseCategorySidebarIcon'
+import { useI18n } from '../../components/LanguageProvider'
 
 interface CourseCategory {
   id: string
@@ -42,6 +43,7 @@ function Chevron({ active }: { active: boolean }) {
 
 export default function Courses() {
   const { data: session, status } = useSession()
+  const { t } = useI18n()
   const [courses, setCourses] = useState<Course[]>([])
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -108,7 +110,7 @@ export default function Courses() {
     >
       <span className="flex min-w-0 items-center gap-3">
         <CourseCategorySidebarIcon categoryName={cat?.name ?? null} icon={cat?.icon} />
-        <span className="truncate text-sm font-bold text-gray-900">{cat ? cat.name : 'All categories'}</span>
+        <span className="truncate text-sm font-bold text-gray-900">{cat ? cat.name : t('common.allCategories')}</span>
       </span>
       <Chevron active={active} />
     </button>
@@ -131,21 +133,21 @@ export default function Courses() {
             onClick={scrollToCourses}
             className="w-full rounded-xl bg-black py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-gray-900"
           >
-            Available courses
+            {t('course.available')}
           </button>
           {status !== 'loading' && session ? (
             <Link
               href="/dashboard"
               className="block w-full rounded-xl bg-emerald-600 py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-emerald-700"
             >
-              Dashboard
+              {t('common.dashboard')}
             </Link>
           ) : (
             <Link
               href="/auth/signup"
               className="block w-full rounded-xl bg-emerald-600 py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-emerald-700"
             >
-              Sign up
+              {t('common.signup')}
             </Link>
           )}
           {status !== 'loading' && session ? (
@@ -154,20 +156,20 @@ export default function Courses() {
               onClick={() => signOut({ callbackUrl: '/courses' })}
               className="block w-full py-2 text-center text-sm font-semibold uppercase tracking-wide text-black underline decoration-2 underline-offset-4"
             >
-              Log out
+              {t('common.logout')}
             </button>
           ) : (
             <Link
               href="/auth/signin"
               className="block w-full py-2 text-center text-sm font-semibold uppercase tracking-wide text-black underline decoration-2 underline-offset-4"
             >
-              Login
+              {t('common.login')}
             </Link>
           )}
         </div>
 
         <div className="px-0 pb-2">
-          <h2 className="mb-2 text-base font-bold text-slate-900">Categories</h2>
+          <h2 className="mb-2 text-base font-bold text-slate-900">{t('common.categories')}</h2>
           <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
             {mobileCategoryRow(null, selectedCategoryId === '', () => setSelectedCategoryId(''))}
             {categoryOptions.map((cat) =>
@@ -178,12 +180,12 @@ export default function Courses() {
 
         <div className="px-0 pb-3">
           <label htmlFor="courses-mobile-search" className="sr-only">
-            Search courses
+            {t('course.search')}
           </label>
           <input
             id="courses-mobile-search"
             type="search"
-            placeholder="Search courses…"
+            placeholder={t('course.search')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
@@ -193,7 +195,7 @@ export default function Courses() {
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
           <aside className="hidden h-fit rounded-2xl bg-white p-5 shadow-md ring-1 ring-black/5 lg:block">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-blue-900">Categories</h2>
+            <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-blue-900">{t('common.categories')}</h2>
             <nav className="flex flex-col gap-1">
               <button
                 type="button"
@@ -201,7 +203,7 @@ export default function Courses() {
                 className={categoryRowClass(selectedCategoryId === '')}
               >
                 <CourseCategorySidebarIcon categoryName={null} />
-                <span className="text-sm font-bold leading-tight text-black">All categories</span>
+                <span className="text-sm font-bold leading-tight text-black">{t('common.allCategories')}</span>
               </button>
               {categoryOptions.map((cat) => (
                 <button
@@ -220,7 +222,7 @@ export default function Courses() {
           <section>
             <div className="mb-5 hidden flex-col gap-4 lg:flex lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900 md:text-base">Available courses</h2>
+                <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900 md:text-base">{t('course.available')}</h2>
                 <p className="mt-1 text-sm text-slate-600">
                   {selectedCategoryLabel ? (
                     <>
@@ -228,12 +230,15 @@ export default function Courses() {
                       {' · '}
                     </>
                   ) : null}
-                  Showing {filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''}
+                  {t('course.showing', {
+                    count: filteredCourses.length,
+                    plural: filteredCourses.length !== 1 ? 's' : '',
+                  })}
                 </p>
               </div>
               <input
                 type="search"
-                placeholder="Search courses…"
+                placeholder={t('course.search')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 sm:max-w-xs md:max-w-sm"
@@ -256,7 +261,7 @@ export default function Courses() {
 
             {filteredCourses.length === 0 && courses.length > 0 && (
               <div className="mt-10 rounded-xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-                <p className="text-slate-600">No courses found for this category or search.</p>
+                <p className="text-slate-600">{t('course.noCoursesFound')}</p>
                 <button
                   type="button"
                   onClick={() => {
@@ -265,7 +270,7 @@ export default function Courses() {
                   }}
                   className="mt-4 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
                 >
-                  Show all courses
+                  {t('course.showAll')}
                 </button>
               </div>
             )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react'
+import { useI18n } from './LanguageProvider'
 
 type ProgressState = {
   completed: boolean
@@ -20,6 +21,7 @@ export default function PDFViewer({
   initialProgress: ProgressState
 }) {
   const { data: session } = useSession()
+  const { t } = useI18n()
 
   // Note: this app stores `lastPage` as a logical value. Since we’re using
   // the default <iframe> PDF renderer, we don’t have reliable page-level
@@ -139,13 +141,13 @@ export default function PDFViewer({
       <div className="mb-3 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold">{title}</h2>
-          <p className="text-sm text-gray-500">Progress: {percent}%</p>
+          <p className="text-sm text-gray-500">{t('course.progress')}: {percent}%</p>
         </div>
 
         <div className="min-w-[140px] text-right">
-          <div className="text-sm text-gray-500">Status</div>
+          <div className="text-sm text-gray-500">{t('course.status')}</div>
           <div className="font-semibold text-gray-900">
-            {progress.completed ? 'Completed' : saving ? 'Saving...' : 'Learning'}
+            {progress.completed ? t('course.completed') : saving ? t('common.saving') : t('common.learning')}
           </div>
         </div>
       </div>
@@ -181,7 +183,7 @@ export default function PDFViewer({
             rel="noreferrer"
             className="text-blue-600 hover:underline text-sm"
           >
-            Open PDF in new tab
+            {t('course.openPdf')}
           </a>
 
           <button
@@ -190,14 +192,13 @@ export default function PDFViewer({
             disabled={progress.completed}
             className="rounded bg-green-600 px-4 py-2 text-white text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {progress.completed ? 'Completed' : 'Mark as Complete'}
+            {progress.completed ? t('course.completed') : t('course.markComplete')}
           </button>
         </div>
       </div>
 
       <div className="mt-4 text-xs text-gray-500">
-        Note: This viewer tracks reading progress by scroll position (logical pages). For full
-        page-level tracking, the PDF should be rendered with a JS PDF library (e.g. pdf.js).
+        {t('course.viewerNote')}
       </div>
     </section>
   )

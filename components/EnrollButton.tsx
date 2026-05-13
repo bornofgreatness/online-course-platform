@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { useI18n } from './LanguageProvider'
 
 interface EnrollButtonProps {
   courseId: string
@@ -11,6 +12,7 @@ interface EnrollButtonProps {
 export default function EnrollButton({ courseId }: EnrollButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { data: session } = useSession()
+  const { t } = useI18n()
   const router = useRouter()
 
   async function handleEnroll() {
@@ -32,7 +34,7 @@ export default function EnrollButton({ courseId }: EnrollButtonProps) {
       return
     }
     const data = await res.json().catch(() => ({}))
-    alert((data as { error?: string }).error || 'Enrollment failed')
+    alert((data as { error?: string }).error || t('course.enrollmentFailed'))
   }
 
   return (
@@ -42,7 +44,7 @@ export default function EnrollButton({ courseId }: EnrollButtonProps) {
       disabled={isLoading}
       className="mt-6 inline-flex items-center justify-center rounded bg-blue-600 px-5 py-3 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
     >
-      {isLoading ? 'Enrolling…' : 'Enroll in Course'}
+      {isLoading ? t('course.enrolling') : t('course.enroll')}
     </button>
   )
 }

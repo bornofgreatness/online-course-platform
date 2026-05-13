@@ -7,6 +7,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]/options'
 import CourseActions from '../../../components/CourseActions'
 import CourseQuizPanel from '../../../components/CourseQuizPanel'
+import { LocalizedText } from '../../../components/LanguageProvider'
 import { getActiveSubscription, isPrivilegedRole } from '../../../lib/subscription'
 import type { Metadata } from 'next'
 
@@ -56,9 +57,9 @@ export default async function CourseDetails({ params }: Props) {
       <>
         <Header />
         <PageShell>
-          <p className={siteMutedClass}>Course not found.</p>
+          <p className={siteMutedClass}><LocalizedText textKey="common.courseNotFound" /></p>
           <Link href="/courses" className="mt-4 inline-block text-sm font-semibold text-blue-600 hover:underline">
-            Back to courses
+            <LocalizedText textKey="common.backToCourses" />
           </Link>
         </PageShell>
       </>
@@ -133,16 +134,18 @@ export default async function CourseDetails({ params }: Props) {
           </div>
 
           <Link href="/courses" className="shrink-0 text-sm font-semibold text-blue-600 hover:underline">
-            Back to all courses
+            <LocalizedText textKey="common.backToAllCourses" />
           </Link>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <div className={`${siteCardClass} p-5 sm:p-6`}>
-              <h2 className="mb-3 text-lg font-bold uppercase tracking-wide text-blue-900 sm:text-xl">About this course</h2>
+              <h2 className="mb-3 text-lg font-bold uppercase tracking-wide text-blue-900 sm:text-xl"><LocalizedText textKey="course.about" /></h2>
               <p className="text-slate-700">{course.description}</p>
-              <p className={`${siteMutedClass} mt-4`}>Workload: {course.workloadHours} hours</p>
+              <p className={`${siteMutedClass} mt-4`}>
+                <LocalizedText textKey="course.workload" values={{ hours: course.workloadHours }} />
+              </p>
               {course.syllabus ? (
                 <div className="mt-4 whitespace-pre-line text-slate-700">{course.syllabus}</div>
               ) : null}
@@ -153,7 +156,7 @@ export default async function CourseDetails({ params }: Props) {
             {enrollment && course.pdfUrl && canViewPdf ? (
               <PDFViewer
                 url={course.pdfUrl}
-                title={`${course.title} - Course material`}
+                title={course.title}
                 courseId={course.id}
                 initialProgress={progress}
               />
@@ -161,14 +164,8 @@ export default async function CourseDetails({ params }: Props) {
 
             {enrollment && course.pdfUrl && !canViewPdf ? (
               <div className={`${siteCardClass} border-amber-200 bg-amber-50 p-5 text-sm text-amber-950`}>
-                <p className="font-semibold">Course materials are locked</p>
-                <p className="mt-2 text-amber-900/90">
-                  Renew your subscription on the{' '}
-                  <Link href="/pricing" className="font-semibold text-blue-700 underline">
-                    pricing
-                  </Link>{' '}
-                  page to view the PDF and use progress tracking.
-                </p>
+                <p className="font-semibold"><LocalizedText textKey="course.courseMaterialsLocked" /></p>
+                <p className="mt-2 text-amber-900/90"><LocalizedText textKey="course.renewPdfAccess" /></p>
               </div>
             ) : null}
           </div>
@@ -176,7 +173,7 @@ export default async function CourseDetails({ params }: Props) {
           <aside className="space-y-6">
             <div className={`${siteCardClass} p-5 sm:p-6`}>
               <div>
-                <p className={`${siteMutedClass} text-xs uppercase tracking-wide`}>Instructor</p>
+                <p className={`${siteMutedClass} text-xs uppercase tracking-wide`}><LocalizedText textKey="course.instructor" /></p>
                 <h3 className="mt-1 text-lg font-bold text-blue-950">PDF Learning Team</h3>
               </div>
               <div className="mt-6">
@@ -194,7 +191,7 @@ export default async function CourseDetails({ params }: Props) {
 
             {course.thumbnailUrl ? (
               <div className={`${siteCardClass} p-5 sm:p-6`}>
-                <h3 className="mb-3 text-lg font-bold text-blue-950">Course preview</h3>
+                <h3 className="mb-3 text-lg font-bold text-blue-950"><LocalizedText textKey="course.coursePreview" /></h3>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={course.thumbnailUrl} alt={course.title} className="h-48 w-full rounded-lg object-cover" />
               </div>

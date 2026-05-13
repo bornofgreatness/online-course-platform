@@ -6,6 +6,7 @@ export type QuizQuestion = {
 }
 
 export type QuizPayload = { questions: QuizQuestion[] }
+export type QuizLanguage = 'en' | 'pt'
 
 export const QUIZ_PASS_SCORE = 7
 export const QUIZ_MAX_QUESTIONS = 10
@@ -120,6 +121,80 @@ export function stripAnswers(payload: QuizPayload) {
       prompt: q.prompt,
       options: q.options,
     })),
+  }
+}
+
+const ptDefaultQuizText: Record<string, Pick<QuizQuestion, 'prompt' | 'options'>> = {
+  q1: {
+    prompt: 'Qual é o formato principal dos materiais do curso nesta plataforma?',
+    options: ['Documentos PDF', 'Fitas VHS', 'Apenas livros impressos', 'Transmissões por fax'],
+  },
+  q2: {
+    prompt: 'Onde os alunos devem acompanhar cursos inscritos e certificados?',
+    options: ['Painel', 'Página de preços', 'Página 404', 'Mapa do site'],
+  },
+  q3: {
+    prompt: 'A nota mínima para aprovação no quiz é de quantas respostas corretas em 10?',
+    options: ['5', '6', '7', '9'],
+  },
+  q4: {
+    prompt: 'Quantas tentativas de quiz são permitidas por curso?',
+    options: ['1', '2', '3', 'Ilimitadas'],
+  },
+  q5: {
+    prompt: 'Os certificados são emitidos depois que você:',
+    options: [
+      'Apenas se inscreve',
+      'Conclui os requisitos, incluindo passar no quiz quando houver',
+      'Compartilha nas redes sociais',
+      'Abre a página inicial',
+    ],
+  },
+  q6: {
+    prompt: 'O acesso da assinatura é verificado quando você:',
+    options: [
+      'Inscreve-se em um curso e abre materiais protegidos',
+      'Altera a cor do avatar',
+      'Imprime apenas o programa',
+      'Vê a landing page pública',
+    ],
+  },
+  q7: {
+    prompt: 'Se você esquecer sua senha, deve usar:',
+    options: ['Fluxo de recuperação de senha', 'Tentar adivinhar até funcionar', 'Enviar e-mail ao instrutor', 'Limpar apenas os cookies'],
+  },
+  q8: {
+    prompt: 'A carga horária do curso descreve:',
+    options: ['Tempo estimado de estudo', 'Horas de CPU do servidor', 'Número de bytes do PDF', 'Idade do instrutor'],
+  },
+  q9: {
+    prompt: 'O progresso durante a leitura é salvo quando:',
+    options: [
+      'Você está conectado e inscrito',
+      'Você desativa o JavaScript',
+      'Você usa janela anônima sem login',
+      'Você atualiza antes de carregar',
+    ],
+  },
+  q10: {
+    prompt: 'Números únicos de certificado ajudam com:',
+    options: ['Verificação pública', 'Decoração aleatória', 'Ocultar conclusão', 'Excluir cursos'],
+  },
+}
+
+export function localizeQuizPayload(payload: QuizPayload, language: QuizLanguage): QuizPayload {
+  if (language !== 'pt') return payload
+
+  return {
+    questions: payload.questions.map((question) => {
+      const localized = ptDefaultQuizText[question.id]
+      if (!localized) return question
+      return {
+        ...question,
+        prompt: localized.prompt,
+        options: localized.options as [string, string, string, string],
+      }
+    }),
   }
 }
 

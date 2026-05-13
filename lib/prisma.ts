@@ -1,27 +1,34 @@
 import { PrismaClient } from './generated/prisma'
 
-let prisma: PrismaClient | null = null
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient
+}
 
+// Always keep a single PrismaClient instance per Node.js process.
+// Prevents "too many clients already" errors under Next.js concurrency/hot reload.
 export function getPrisma() {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL is not defined')
   }
 
-  if (!prisma) {
-    prisma = new PrismaClient({
-      log:
-        process.env.NODE_ENV === 'development'
-          ? ['query', 'error', 'warn']
-          : ['error']
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = new PrismaClient({
+      log: ['error'],
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL,
+        },
+      },
     })
   }
 
-  return prisma
+  return globalForPrisma.prisma
 }
 
+// Disable disconnect-by-default; disconnecting during request handling can force
+// Prisma to create additional clients and exhaust the DB.
 export async function closePrisma() {
-  if (prisma) {
-    await prisma.$disconnect()
-    prisma = null
-  }
+  // no-op in server runtime
 }
+
+

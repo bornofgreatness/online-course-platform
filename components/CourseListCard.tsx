@@ -1,5 +1,8 @@
+'use client'
+
 import Link from 'next/link'
 import { getCourseCardDisplay, initialsFromName } from '../lib/courseCardDisplay'
+import { useI18n } from './LanguageProvider'
 
 export type CourseListCardCourse = {
   id: string
@@ -23,6 +26,7 @@ function StarRating({ value }: { value: number }) {
 export default function CourseListCard({ course }: { course: CourseListCardCourse }) {
   const d = getCourseCardDisplay(course.id)
   const initials = initialsFromName(d.instructor)
+  const { t } = useI18n()
 
   return (
     <article className="flex flex-row overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-black/5 transition hover:shadow-lg h-32 sm:h-40">
@@ -63,7 +67,7 @@ export default function CourseListCard({ course }: { course: CourseListCardCours
             href={`/courses/${course.id}`}
             className="shrink-0 rounded-lg bg-blue-600 px-2.5 py-1 text-center text-[10px] font-bold uppercase tracking-wide text-white transition hover:bg-blue-700 sm:px-3 sm:py-1.5 sm:text-xs"
           >
-            Access
+            {t('common.access')}
           </Link>
         </div>
       </div>

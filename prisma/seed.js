@@ -1,9 +1,16 @@
-const { PrismaClient } = require('../lib/generated/prisma')
 const bcrypt = require('bcryptjs')
+
+// Seed runs outside Next.js; use the Prisma client directly.
+// IMPORTANT: If you still see "too many clients", restart the server/process(es)
+// that are keeping connections open, or close the DB pool on exit.
+const { PrismaClient } = require('../lib/generated/prisma')
 
 const prisma = new PrismaClient()
 
 async function main() {
+
+
+
   const category = await prisma.category.upsert({
     where: { name: 'PDF Productivity' },
     update: {

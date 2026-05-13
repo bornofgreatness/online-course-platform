@@ -5,11 +5,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { CourseCategorySidebarIcon } from './CourseCategorySidebarIcon'
+import LanguageSwitch from './LanguageSwitch'
+import { useI18n } from './LanguageProvider'
 
 type NavCategory = { id: string; name: string; courseCount: number; icon?: string | null; imageUrl?: string | null }
 
 export default function Header() {
   const { data: session, status } = useSession()
+  const { t } = useI18n()
   const [categories, setCategories] = useState<NavCategory[]>([])
   const [categoriesOpen, setCategoriesOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -75,19 +78,22 @@ export default function Header() {
           <Link href="/" className="text-sm font-bold uppercase tracking-wide text-white">
             Course Platform
           </Link>
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(true)}
-            className="rounded-lg border border-white p-2 text-white hover:bg-white/10"
-            aria-expanded={mobileMenuOpen}
-            aria-label="Open menu"
-          >
-            <span className="flex h-4 w-5 flex-col justify-center gap-1">
-              <span className="h-0.5 w-full rounded-full bg-white" />
-              <span className="h-0.5 w-full rounded-full bg-white" />
-              <span className="h-0.5 w-full rounded-full bg-white" />
-            </span>
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageSwitch compact />
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="rounded-lg border border-white p-2 text-white hover:bg-white/10"
+              aria-expanded={mobileMenuOpen}
+              aria-label="Open menu"
+            >
+              <span className="flex h-4 w-5 flex-col justify-center gap-1">
+                <span className="h-0.5 w-full rounded-full bg-white" />
+                <span className="h-0.5 w-full rounded-full bg-white" />
+                <span className="h-0.5 w-full rounded-full bg-white" />
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -96,52 +102,52 @@ export default function Header() {
           <button
             type="button"
             className="absolute inset-0 bg-black/50"
-            aria-label="Close menu"
+            aria-label={t('common.close')}
             onClick={() => setMobileMenuOpen(false)}
           />
           <div className="absolute right-0 top-0 flex h-full w-[min(100%,20rem)] flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-              <span className="text-sm font-bold text-slate-900">Menu</span>
+              <span className="text-sm font-bold text-slate-900">{t('common.menu')}</span>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
                 className="rounded-lg p-2 text-slate-600 hover:bg-gray-100"
-                aria-label="Close"
+                aria-label={t('common.close')}
               >
                 ✕
               </button>
             </div>
             <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3 text-sm font-semibold">
               <Link href="/" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                Home
+                {t('common.home')}
               </Link>
               <Link
                 href="/courses"
                 className={`${drawerLinkClass} ${coursesActive ? 'text-teal-700' : ''}`}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Courses
+                {t('common.courses')}
               </Link>
               <Link href="/categories" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                Categories
+                {t('common.categories')}
               </Link>
               <Link href="/certificates" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                Certificates
+                {t('common.certificates')}
               </Link>
               <Link href="/pricing" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                Prices
+                {t('common.prices')}
               </Link>
               {session ? (
                 <>
                   <Link href="/dashboard" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                    Dashboard
+                    {t('common.dashboard')}
                   </Link>
                   <Link href="/affiliate" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                    Affiliate
+                    {t('common.affiliate')}
                   </Link>
                   {['ADMIN', 'SUPER_ADMIN'].includes(((session.user as { role?: string })?.role ?? '').toUpperCase()) && (
                     <Link href="/admin" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                      Admin
+                      {t('common.admin')}
                     </Link>
                   )}
                   <button
@@ -152,16 +158,16 @@ export default function Header() {
                       signOut({ callbackUrl: '/' })
                     }}
                   >
-                    Log out
+                    {t('common.logout')}
                   </button>
                 </>
               ) : (
                 <>
                   <Link href="/auth/signin" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                    Login
+                    {t('common.login')}
                   </Link>
                   <Link href="/auth/signup" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                    Sign up
+                    {t('common.signup')}
                   </Link>
                 </>
               )}
@@ -179,6 +185,7 @@ export default function Header() {
             Course Platform
           </Link>
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <LanguageSwitch />
             {status === 'loading' ? (
               <span className="text-sm font-semibold uppercase text-gray-400">…</span>
             ) : session ? (
@@ -187,7 +194,7 @@ export default function Header() {
                 onClick={handleLogout}
                 className="rounded-full border border-black bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-gray-50 sm:px-5 sm:text-sm"
               >
-                Log out
+                {t('common.logout')}
               </button>
             ) : (
               <>
@@ -195,13 +202,13 @@ export default function Header() {
                   href="/auth/signin"
                   className="rounded-full border border-black bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-gray-50 sm:px-5 sm:text-sm"
                 >
-                  Login
+                  {t('common.login')}
                 </Link>
                 <Link
                   href="/auth/signup"
                   className="rounded-full bg-black px-4 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-gray-900 sm:px-5 sm:text-sm"
                 >
-                  Sign up
+                  {t('common.signup')}
                 </Link>
               </>
             )}
@@ -217,7 +224,7 @@ export default function Header() {
                 aria-expanded={categoriesOpen}
                 aria-haspopup="true"
               >
-                Categories
+                {t('common.categories')}
                 <span className="text-[0.65rem] font-bold" aria-hidden>
                   ▾
                 </span>
@@ -233,7 +240,7 @@ export default function Header() {
                     role="menuitem"
                     onClick={() => setCategoriesOpen(false)}
                   >
-                    All categories
+                    {t('common.allCategories')}
                   </Link>
                   {categories.length > 0 && (
                     <>
@@ -262,46 +269,46 @@ export default function Header() {
             </div>
 
             <Link href="/courses" className={navText(coursesActive)}>
-              Courses
+              {t('common.courses')}
             </Link>
 
             {status === 'loading' ? null : !session ? (
               <span className="inline-flex flex-wrap items-center gap-1 text-sm font-bold uppercase tracking-wide">
                 <Link href="/auth/signin" className={navText(signinActive)}>
-                  Login
+                  {t('common.login')}
                 </Link>
                 <span className="text-black">/</span>
                 <Link href="/auth/forgot-password" className={navText(forgotActive)}>
-                  Password
+                  {t('common.password')}
                 </Link>
               </span>
             ) : null}
 
             {!session && status !== 'loading' && (
               <Link href="/auth/signup" className={navText(signupActive)}>
-                Sign up
+                {t('common.signup')}
               </Link>
             )}
 
             <Link href="/certificates" className={navText(certificatesActive)}>
-              Certificates
+              {t('common.certificates')}
             </Link>
 
             <Link href="/pricing" className={navText(pricingActive)}>
-              Prices
+              {t('common.prices')}
             </Link>
 
             {status === 'loading' ? null : session ? (
               <>
                 <Link href="/affiliate" className={navText(pathname.startsWith('/affiliate'))}>
-                  Affiliate
+                  {t('common.affiliate')}
                 </Link>
                 <Link href="/dashboard" className={navText(dashboardActive)}>
-                  Dashboard
+                  {t('common.dashboard')}
                 </Link>
                 {['ADMIN', 'SUPER_ADMIN'].includes(((session.user as { role?: string })?.role ?? '').toUpperCase()) && (
                   <Link href="/admin" className={navText(pathname.startsWith('/admin'))}>
-                    Admin
+                    {t('common.admin')}
                   </Link>
                 )}
               </>

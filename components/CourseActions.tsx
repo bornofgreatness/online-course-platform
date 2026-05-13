@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import EnrollButton from './EnrollButton'
+import { useI18n } from './LanguageProvider'
 
 interface CourseActionsProps {
   courseId: string
@@ -27,6 +28,7 @@ export default function CourseActions({
 }: CourseActionsProps) {
   const [loading, setLoading] = useState(false)
   const [quizPassed, setQuizPassed] = useState(initialQuizPassed)
+  const { t } = useI18n()
   const router = useRouter()
 
   useEffect(() => {
@@ -58,10 +60,10 @@ export default function CourseActions({
         router.refresh()
       } else {
         const data = await res.json().catch(() => ({}))
-        alert((data as { error?: string }).error || 'Failed to mark course as complete')
+        alert((data as { error?: string }).error || t('actions.failedMarkComplete'))
       }
     } catch {
-      alert('Error updating progress')
+      alert(t('actions.errorUpdatingProgress'))
     }
     setLoading(false)
   }
@@ -79,10 +81,10 @@ export default function CourseActions({
         router.refresh()
       } else {
         const data = await res.json()
-        alert(data.error || 'Failed to generate certificate')
+        alert(data.error || t('actions.failedGenerateCertificate'))
       }
     } catch {
-      alert('Error generating certificate')
+      alert(t('actions.errorGeneratingCertificate'))
     }
     setLoading(false)
   }
@@ -94,13 +96,13 @@ export default function CourseActions({
   if (subscriptionBlocked) {
     return (
       <div className="space-y-3 text-sm">
-        <p className="font-medium text-amber-900">Your subscription is inactive or has expired.</p>
-        <p className="text-slate-600">Renew to access course materials, the quiz, and progress tracking.</p>
+        <p className="font-medium text-amber-900">{t('actions.subscriptionInactive')}</p>
+        <p className="text-slate-600">{t('actions.renewAccess')}</p>
         <Link
           href="/pricing"
           className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-blue-700"
         >
-          View plans
+          {t('actions.viewPlans')}
         </Link>
       </div>
     )
@@ -112,27 +114,22 @@ export default function CourseActions({
   return (
     <div className="space-y-3">
       <div className="text-sm">
-        <span className="font-medium">Progress:</span> {progress.completed ? 'Completed' : 'In progress'}
+        <span className="font-medium">{t('course.progress')}:</span>{' '}
+        {progress.completed ? t('course.completed') : t('course.inProgress')}
       </div>
 
       {quizGateActive && (
-        <p className="text-sm text-slate-700">
-          Pass the{' '}
-          <a href="#course-quiz" className="font-semibold text-blue-600 underline">
-            course quiz
-          </a>{' '}
-          (7/10 or higher) before marking complete.
-        </p>
+        <p className="text-sm text-slate-700">{t('actions.passQuizBeforeComplete')}</p>
       )}
 
       {hasCertificate ? (
         <div className="text-center">
-          <div className="mb-2 font-semibold text-green-600">✓ Certificate earned</div>
+          <div className="mb-2 font-semibold text-green-600">✓ {t('actions.certificateEarned')}</div>
           <a
             href="/certificates"
             className="inline-block rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
           >
-            View certificate
+            {t('actions.viewCertificate')}
           </a>
         </div>
       ) : progress.completed ? (
@@ -142,7 +139,7 @@ export default function CourseActions({
           disabled={loading}
           className="w-full rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? 'Generating…' : 'Generate certificate'}
+          {loading ? t('actions.generating') : t('actions.generateCertificate')}
         </button>
       ) : (
         <button
@@ -151,7 +148,7 @@ export default function CourseActions({
           disabled={loading || !canMarkComplete}
           className="w-full rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? 'Updating…' : 'Mark as complete'}
+          {loading ? t('actions.updating') : t('course.markComplete')}
         </button>
       )}
     </div>
