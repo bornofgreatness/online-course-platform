@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { PrismaClient } = require('@prisma/client')
+const { PrismaClient } = require('../lib/generated/prisma')
 
 async function main() {
   const email = process.argv[2]

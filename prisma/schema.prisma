@@ -3,6 +3,8 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Custom output avoids Windows EPERM when next dev locks the default query engine DLL
+  output   = "../lib/generated/prisma"
 }
 
 datasource db {

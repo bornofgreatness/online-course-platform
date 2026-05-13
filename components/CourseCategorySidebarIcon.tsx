@@ -170,6 +170,15 @@ export function CourseCategorySidebarIcon({
 }) {
   const rawIcon = (icon ?? '').trim()
   if (rawIcon) {
+    if (/^https?:\/\//i.test(rawIcon)) {
+      return (
+        <img
+          src={rawIcon}
+          alt=""
+          className="h-6 w-6 shrink-0 object-contain"
+        />
+      )
+    }
     const fromKey = IconFromStoredKey(rawIcon)
     if (fromKey) return fromKey
     if (!/^[a-z_]+$/i.test(rawIcon)) {
