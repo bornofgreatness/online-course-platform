@@ -6,12 +6,15 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
 import PageShell, { siteCardClass, siteTitleClass } from '../../../components/PageShell'
+import { useI18n } from '../../../components/LanguageProvider'
 
 const inputClass =
   'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30'
 const labelClass = 'block text-sm font-medium text-slate-700'
 
 export default function SignIn() {
+  const { t } = useI18n()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -22,35 +25,39 @@ export default function SignIn() {
     e.preventDefault()
     setErrorMessage(null)
     setResendMessage(null)
+
     const result = await signIn('credentials', {
       email,
       password,
       redirect: false,
     })
+
     if (result?.ok) {
       router.push('/dashboard')
     } else {
-      setErrorMessage(result?.error || 'Invalid credentials')
+      setErrorMessage(result?.error || t('common.password'))
     }
   }
 
   const handleResend = async () => {
     if (!email) {
-      setResendMessage('Enter your email address to resend verification.')
+      setResendMessage(t('common.password'))
       return
     }
 
-    setResendMessage('Sending verification email...')
+    setResendMessage(t('common.saving'))
+
     const res = await fetch('/api/auth/send-verification-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     })
+
     const data = await res.json().catch(() => null)
+
     if (res.ok) {
-      setResendMessage(
-        data?.verifyUrl ? 'Verification email sent. Check your inbox or use the link below.' : 'Verification email sent. Check your inbox.'
-      )
+      setResendMessage(data?.verifyUrl ? t('common.verify') : t('common.verify'))
+
       if (data?.verifyUrl) {
         setErrorMessage(null)
         setResendMessage(`Verification link: ${data.verifyUrl}`)
@@ -66,13 +73,22 @@ export default function SignIn() {
       <PageShell centered>
         <div className={`${siteCardClass} p-6 sm:p-8`}>
           <form onSubmit={handleSubmit}>
-            <h1 className={`${siteTitleClass} mb-6 text-center`}>Sign in</h1>
+            <h1 className={`${siteTitleClass} mb-6 text-center`}>{t('common.login')}</h1>
+
             <div className="mb-4">
-              <label className={labelClass}>Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} required />
+              <label className={labelClass}>{t('common.login')}</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+                required
+                aria-label={t('common.login')}
+              />
             </div>
+
             <div className="mb-6">
-              <label className={labelClass}>Password</label>
+              <label className={labelClass}>{t('common.password')}</label>
               <input
                 type="password"
                 value={password}
@@ -81,13 +97,16 @@ export default function SignIn() {
                 required
               />
             </div>
+
             <button
               type="submit"
               className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
             >
-              Sign in
+              {t('common.login')}
             </button>
+
             {errorMessage && <div className="mt-4 text-center text-sm text-red-600">{errorMessage}</div>}
+
             {errorMessage === 'Email not verified' && (
               <div className="mt-4 text-center">
                 <button
@@ -99,7 +118,11 @@ export default function SignIn() {
                 </button>
               </div>
             )}
-            {resendMessage && <div className="mt-4 break-words text-center text-sm text-slate-700">{resendMessage}</div>}
+
+            {resendMessage && (
+              <div className="mt-4 break-words text-center text-sm text-slate-700">{resendMessage}</div>
+            )}
+
             <div className="mt-4 flex flex-col items-center gap-2">
               <Link href="/auth/forgot-password" className="text-sm font-semibold text-blue-600 hover:underline">
                 Forgot password?
@@ -107,7 +130,7 @@ export default function SignIn() {
               <p className="text-center text-sm text-slate-600">
                 No account?{' '}
                 <Link href="/auth/signup" className="font-semibold text-blue-600 hover:underline">
-                  Sign up
+                  {t('common.signup')}
                 </Link>
               </p>
             </div>
@@ -117,3 +140,4 @@ export default function SignIn() {
     </>
   )
 }
+

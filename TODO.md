@@ -1,20 +1,18 @@
 - [x] Investigated i18n setup (LanguageProvider translations + LanguageSwitch)
 - [x] Updated app/affiliate/page.tsx page title to use PT via i18n key (common.affiliate)
 - [x] Fixed JSX parsing issue in app/auth/forgot-password/page.tsx so lint passes
-- [ ] Implement PT for ALL remaining pages (remove hardcoded English UI strings):
-  - [ ] app/pricing/page.tsx
-  - [ ] app/auth/signin/page.tsx
+- [x] Implemented i18n for components/PricingPlans.tsx (removed hardcoded “Subscribe”/“Redirecting…”)
+- [x] Implemented i18n for app/pricing/page.tsx title (common.prices)
+- [x] Repaired and started i18n conversion for app/auth/signin/page.tsx
+- [x] Partially converted app/auth/forgot-password/page.tsx
+- [ ] Finish i18n conversion for app/auth/forgot-password/page.tsx (remove remaining hardcoded English strings)
+- [ ] Convert remaining auth pages:
   - [ ] app/auth/signup/page.tsx
-  - [ ] app/auth/forgot-password/page.tsx (remaining strings)
   - [ ] app/auth/verify-email/page.tsx
   - [ ] app/auth/reset-password/page.tsx
-  - [ ] app/verify/certificate/[certificateNumber]/page.tsx
+- [ ] Convert remaining pages/components:
   - [ ] app/categories/page.tsx
-  - [ ] app/admin/admin-crud/ClientAdminCrud.tsx (if hardcoded)
-  - [ ] any other pages flagged by search (Loading… etc.)
-- [ ] Implement PT for ALL components (remove hardcoded English UI strings):
-  - [ ] app/components/PricingPlans.tsx (found 'Subscribe'/'Redirecting…' hardcoded)
-  - [ ] app/components/Header.tsx (ensure all strings use t())
-  - [ ] any other components flagged by search
-- [ ] Run `npm run lint` to confirm no parse errors and only existing warnings
+  - [ ] app/verify/certificate/[certificateNumber]/page.tsx
+  - [ ] components/Header.tsx (ensure all text uses i18n)
+- [ ] Add new LanguageProvider keys only if truly missing
 

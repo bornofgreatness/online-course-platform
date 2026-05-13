@@ -58,10 +58,9 @@ export default function AffiliatePage() {
     <>
       <Header />
       <PageShell>
-<h1 className={siteTitleClass}>{t('common.affiliate')}</h1>
+        <h1 className={siteTitleClass}>{t('common.affiliate')}</h1>
         <p className={`${siteMutedClass} mt-2 max-w-2xl`}>
-          Share your referral link. When referred learners subscribe, you earn a commission (pending admin payout in this
-          MVP).
+          Share your referral link. When referred learners subscribe, you earn a commission (pending admin payout in this MVP).
         </p>
 
         {loading ? (
@@ -137,3 +136,4 @@ export default function AffiliatePage() {
     </>
   )
 }
+

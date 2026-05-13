@@ -76,7 +76,7 @@ export default function Header() {
       <div className="sticky top-0 z-50 border-b border-white/10 bg-black lg:hidden">
         <div className="flex items-center justify-between px-4 py-3.5">
           <Link href="/" className="text-sm font-bold uppercase tracking-wide text-white">
-            Course Platform
+            {t('common.home')}
           </Link>
           <div className="flex items-center gap-2">
             <LanguageSwitch compact />
@@ -182,12 +182,12 @@ export default function Header() {
             href="/"
             className="text-xl font-bold uppercase tracking-tight text-slate-950 hover:opacity-80 md:text-2xl"
           >
-            Course Platform
+            {t('common.home')}
           </Link>
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <LanguageSwitch />
             {status === 'loading' ? (
-              <span className="text-sm font-semibold uppercase text-gray-400">…</span>
+                <span className="text-sm font-semibold uppercase text-gray-400">…</span>
             ) : session ? (
               <button
                 type="button"
