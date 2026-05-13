@@ -66,6 +66,10 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
       const json = await res.json().catch(() => null)
       if (!res.ok) throw new Error(json?.error || 'Submit failed')
       setResult({ score: json.score, passed: json.passed, attemptsRemaining: json.attemptsRemaining })
+      // Dispatch custom event to notify other components (like CourseActions) that quiz state changed
+      if (json.passed) {
+        window.dispatchEvent(new CustomEvent('quiz-passed', { detail: { courseId } }))
+      }
       await load()
     } catch (e: any) {
       setError(e?.message || 'Submit failed')

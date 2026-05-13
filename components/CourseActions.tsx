@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import EnrollButton from './EnrollButton'
@@ -23,10 +23,24 @@ export default function CourseActions({
   progress,
   hasCertificate,
   quizExists,
-  quizPassed,
+  quizPassed: initialQuizPassed,
 }: CourseActionsProps) {
   const [loading, setLoading] = useState(false)
+  const [quizPassed, setQuizPassed] = useState(initialQuizPassed)
   const router = useRouter()
+
+  useEffect(() => {
+    const handleQuizPassed = (event: CustomEvent<{ courseId: string }>) => {
+      if (event.detail.courseId === courseId) {
+        setQuizPassed(true)
+      }
+    }
+
+    window.addEventListener('quiz-passed', handleQuizPassed as EventListener)
+    return () => {
+      window.removeEventListener('quiz-passed', handleQuizPassed as EventListener)
+    }
+  }, [courseId])
 
   const handleMarkComplete = async () => {
     setLoading(true)

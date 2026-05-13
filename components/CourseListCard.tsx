@@ -25,43 +25,45 @@ export default function CourseListCard({ course }: { course: CourseListCardCours
   const initials = initialsFromName(d.instructor)
 
   return (
-    <article className="flex flex-row overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-black/5 transition hover:shadow-lg">
-      <div className="relative w-[34%] min-w-[100px] max-w-[130px] shrink-0 self-stretch bg-slate-200 sm:w-[40%] sm:max-w-[220px]">
-        {course.thumbnailUrl ? (
-          <img
-            src={course.thumbnailUrl}
-            alt={course.title}
-            className="h-full min-h-[112px] w-full object-cover sm:min-h-[168px] sm:rounded-l-xl sm:rounded-r-none"
-          />
-        ) : (
-          <div className="flex h-full min-h-[112px] w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-3xl text-slate-500 sm:min-h-[168px] sm:rounded-l-xl">
-            📚
-          </div>
-        )}
+    <article className="flex flex-row overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-black/5 transition hover:shadow-lg h-32 sm:h-40">
+      <div className="flex flex-shrink-0 items-center justify-center" style={{ width: '60%', minWidth: '120px', maxWidth: '180px' }}>
+        <div className="ml-1.5 mr-3 h-[calc(100%-16px)] w-[calc(100%-18px)] overflow-hidden rounded-lg sm:rounded-xl">
+          {course.thumbnailUrl ? (
+            <img
+              src={course.thumbnailUrl}
+              alt={course.title}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-2xl text-slate-500">
+              📚
+            </div>
+          )}
+        </div>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col justify-between p-3 sm:p-5">
+      <div className="flex min-w-0 flex-1 flex-col justify-center py-1 pr-2 sm:pr-2.5">
         <div>
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="line-clamp-2 text-sm font-bold leading-snug text-blue-950 sm:text-base">{course.title}</h3>
+          <div className="flex items-start justify-between gap-1">
+            <h3 className="line-clamp-1 text-sm font-bold leading-tight text-blue-950 sm:text-base">{course.title}</h3>
             <StarRating value={d.rating} />
           </div>
-          <p className="mt-2 hidden text-sm leading-relaxed text-slate-600 lg:line-clamp-2 lg:block">{course.description}</p>
-          <div className="mt-2 flex items-center gap-2 sm:mt-3 sm:gap-2.5">
+          <p className="mt-0.5 line-clamp-2 text-[10px] leading-tight text-slate-600 sm:text-xs">{course.description}</p>
+          <div className="mt-0.5 flex items-center gap-1">
             <div
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold sm:h-9 sm:w-9 sm:text-xs ${d.avatarClass}`}
+              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[6px] font-bold sm:h-5 sm:w-5 sm:text-[7px] ${d.avatarClass}`}
             >
               {initials}
             </div>
-            <span className="truncate text-xs font-medium text-slate-800 sm:text-sm">{d.instructor}</span>
+            <span className="truncate text-[10px] font-medium text-slate-700">{d.instructor}</span>
           </div>
         </div>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 sm:mt-4 sm:gap-3 sm:pt-4">
-          <span className="text-base font-bold tabular-nums text-blue-950 sm:text-lg">{d.priceLabel}</span>
+        <div className="flex items-center justify-between gap-1.5">
+          <span className="text-xs font-bold tabular-nums text-blue-950 sm:text-sm">{d.priceLabel}</span>
           <Link
             href={`/courses/${course.id}`}
-            className="rounded-lg bg-blue-600 px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wide text-white transition hover:bg-blue-700 sm:px-4 sm:py-2.5 sm:text-xs"
+            className="shrink-0 rounded-lg bg-blue-600 px-2.5 py-1 text-center text-[10px] font-bold uppercase tracking-wide text-white transition hover:bg-blue-700 sm:px-3 sm:py-1.5 sm:text-xs"
           >
-            Access course
+            Access
           </Link>
         </div>
       </div>
