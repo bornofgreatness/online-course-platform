@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Header from '../../components/Header'
 import { CourseCategorySidebarIcon } from '../../components/CourseCategorySidebarIcon'
+import { getCourseCardDisplay, initialsFromName } from '../../lib/courseCardDisplay'
 
 interface Course {
   id: string
@@ -69,8 +70,6 @@ export default function Courses() {
     <>
       <Header />
       <div className="min-h-screen bg-slate-100/80 p-6 md:p-8">
-        <h1 className="mb-6 text-3xl font-bold text-slate-900">Courses</h1>
-
         <div className="grid gap-6 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
           <aside className="h-fit rounded-2xl bg-white p-5 shadow-md ring-1 ring-black/5">
             <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-blue-900">Categories</h2>
@@ -98,70 +97,109 @@ export default function Courses() {
           </aside>
 
           <section>
-            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-2xl font-semibold">
-                  {selectedCategory ? `${selectedCategory} Courses` : 'All Courses'}
+                <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900 md:text-base">
+                  Available courses
                 </h2>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="mt-1 text-sm text-slate-600">
+                  {selectedCategory ? (
+                    <>
+                      <span className="font-medium text-slate-800">{selectedCategory}</span>
+                      {' · '}
+                    </>
+                  ) : null}
                   Showing {filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''}
                 </p>
               </div>
-
               <input
-                type="text"
-                placeholder="Search courses..."
+                type="search"
+                placeholder="Search courses…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full max-w-md rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 sm:max-w-xs md:max-w-sm"
               />
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredCourses.map(course => (
-                <div key={course.id} className="flex flex-col rounded-3xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md overflow-hidden">
-                  <div className="h-48 bg-gray-200 overflow-hidden flex-shrink-0">
-                    {course.thumbnailUrl ? (
-                      <img
-                        src={course.thumbnailUrl}
-                        alt={course.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 text-4xl">
-                        📚
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {filteredCourses.map((course) => {
+                const d = getCourseCardDisplay(course.id)
+                const initials = initialsFromName(d.instructor)
+                return (
+                  <article
+                    key={course.id}
+                    className="flex flex-col overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-black/5 transition hover:shadow-lg sm:flex-row"
+                  >
+                    <div className="relative aspect-[16/10] w-full shrink-0 bg-slate-200 sm:aspect-auto sm:w-[40%] sm:min-h-[168px] sm:max-w-[220px]">
+                      {course.thumbnailUrl ? (
+                        <img
+                          src={course.thumbnailUrl}
+                          alt={course.title}
+                          className="h-full w-full object-cover sm:rounded-l-xl sm:rounded-r-none"
+                        />
+                      ) : (
+                        <div className="flex h-full min-h-[140px] w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-4xl text-slate-500 sm:min-h-0 sm:rounded-l-xl">
+                          📚
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex min-w-0 flex-1 flex-col justify-between p-4 sm:p-5">
+                      <div>
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="line-clamp-2 text-base font-bold leading-snug text-blue-950 sm:text-[0.95rem] md:text-base">
+                            {course.title}
+                          </h3>
+                          <div className="flex shrink-0 items-center gap-1 pt-0.5">
+                            <svg
+                              className="h-4 w-4 text-amber-400"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              aria-hidden
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <span className="text-sm font-semibold tabular-nums text-slate-800">
+                              {d.rating.toFixed(1)}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">
+                          {course.description}
+                        </p>
+                        <div className="mt-3 flex items-center gap-2.5">
+                          <div
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${d.avatarClass}`}
+                          >
+                            {initials}
+                          </div>
+                          <span className="truncate text-sm font-medium text-slate-800">{d.instructor}</span>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                  <div className="p-6 flex flex-col flex-grow">
-                    <h3 className="text-lg font-semibold mb-2 line-clamp-2">{course.title}</h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{course.description}</p>
-                    <div className="mb-3 text-xs text-gray-500">
-                      {course.category.name}
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                        <span className="text-lg font-bold tabular-nums text-blue-950">{d.priceLabel}</span>
+                        <Link
+                          href={`/courses/${course.id}`}
+                          className="rounded-lg bg-blue-600 px-4 py-2.5 text-center text-xs font-bold uppercase tracking-wide text-white transition hover:bg-blue-700"
+                        >
+                          Access course
+                        </Link>
+                      </div>
                     </div>
-                    <div className="mb-2 text-xs text-gray-500">
-                      {course.workloadHours} hours
-                    </div>
-                    <div className="mb-4 text-sm font-medium text-blue-600">
-                      {course.enrollments.length} student{course.enrollments.length !== 1 ? 's' : ''}
-                    </div>
-                    <Link href={`/courses/${course.id}`} className="text-blue-600 hover:underline text-sm font-medium mt-auto">
-                      View Course →
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                  </article>
+                )
+              })}
             </div>
 
             {filteredCourses.length === 0 && courses.length > 0 && (
-              <div className="mt-10 rounded-3xl border border-gray-200 bg-gray-50 p-10 text-center">
-                <p className="text-gray-500">No courses found for this category or search.</p>
+              <div className="mt-10 rounded-xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+                <p className="text-slate-600">No courses found for this category or search.</p>
                 <button
+                  type="button"
                   onClick={() => {
                     setSearchTerm('')
                     setSelectedCategory('')
                   }}
-                  className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                  className="mt-4 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
                 >
                   Show all courses
                 </button>
