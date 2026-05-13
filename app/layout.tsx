@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <SessionProvider>
-        <body className={inter.className}>{children}</body>
+        <body className={`${inter.className} bg-slate-100 antialiased`}>{children}</body>
       </SessionProvider>
     </html>
   )

@@ -3,6 +3,12 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Header from '../../../components/Header'
+import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
+
+const inputClass =
+  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30'
+const labelClass = 'block text-sm font-medium text-slate-700'
 
 function ResetPasswordInner() {
   const searchParams = useSearchParams()
@@ -42,50 +48,58 @@ function ResetPasswordInner() {
 
   if (done) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <div className="text-green-600 text-4xl mb-3">✓</div>
-          <h1 className="text-xl font-semibold">Password updated</h1>
-          <p className="text-gray-600 mt-2">Redirecting to sign in...</p>
-        </div>
-      </div>
+      <>
+        <Header />
+        <PageShell centered>
+          <div className={`${siteCardClass} p-8 text-center`}>
+            <div className="mb-3 text-4xl text-emerald-600">✓</div>
+            <h1 className="text-xl font-bold text-blue-950">Password updated</h1>
+            <p className={`${siteMutedClass} mt-2`}>Redirecting to sign in…</p>
+          </div>
+        </PageShell>
+      </>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <form onSubmit={onSubmit} className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Reset Password</h1>
+    <>
+      <Header />
+      <PageShell centered>
+        <div className={`${siteCardClass} p-6 sm:p-8`}>
+          <form onSubmit={onSubmit}>
+            <h1 className={`${siteTitleClass} mb-6 text-center`}>Reset password</h1>
 
-        {error && <div className="mb-4 text-red-600 text-sm">{error}</div>}
+            {error && <div className="mb-4 text-sm text-red-600">{error}</div>}
 
-        <div className="mb-4">
-          <label className="block text-gray-700">New password</label>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded mt-1"
-            required
-            minLength={8}
-          />
+            <div className="mb-4">
+              <label className={labelClass}>New password</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className={inputClass}
+                required
+                minLength={8}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || !token}
+              className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? 'Updating…' : 'Update password'}
+            </button>
+
+            <p className="mt-4 text-center text-sm">
+              <Link href="/auth/signin" className="font-semibold text-blue-600 hover:underline">
+                Back to sign in
+              </Link>
+            </p>
+          </form>
         </div>
-
-        <button
-          type="submit"
-          disabled={loading || !token}
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? 'Updating...' : 'Update password'}
-        </button>
-
-        <p className="mt-4 text-center text-sm">
-          <Link href="/auth/signin" className="text-blue-600 hover:underline">
-            Back to Sign In
-          </Link>
-        </p>
-      </form>
-    </div>
+      </PageShell>
+    </>
   )
 }
 
@@ -93,11 +107,15 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">Loading...</div>
+        <>
+          <Header />
+          <PageShell centered>
+            <p className="text-center text-slate-600">Loading…</p>
+          </PageShell>
+        </>
       }
     >
       <ResetPasswordInner />
     </Suspense>
   )
 }
-

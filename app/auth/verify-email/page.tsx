@@ -3,6 +3,8 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Header from '../../../components/Header'
+import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
 
 function VerifyEmailInner() {
   const searchParams = useSearchParams()
@@ -42,38 +44,43 @@ function VerifyEmailInner() {
 
   if (done) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <div className="text-green-600 text-4xl mb-3">✓</div>
-          <h1 className="text-xl font-semibold">Email verified</h1>
-          <p className="text-gray-600 mt-2">Redirecting to sign in...</p>
-        </div>
-      </div>
+      <>
+        <Header />
+        <PageShell centered>
+          <div className={`${siteCardClass} p-8 text-center`}>
+            <div className="mb-3 text-4xl text-emerald-600">✓</div>
+            <h1 className="text-xl font-bold text-blue-950">Email verified</h1>
+            <p className={`${siteMutedClass} mt-2`}>Redirecting to sign in…</p>
+          </div>
+        </PageShell>
+      </>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <form
-        onSubmit={onSubmit}
-        className="bg-white p-8 rounded-lg shadow-md w-full max-w-md"
-      >
-        <h1 className="text-2xl font-bold mb-6 text-center">Verify Email</h1>
-        {error && <div className="mb-4 text-red-600 text-sm">{error}</div>}
-        <button
-          type="submit"
-          disabled={loading || !token}
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? 'Verifying...' : 'Verify email'}
-        </button>
-        <p className="mt-4 text-center text-sm">
-          <Link href="/auth/signin" className="text-blue-600 hover:underline">
-            Back to Sign In
-          </Link>
-        </p>
-      </form>
-    </div>
+    <>
+      <Header />
+      <PageShell centered>
+        <div className={`${siteCardClass} p-6 sm:p-8`}>
+          <form onSubmit={onSubmit}>
+            <h1 className={`${siteTitleClass} mb-6 text-center`}>Verify email</h1>
+            {error && <div className="mb-4 text-sm text-red-600">{error}</div>}
+            <button
+              type="submit"
+              disabled={loading || !token}
+              className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? 'Verifying…' : 'Verify email'}
+            </button>
+            <p className="mt-4 text-center text-sm">
+              <Link href="/auth/signin" className="font-semibold text-blue-600 hover:underline">
+                Back to sign in
+              </Link>
+            </p>
+          </form>
+        </div>
+      </PageShell>
+    </>
   )
 }
 
@@ -81,13 +88,15 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-          Loading...
-        </div>
+        <>
+          <Header />
+          <PageShell centered>
+            <p className="text-center text-slate-600">Loading…</p>
+          </PageShell>
+        </>
       }
     >
       <VerifyEmailInner />
     </Suspense>
   )
 }
-

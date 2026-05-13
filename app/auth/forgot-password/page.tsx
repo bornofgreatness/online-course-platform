@@ -2,6 +2,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Header from '../../../components/Header'
+import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
+
+const inputClass =
+  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30'
+const labelClass = 'block text-sm font-medium text-slate-700'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -24,51 +30,46 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <form
-        onSubmit={onSubmit}
-        className="bg-white p-8 rounded-lg shadow-md w-full max-w-md"
-      >
-        <h1 className="text-2xl font-bold mb-6 text-center">Forgot Password</h1>
+    <>
+      <Header />
+      <PageShell centered>
+        <div className={`${siteCardClass} p-6 sm:p-8`}>
+          <form onSubmit={onSubmit}>
+            <h1 className={`${siteTitleClass} mb-6 text-center`}>Forgot password</h1>
 
-        {sent ? (
-          <div className="text-center">
-            <div className="text-green-600 text-4xl mb-3">✓</div>
-            <p className="text-gray-700">If an account exists for that email, a reset link has been sent.</p>
-            <Link href="/auth/signin" className="text-blue-600 hover:underline block mt-6">
-              Back to Sign In
-            </Link>
-          </div>
-        ) : (
-          <>
-            <div className="mb-4">
-              <label className="block text-gray-700">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded mt-1"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? 'Sending...' : 'Send reset link'}
-            </button>
+            {sent ? (
+              <div className="text-center">
+                <div className="mb-3 text-4xl text-emerald-600">✓</div>
+                <p className={siteMutedClass}>If an account exists for that email, a reset link has been sent.</p>
+                <Link href="/auth/signin" className="mt-6 inline-block text-sm font-semibold text-blue-600 hover:underline">
+                  Back to sign in
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4">
+                  <label className={labelClass}>Email</label>
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} required />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {loading ? 'Sending…' : 'Send reset link'}
+                </button>
 
-            <p className="mt-4 text-center text-sm">
-              Remembered it?{' '}
-              <Link href="/auth/signin" className="text-blue-600 hover:underline">
-                Sign in
-              </Link>
-            </p>
-          </>
-        )}
-      </form>
-    </div>
+                <p className="mt-4 text-center text-sm text-slate-600">
+                  Remembered it?{' '}
+                  <Link href="/auth/signin" className="font-semibold text-blue-600 hover:underline">
+                    Sign in
+                  </Link>
+                </p>
+              </>
+            )}
+          </form>
+        </div>
+      </PageShell>
+    </>
   )
 }
-

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
 
 type Category = {
   id: string
@@ -261,7 +262,7 @@ export default function ClientAdminCrud() {
   }
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="mx-auto max-w-6xl">
       {toast && (
         <div
           className={`mb-4 rounded border px-4 py-2 text-sm ${
@@ -274,8 +275,8 @@ export default function ClientAdminCrud() {
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Admin Panel</h1>
-          <p className="text-gray-600 mt-2">Manage categories and PDF courses.</p>
+          <h1 className={siteTitleClass}>Admin panel</h1>
+          <p className={`${siteMutedClass} mt-2`}>Manage categories and PDF courses.</p>
         </div>
 
         <div className="flex gap-2">

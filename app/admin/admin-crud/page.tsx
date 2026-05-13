@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]/options'
 import Header from '../../../components/Header'
+import PageShell from '../../../components/PageShell'
 import { redirect } from 'next/navigation'
 import dynamic from 'next/dynamic'
 
@@ -18,7 +19,9 @@ export default async function AdminCrudPage() {
   return (
     <>
       <Header />
-      <ClientAdminCrud />
+      <PageShell>
+        <ClientAdminCrud />
+      </PageShell>
     </>
   )
 

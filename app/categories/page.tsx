@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import Header from '../../components/Header'
+import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
+import CategoryListCard from '../../components/CategoryListCard'
 import { getPrisma } from '../../lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -22,46 +24,30 @@ export default async function CategoriesPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen p-8">
+      <PageShell>
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Categories</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className={siteTitleClass}>Categories</h1>
+          <p className={`${siteMutedClass} mt-2 max-w-2xl`}>
             Browse courses grouped by topic. Select a category to see all courses in that area.
           </p>
         </div>
 
         {categories.length === 0 ? (
-          <div className="rounded-3xl border border-gray-200 bg-gray-50 p-10 text-center text-gray-500">
-            No categories are available yet.
-          </div>
+          <div className={`${siteCardClass} p-10 text-center ${siteMutedClass}`}>No categories are available yet.</div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/categories/${cat.id}`}
-                className="group flex flex-col rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-200 hover:shadow-md"
-              >
-                <h2 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600">
-                  {cat.name}
-                </h2>
-                <p className="mt-3 text-sm text-gray-500">
-                  {cat._count.courses} course{cat._count.courses !== 1 ? 's' : ''}
-                </p>
-                <span className="mt-auto pt-4 text-sm font-medium text-blue-600 group-hover:underline">
-                  View category →
-                </span>
-              </Link>
+              <CategoryListCard key={cat.id} category={cat} />
             ))}
           </div>
         )}
 
         <p className="mt-10">
-          <Link href="/courses" className="text-blue-600 hover:underline">
+          <Link href="/courses" className="text-sm font-semibold text-blue-600 hover:underline">
             ← All courses
           </Link>
         </p>
-      </div>
+      </PageShell>
     </>
   )
 }

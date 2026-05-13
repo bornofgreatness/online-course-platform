@@ -48,3 +48,15 @@ export function getCourseCardDisplay(courseId: string) {
     avatarClass: AVATAR_CLASSES[h % AVATAR_CLASSES.length],
   }
 }
+
+/** Visual parity for category browse cards (rating / curator row / footer count). */
+export function getCategoryListCardDisplay(categoryId: string, courseCount: number) {
+  const h = hashString(categoryId)
+  const rating = RATINGS[h % RATINGS.length]
+  return {
+    rating,
+    curator: 'Category catalog',
+    avatarClass: AVATAR_CLASSES[h % AVATAR_CLASSES.length],
+    footerLabel: courseCount === 1 ? '1 course' : `${courseCount} courses`,
+  }
+}
