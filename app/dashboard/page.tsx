@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
+import { useI18n } from '../../components/LanguageProvider'
 
 interface Enrollment {
   id: string
@@ -44,6 +45,7 @@ interface CertificateRow {
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
+  const { t } = useI18n()
   const router = useRouter()
   const [enrollments, setEnrollments] = useState<Enrollment[]>([])
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
@@ -102,40 +104,40 @@ export default function Dashboard() {
       <PageShell>
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className={siteTitleClass}>Dashboard</h1>
-            <p className={`${siteMutedClass} mt-2`}>Welcome back, {user.name ?? 'Learner'}.</p>
+            <h1 className={siteTitleClass}>{t('common.dashboard')}</h1>
+            <p className={`${siteMutedClass} mt-2`}>{t('common.welcomeBack')}, {user.name ?? 'Learner'}.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/courses"
               className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
             >
-              Browse courses
+              {t('common.browseCourses')}
             </Link>
             <Link
               href="/pricing"
               className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
             >
-              Subscription
+              {t('common.subscription')}
             </Link>
             <Link
               href="/affiliate"
               className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
             >
-              Affiliate
+              {t('common.affiliate')}
             </Link>
             <Link
               href="/certificates"
               className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
             >
-              Certificates
+              {t('common.certificates')}
             </Link>
             {user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' ? (
               <Link
                 href="/admin"
                 className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
               >
-                Admin
+                {t('common.admin')}
               </Link>
             ) : null}
           </div>
@@ -143,48 +145,48 @@ export default function Dashboard() {
 
         <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">Subscription</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('common.subscription')}</p>
             {activeSubscription ? (
               <>
                 <p className="mt-2 text-lg font-bold text-slate-900">{activeSubscription.plan}</p>
                 <p className="text-xs text-slate-600">
-                  Renews / ends {new Date(activeSubscription.endDate).toLocaleDateString()}
+                  {t('common.renewsEnds')} {new Date(activeSubscription.endDate).toLocaleDateString()}
                 </p>
               </>
             ) : (
-              <p className="mt-2 text-sm text-amber-800">No active plan — enroll after subscribing.</p>
+              <p className="mt-2 text-sm text-amber-800">{t('common.noActivePlan')}</p>
             )}
           </div>
           <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">Course completion</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('common.courseCompletion')}</p>
             <p className="mt-2 text-lg font-bold tabular-nums text-slate-900">{completionPercent}%</p>
-            <p className="text-xs text-slate-600">Across enrolled courses</p>
+            <p className="text-xs text-slate-600">{t('common.acrossEnrolledCourses')}</p>
           </div>
           <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">Certificates</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('common.certificates')}</p>
             <p className="mt-2 text-lg font-bold tabular-nums text-slate-900">{certificates.length}</p>
           </div>
           <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">Payments</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('common.payments')}</p>
             <p className="mt-2 text-lg font-bold tabular-nums text-slate-900">{payments.length}</p>
           </div>
         </div>
 
         {continueCourse ? (
           <div className={`${siteCardClass} mb-6 p-5`}>
-            <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900">Continue learning</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900">{t('common.continueLearning')}</h2>
             <p className="mt-1 text-lg font-bold text-blue-950">{continueCourse.course.title}</p>
             <Link href={`/courses/${continueCourse.course.id}`} className="mt-3 inline-block text-sm font-semibold text-blue-600 hover:underline">
-              Open course →
+              {t('common.openCourse')}
             </Link>
           </div>
         ) : null}
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className={`${siteCardClass} p-5 sm:p-6`}>
-            <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-blue-900 sm:text-xl">Enrolled courses</h2>
+            <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-blue-900 sm:text-xl">{t('common.enrolledCourses')}</h2>
             {enrollments.length === 0 ? (
-              <p className={siteMutedClass}>You have not enrolled in any courses yet.</p>
+              <p className={siteMutedClass}>{t('common.noEnrollments')}</p>
             ) : (
               <div className="space-y-4">
                 {enrollments.map((enrollment) => {
@@ -205,17 +207,17 @@ export default function Dashboard() {
                             progress.completed ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'
                           }`}
                         >
-                          {progress.completed ? 'Completed' : 'In progress'}
+                          {progress.completed ? t('common.completed') : t('common.inProgress')}
                         </span>
                       </div>
                       <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                        Category: {enrollment.course.category.name}
+                        {t('common.category')}: {enrollment.course.category.name}
                       </p>
                       <p className="mt-2 line-clamp-2 text-sm text-slate-700">{enrollment.course.description}</p>
 
                       <div className="mt-3">
                         <div className="mb-1 flex items-center justify-between text-sm text-slate-600">
-                          <span>Progress</span>
+                          <span>{t('common.progress')}</span>
                           <span className="tabular-nums font-medium">{Math.round(progressPercent)}%</span>
                         </div>
                         <div className="h-2 w-full rounded-full bg-slate-200">
@@ -228,9 +230,9 @@ export default function Dashboard() {
 
                       <div className="mt-3 flex flex-wrap items-center gap-3">
                         <Link href={`/courses/${enrollment.course.id}`} className="text-sm font-semibold text-blue-600 hover:underline">
-                          {progress.completed ? 'Review course' : 'Continue learning'}
+                          {progress.completed ? t('common.reviewCourse') : t('common.continueLearning')}
                         </Link>
-                        <span className="text-xs text-slate-500">Enrolled {new Date(enrollment.enrolledAt).toLocaleDateString()}</span>
+                        <span className="text-xs text-slate-500">{t('common.enrolled')} {new Date(enrollment.enrolledAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                   )
@@ -241,9 +243,9 @@ export default function Dashboard() {
 
           <div className="space-y-6">
             <div className={`${siteCardClass} p-5 sm:p-6`}>
-              <h2 className="mb-3 text-lg font-bold uppercase tracking-wide text-blue-900">Payment history</h2>
+              <h2 className="mb-3 text-lg font-bold uppercase tracking-wide text-blue-900">{t('common.paymentHistory')}</h2>
               {payments.length === 0 ? (
-                <p className={siteMutedClass}>No payments yet.</p>
+                <p className={siteMutedClass}>{t('common.noPayments')}</p>
               ) : (
                 <ul className="divide-y divide-slate-100 text-sm">
                   {payments.slice(0, 12).map((p) => (
@@ -260,15 +262,15 @@ export default function Dashboard() {
             </div>
 
             <div className={`${siteCardClass} p-5 sm:p-6`}>
-              <h2 className="mb-3 text-lg font-bold uppercase tracking-wide text-blue-900">Subscription history</h2>
+              <h2 className="mb-3 text-lg font-bold uppercase tracking-wide text-blue-900">{t('common.subscriptionHistory')}</h2>
               {subscriptions.length === 0 ? (
-                <p className={siteMutedClass}>No subscriptions yet.</p>
+                <p className={siteMutedClass}>{t('common.noSubscriptions')}</p>
               ) : (
                 <ul className="divide-y divide-slate-100 text-sm">
                   {subscriptions.slice(0, 8).map((s) => (
                     <li key={s.id} className="flex flex-col py-2">
                       <span className="font-medium text-slate-900">
-                        {s.plan} {s.active ? '(active)' : ''}
+                        {s.plan} {s.active ? `(${t('common.active')})` : ''}
                       </span>
                       <span className="text-xs text-slate-500">
                         {new Date(s.startDate).toLocaleDateString()} — {new Date(s.endDate).toLocaleDateString()}
@@ -280,9 +282,9 @@ export default function Dashboard() {
             </div>
 
             <div className={`${siteCardClass} p-5 sm:p-6`}>
-              <h2 className="mb-3 text-lg font-bold uppercase tracking-wide text-blue-900">Certificates</h2>
+              <h2 className="mb-3 text-lg font-bold uppercase tracking-wide text-blue-900">{t('common.certificates')}</h2>
               {certificates.length === 0 ? (
-                <p className={siteMutedClass}>No certificates yet.</p>
+                <p className={siteMutedClass}>{t('common.noCertificates')}</p>
               ) : (
                 <ul className="space-y-2 text-sm">
                   {certificates.map((c) => (
@@ -293,7 +295,7 @@ export default function Dashboard() {
                         href={`/verify/certificate/${encodeURIComponent(c.certificateNumber)}`}
                         className="mt-1 text-xs font-semibold text-blue-600 hover:underline"
                       >
-                        Verify publicly
+                        {t('common.verifyPublicly')}
                       </Link>
                     </li>
                   ))}

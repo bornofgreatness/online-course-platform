@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import SessionProvider from '../components/SessionProvider'
+import { LanguageProvider } from '../components/LanguageProvider'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -34,10 +35,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <SessionProvider>
-        <body className={`${inter.className} bg-slate-100 antialiased`}>{children}</body>
-      </SessionProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} bg-slate-100 antialiased`}>
+        <LanguageProvider>
+          <SessionProvider>{children}</SessionProvider>
+        </LanguageProvider>
+      </body>
     </html>
   )
 }

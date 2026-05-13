@@ -6,27 +6,66 @@ export type Language = 'en' | 'pt'
 
 export type TranslationKey =
   | 'common.access'
+  | 'common.acrossEnrolledCourses'
+  | 'common.active'
   | 'common.admin'
   | 'common.affiliate'
   | 'common.allCategories'
   | 'common.backToAllCourses'
   | 'common.backToCourses'
+  | 'common.backToDashboard'
+  | 'common.browseCourses'
   | 'common.categories'
+  | 'common.category'
   | 'common.certificates'
+  | 'common.certificateFor'
+  | 'common.certificateNumber'
+  | 'common.certificateSubtitle'
   | 'common.close'
+  | 'common.completed'
+  | 'common.completedCourse'
+  | 'common.completeCourseToEarn'
+  | 'common.continueLearning'
+  | 'common.courseCompletion'
   | 'common.courseNotFound'
   | 'common.courses'
   | 'common.dashboard'
+  | 'common.downloadPdf'
+  | 'common.enrolled'
+  | 'common.enrolledCourses'
   | 'common.home'
+  | 'common.inProgress'
+  | 'common.issued'
   | 'common.language'
   | 'common.learning'
   | 'common.login'
   | 'common.logout'
   | 'common.menu'
+  | 'common.myCertificates'
+  | 'common.noActivePlan'
+  | 'common.noCertificates'
+  | 'common.noCertificatesYet'
+  | 'common.noEnrollments'
+  | 'common.noPayments'
+  | 'common.noSubscriptions'
+  | 'common.openCourse'
   | 'common.password'
+  | 'common.paymentHistory'
+  | 'common.payments'
   | 'common.prices'
+  | 'common.progress'
+  | 'common.renewsEnds'
+  | 'common.reviewCourse'
   | 'common.saving'
+  | 'common.share'
   | 'common.signup'
+  | 'common.subscription'
+  | 'common.subscriptionHistory'
+  | 'common.verify'
+  | 'common.verifyPublicly'
+  | 'common.viewAndDownloadCertificates'
+  | 'common.welcomeBack'
+  | 'common.youHaveNotEnrolled'
   | 'course.about'
   | 'course.available'
   | 'course.complete'
@@ -81,27 +120,66 @@ export type TranslationKey =
 const translations: Record<Language, Record<TranslationKey, string>> = {
   en: {
     'common.access': 'Access',
+    'common.acrossEnrolledCourses': 'Across enrolled courses',
+    'common.active': 'active',
     'common.admin': 'Admin',
     'common.affiliate': 'Affiliate',
     'common.allCategories': 'All categories',
     'common.backToAllCourses': 'Back to all courses',
     'common.backToCourses': 'Back to courses',
+    'common.backToDashboard': 'Back to dashboard',
+    'common.browseCourses': 'Browse courses',
     'common.categories': 'Categories',
+    'common.category': 'Category',
     'common.certificates': 'Certificates',
+    'common.certificateFor': 'Certificate for',
+    'common.certificateNumber': 'Certificate #{number}',
+    'common.certificateSubtitle': 'View and download your course completion certificates.',
     'common.close': 'Close',
+    'common.completed': 'Completed',
+    'common.completedCourse': 'I completed the course',
+    'common.completeCourseToEarn': 'Complete a course to earn your first certificate.',
+    'common.continueLearning': 'Continue learning',
+    'common.courseCompletion': 'Course completion',
     'common.courseNotFound': 'Course not found.',
     'common.courses': 'Courses',
     'common.dashboard': 'Dashboard',
+    'common.downloadPdf': 'Download PDF',
+    'common.enrolled': 'Enrolled',
+    'common.enrolledCourses': 'Enrolled courses',
     'common.home': 'Home',
+    'common.inProgress': 'In progress',
+    'common.issued': 'Issued',
     'common.language': 'Language',
     'common.learning': 'Learning',
     'common.login': 'Login',
     'common.logout': 'Log out',
     'common.menu': 'Menu',
+    'common.myCertificates': 'My certificates',
+    'common.noActivePlan': 'No active plan — enroll after subscribing.',
+    'common.noCertificates': 'No certificates yet.',
+    'common.noCertificatesYet': 'No certificates yet',
+    'common.noEnrollments': 'You have not enrolled in any courses yet.',
+    'common.noPayments': 'No payments yet.',
+    'common.noSubscriptions': 'No subscriptions yet.',
+    'common.openCourse': 'Open course →',
     'common.password': 'Password',
+    'common.paymentHistory': 'Payment history',
+    'common.payments': 'Payments',
     'common.prices': 'Prices',
+    'common.progress': 'Progress',
+    'common.renewsEnds': 'Renews / ends',
+    'common.reviewCourse': 'Review course',
     'common.saving': 'Saving...',
+    'common.share': 'Share',
     'common.signup': 'Sign up',
+    'common.subscription': 'Subscription',
+    'common.subscriptionHistory': 'Subscription history',
+    'common.verify': 'Verify',
+    'common.verifyPublicly': 'Verify publicly',
+    'common.viewAndDownloadCertificates': 'View and download your course completion certificates.',
+    'common.welcomeBack': 'Welcome back',
+    'common.youHaveNotEnrolled': 'You have not enrolled in any courses yet.',
     'course.about': 'About this course',
     'course.available': 'Available courses',
     'course.complete': 'Completed',
@@ -156,27 +234,66 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
   },
   pt: {
     'common.access': 'Acessar',
+    'common.acrossEnrolledCourses': 'Entre cursos inscritos',
+    'common.active': 'ativo',
     'common.admin': 'Admin',
     'common.affiliate': 'Afiliado',
     'common.allCategories': 'Todas as categorias',
     'common.backToAllCourses': 'Voltar para todos os cursos',
     'common.backToCourses': 'Voltar para cursos',
+    'common.backToDashboard': 'Voltar ao painel',
+    'common.browseCourses': 'Navegar cursos',
     'common.categories': 'Categorias',
+    'common.category': 'Categoria',
     'common.certificates': 'Certificados',
+    'common.certificateFor': 'Certificado de',
+    'common.certificateNumber': 'Certificado #{number}',
+    'common.certificateSubtitle': 'Veja e baixe seus certificados de conclusão de curso.',
     'common.close': 'Fechar',
+    'common.completed': 'Concluído',
+    'common.completedCourse': 'Completei o curso',
+    'common.completeCourseToEarn': 'Complete um curso para ganhar seu primeiro certificado.',
+    'common.continueLearning': 'Continuar aprendendo',
+    'common.courseCompletion': 'Conclusão do curso',
     'common.courseNotFound': 'Curso não encontrado.',
     'common.courses': 'Cursos',
     'common.dashboard': 'Painel',
+    'common.downloadPdf': 'Baixar PDF',
+    'common.enrolled': 'Inscrito',
+    'common.enrolledCourses': 'Cursos inscritos',
     'common.home': 'Início',
+    'common.inProgress': 'Em andamento',
+    'common.issued': 'Emitido',
     'common.language': 'Idioma',
     'common.learning': 'Estudando',
     'common.login': 'Entrar',
     'common.logout': 'Sair',
     'common.menu': 'Menu',
+    'common.myCertificates': 'Meus certificados',
+    'common.noActivePlan': 'Nenhum plano ativo — inscreva-se após assinar.',
+    'common.noCertificates': 'Nenhum certificado ainda.',
+    'common.noCertificatesYet': 'Nenhum certificado ainda',
+    'common.noEnrollments': 'Você ainda não se inscreveu em nenhum curso.',
+    'common.noPayments': 'Nenhum pagamento ainda.',
+    'common.noSubscriptions': 'Nenhuma assinatura ainda.',
+    'common.openCourse': 'Abrir curso →',
     'common.password': 'Senha',
+    'common.paymentHistory': 'Histórico de pagamentos',
+    'common.payments': 'Pagamentos',
     'common.prices': 'Preços',
+    'common.progress': 'Progresso',
+    'common.renewsEnds': 'Renova / termina',
+    'common.reviewCourse': 'Revisar curso',
     'common.saving': 'Salvando...',
+    'common.share': 'Compartilhar',
     'common.signup': 'Cadastrar',
+    'common.subscription': 'Assinatura',
+    'common.subscriptionHistory': 'Histórico de assinaturas',
+    'common.verify': 'Verificar',
+    'common.verifyPublicly': 'Verificar publicamente',
+    'common.viewAndDownloadCertificates': 'Veja e baixe seus certificados de conclusão de curso.',
+    'common.welcomeBack': 'Bem-vindo de volta',
+    'common.youHaveNotEnrolled': 'Você ainda não se inscreveu em nenhum curso.',
     'course.about': 'Sobre este curso',
     'course.available': 'Cursos disponíveis',
     'course.complete': 'Concluído',

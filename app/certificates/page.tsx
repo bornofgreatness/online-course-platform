@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
 import { certificatePdfDownloadPath } from '../../lib/certificateDownload'
+import { useI18n } from '../../components/LanguageProvider'
 
 interface Certificate {
   id: string
@@ -22,6 +23,7 @@ interface Certificate {
 
 export default function Certificates() {
   const { data: session, status } = useSession()
+  const { t } = useI18n()
   const router = useRouter()
   const [certificates, setCertificates] = useState<Certificate[]>([])
   const [loading, setLoading] = useState(true)
@@ -61,23 +63,23 @@ export default function Certificates() {
       <Header />
       <PageShell>
         <div className="mb-8">
-          <h1 className={siteTitleClass}>My certificates</h1>
-          <p className={`${siteMutedClass} mt-2`}>View and download your course completion certificates.</p>
+          <h1 className={siteTitleClass}>{t('common.myCertificates')}</h1>
+          <p className={`${siteMutedClass} mt-2`}>{t('common.viewAndDownloadCertificates')}</p>
           <Link href="/dashboard" className="mt-3 inline-block text-sm font-semibold text-blue-600 hover:underline">
-            ← Back to dashboard
+            ← {t('common.backToDashboard')}
           </Link>
         </div>
 
         {certificates.length === 0 ? (
           <div className={`${siteCardClass} p-10 text-center`}>
             <div className="mb-4 text-5xl">🏆</div>
-            <h2 className="text-lg font-bold text-blue-950">No certificates yet</h2>
-            <p className={`${siteMutedClass} mx-auto mt-2 max-w-md`}>Complete a course to earn your first certificate.</p>
+            <h2 className="text-lg font-bold text-blue-950">{t('common.noCertificatesYet')}</h2>
+            <p className={`${siteMutedClass} mx-auto mt-2 max-w-md`}>{t('common.completeCourseToEarn')}</p>
             <Link
               href="/courses"
               className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
             >
-              Browse courses
+              {t('common.browseCourses')}
             </Link>
           </div>
         ) : (
@@ -87,14 +89,14 @@ export default function Certificates() {
                 <div className="mb-4 text-center">
                   <div className="mb-2 text-4xl">🎓</div>
                   <h3 className="text-base font-bold text-blue-950">{certificate.course.title}</h3>
-                  <p className="text-xs text-slate-500">Certificate #{certificate.certificateNumber}</p>
+                  <p className="text-xs text-slate-500">{t('common.certificateNumber', { number: certificate.certificateNumber })}</p>
                 </div>
 
                 <div className="mb-4 flex justify-center">
                   <img src={certificate.qrCode} alt="Certificate QR Code" className="h-20 w-20" />
                 </div>
 
-                <div className="mb-4 text-center text-xs text-slate-500">Issued {new Date(certificate.issuedAt).toLocaleDateString()}</div>
+                <div className="mb-4 text-center text-xs text-slate-500">{t('common.issued')} {new Date(certificate.issuedAt).toLocaleDateString()}</div>
 
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
@@ -104,13 +106,13 @@ export default function Certificates() {
                       rel="noopener noreferrer"
                       className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
                     >
-                      Download PDF
+                      {t('common.downloadPdf')}
                     </a>
                     <Link
                       href={`/verify/certificate/${encodeURIComponent(certificate.certificateNumber)}`}
                       className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-center text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
                     >
-                      Verify
+                      {t('common.verify')}
                     </Link>
                   </div>
                   <button
@@ -119,14 +121,14 @@ export default function Certificates() {
                       const path = certificatePdfDownloadPath(certificate.certificateNumber, certificate.pdfUrl)
                       const url = typeof window !== 'undefined' ? `${window.location.origin}${path}` : path
                       navigator.share?.({
-                        title: `Certificate for ${certificate.course.title}`,
-                        text: `I completed the course: ${certificate.course.title}`,
+                        title: `${t('common.certificateFor')} ${certificate.course.title}`,
+                        text: `${t('common.completedCourse')}: ${certificate.course.title}`,
                         url,
                       })
                     }}
                     className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
                   >
-                    Share
+                    {t('common.share')}
                   </button>
                 </div>
               </div>
