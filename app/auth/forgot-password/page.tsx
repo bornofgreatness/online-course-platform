@@ -35,7 +35,9 @@ export default function ForgotPasswordPage() {
       <PageShell centered>
         <div className={`${siteCardClass} p-6 sm:p-8`}>
           <form onSubmit={onSubmit}>
+            
             <h1 className={`${siteTitleClass} mb-6 text-center`}>Forgot password</h1>
+
 
             {sent ? (
               <div className="text-center">

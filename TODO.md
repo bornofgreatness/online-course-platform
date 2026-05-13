@@ -1,26 +1,20 @@
-# TODO
-
-## Step 1 — Fix build/runtime blockers
-- [ ] Ensure `next build` succeeds in this environment.
-  - [ ] Add Suspense boundary / refactor pages using `useSearchParams` in:
-    - [ ] `app/auth/verify-email/page.tsx`
-    - [ ] `app/auth/reset-password/page.tsx`
-  - [ ] Ensure Prisma/API routes don’t crash static export due to missing DB connection.
-
-## Step 2 — Email verification requirement
-- [ ] Verify `POST /api/auth/confirm-email` implementation end-to-end:
-  - [ ] token lookup + expiry + used checks
-  - [ ] mark `user.emailVerifiedAt`
-  - [ ] mark token `used=true`
-
-## Step 3 — Update checklist
-- [ ] Update `TODO_REQUIREMENTS.md` checkboxes based on what now works.
-
-## Step 4 — Continue implementing remaining missing requirements
-- [ ] Affiliate flows
-- [ ] Student dashboard sections
-- [ ] Quizzes + certificates + verification
-- [ ] Subscriptions/payment integrations
-- [ ] Access control guards
-- [ ] SEO/perf/security items
+- [x] Investigated i18n setup (LanguageProvider translations + LanguageSwitch)
+- [x] Updated app/affiliate/page.tsx page title to use PT via i18n key (common.affiliate)
+- [x] Fixed JSX parsing issue in app/auth/forgot-password/page.tsx so lint passes
+- [ ] Implement PT for ALL remaining pages (remove hardcoded English UI strings):
+  - [ ] app/pricing/page.tsx
+  - [ ] app/auth/signin/page.tsx
+  - [ ] app/auth/signup/page.tsx
+  - [ ] app/auth/forgot-password/page.tsx (remaining strings)
+  - [ ] app/auth/verify-email/page.tsx
+  - [ ] app/auth/reset-password/page.tsx
+  - [ ] app/verify/certificate/[certificateNumber]/page.tsx
+  - [ ] app/categories/page.tsx
+  - [ ] app/admin/admin-crud/ClientAdminCrud.tsx (if hardcoded)
+  - [ ] any other pages flagged by search (Loading… etc.)
+- [ ] Implement PT for ALL components (remove hardcoded English UI strings):
+  - [ ] app/components/PricingPlans.tsx (found 'Subscribe'/'Redirecting…' hardcoded)
+  - [ ] app/components/Header.tsx (ensure all strings use t())
+  - [ ] any other components flagged by search
+- [ ] Run `npm run lint` to confirm no parse errors and only existing warnings
 

@@ -4,8 +4,10 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
+import { useI18n } from '../../components/LanguageProvider'
 
 export default function AffiliatePage() {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(true)
   const [registering, setRegistering] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -56,7 +58,7 @@ export default function AffiliatePage() {
     <>
       <Header />
       <PageShell>
-        <h1 className={siteTitleClass}>Affiliate program</h1>
+<h1 className={siteTitleClass}>{t('common.affiliate')}</h1>
         <p className={`${siteMutedClass} mt-2 max-w-2xl`}>
           Share your referral link. When referred learners subscribe, you earn a commission (pending admin payout in this
           MVP).
