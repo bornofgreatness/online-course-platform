@@ -6,6 +6,8 @@ import { siteCardClass, siteMutedClass, siteTitleClass } from '../../../componen
 type Category = {
   id: string
   name: string
+  icon: string | null
+  imageUrl: string | null
   createdAt: string
 }
 
@@ -19,7 +21,7 @@ type Course = {
   syllabus: string | null
   seoTitle: string | null
   seoDescription: string | null
-  category: { id: string; name: string }
+  category: { id: string; name: string; icon?: string | null; imageUrl?: string | null }
   categoryId: string
 }
 
@@ -41,9 +43,13 @@ export default function ClientAdminCrud() {
   // Categories
   const [categories, setCategories] = useState<Category[]>([])
   const [catName, setCatName] = useState('')
+  const [catIcon, setCatIcon] = useState('')
+  const [catImageUrl, setCatImageUrl] = useState('')
   const [catBusy, setCatBusy] = useState(false)
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
   const [editingCategoryName, setEditingCategoryName] = useState('')
+  const [editingCategoryIcon, setEditingCategoryIcon] = useState('')
+  const [editingCategoryImageUrl, setEditingCategoryImageUrl] = useState('')
 
   // Courses
   const [courses, setCourses] = useState<any[]>([])
@@ -102,13 +108,19 @@ export default function ClientAdminCrud() {
       const res = await fetch('/api/admin/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: catName.trim() }),
+        body: JSON.stringify({
+          name: catName.trim(),
+          icon: catIcon.trim() || null,
+          imageUrl: catImageUrl.trim() || null,
+        }),
       })
 
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error || 'Failed to create category')
 
       setCatName('')
+      setCatIcon('')
+      setCatImageUrl('')
       await fetchCategories()
       showToast({ type: 'success', message: 'Category created' })
     } catch (e: any) {
@@ -130,7 +142,11 @@ export default function ClientAdminCrud() {
       const res = await fetch(`/api/admin/categories/${editingCategoryId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editingCategoryName.trim() }),
+        body: JSON.stringify({
+          name: editingCategoryName.trim(),
+          icon: editingCategoryIcon.trim() || null,
+          imageUrl: editingCategoryImageUrl.trim() || null,
+        }),
       })
 
       const data = await res.json()
@@ -138,6 +154,8 @@ export default function ClientAdminCrud() {
 
       setEditingCategoryId(null)
       setEditingCategoryName('')
+      setEditingCategoryIcon('')
+      setEditingCategoryImageUrl('')
       await fetchCategories()
       showToast({ type: 'success', message: 'Category updated' })
     } catch (e: any) {
@@ -313,6 +331,22 @@ export default function ClientAdminCrud() {
                   placeholder="e.g. Programming"
                 />
               </Field>
+              <Field label="Icon (optional)">
+                <input
+                  value={catIcon}
+                  onChange={(e) => setCatIcon(e.target.value)}
+                  className="mt-1 w-full rounded border px-3 py-2"
+                  placeholder="Key: laptop, business, folder — or an emoji"
+                />
+              </Field>
+              <Field label="Card image URL (optional)">
+                <input
+                  value={catImageUrl}
+                  onChange={(e) => setCatImageUrl(e.target.value)}
+                  className="mt-1 w-full rounded border px-3 py-2"
+                  placeholder="https://…"
+                />
+              </Field>
 
               <button
                 disabled={catBusy}
@@ -338,6 +372,19 @@ export default function ClientAdminCrud() {
                           value={editingCategoryName}
                           onChange={(e) => setEditingCategoryName(e.target.value)}
                           className="w-full rounded border px-3 py-2"
+                          placeholder="Name"
+                        />
+                        <input
+                          value={editingCategoryIcon}
+                          onChange={(e) => setEditingCategoryIcon(e.target.value)}
+                          className="w-full rounded border px-3 py-2"
+                          placeholder="Icon key or emoji"
+                        />
+                        <input
+                          value={editingCategoryImageUrl}
+                          onChange={(e) => setEditingCategoryImageUrl(e.target.value)}
+                          className="w-full rounded border px-3 py-2"
+                          placeholder="Card image URL"
                         />
                         <div className="flex gap-2">
                           <button
@@ -352,6 +399,8 @@ export default function ClientAdminCrud() {
                             onClick={() => {
                               setEditingCategoryId(null)
                               setEditingCategoryName('')
+                              setEditingCategoryIcon('')
+                              setEditingCategoryImageUrl('')
                             }}
                             className="rounded border px-3 py-2 hover:bg-gray-50"
                           >
@@ -364,6 +413,13 @@ export default function ClientAdminCrud() {
                         <div className="flex items-center justify-between gap-3">
                           <div>
                             <div className="font-medium">{c.name}</div>
+                            {(c.icon || c.imageUrl) && (
+                              <div className="mt-1 text-xs text-gray-500">
+                                {c.icon ? <span>Icon: {c.icon}</span> : null}
+                                {c.icon && c.imageUrl ? ' · ' : null}
+                                {c.imageUrl ? <span className="break-all">Image set</span> : null}
+                              </div>
+                            )}
                             <div className="text-xs text-gray-500">{c.id}</div>
                           </div>
                           <div className="flex gap-2">
@@ -372,6 +428,8 @@ export default function ClientAdminCrud() {
                               onClick={() => {
                                 setEditingCategoryId(c.id)
                                 setEditingCategoryName(c.name)
+                                setEditingCategoryIcon(c.icon ?? '')
+                                setEditingCategoryImageUrl(c.imageUrl ?? '')
                               }}
                               className="rounded border px-3 py-2 text-sm hover:bg-gray-50"
                             >

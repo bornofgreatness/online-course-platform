@@ -8,11 +8,18 @@ import PageShell from '../../components/PageShell'
 import CourseListCard from '../../components/CourseListCard'
 import { CourseCategorySidebarIcon } from '../../components/CourseCategorySidebarIcon'
 
+interface CourseCategory {
+  id: string
+  name: string
+  icon?: string | null
+  imageUrl?: string | null
+}
+
 interface Course {
   id: string
   title: string
   description: string
-  category: { id: string; name: string }
+  category: CourseCategory
   workloadHours: number
   thumbnailUrl?: string | null
   enrollments: Array<{ id: string }>
@@ -38,7 +45,7 @@ export default function Courses() {
   const [courses, setCourses] = useState<Course[]>([])
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const coursesListRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -54,8 +61,12 @@ export default function Courses() {
   }, [])
 
   const categoryOptions = useMemo(() => {
-    const names = Array.from(new Set(courses.map((c) => c.category?.name).filter(Boolean))) as string[]
-    return names.sort((a, b) => a.localeCompare(b))
+    const byId = new Map<string, CourseCategory>()
+    for (const c of courses) {
+      const cat = c.category
+      if (cat?.id) byId.set(cat.id, cat)
+    }
+    return Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name))
   }, [courses])
 
   useEffect(() => {
@@ -69,12 +80,12 @@ export default function Courses() {
       )
     }
 
-    if (selectedCategory) {
-      filtered = filtered.filter((course) => course.category.name === selectedCategory)
+    if (selectedCategoryId) {
+      filtered = filtered.filter((course) => course.category.id === selectedCategoryId)
     }
 
     setFilteredCourses(filtered)
-  }, [courses, searchTerm, selectedCategory])
+  }, [courses, searchTerm, selectedCategoryId])
 
   const categoryRowClass = (active: boolean) =>
     [
@@ -86,22 +97,27 @@ export default function Courses() {
     coursesListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const mobileCategoryRow = (name: string | null, active: boolean, onSelect: () => void) => (
+  const mobileCategoryRow = (cat: CourseCategory | null, active: boolean, onSelect: () => void) => (
     <button
       type="button"
-      key={name ?? 'all'}
+      key={cat?.id ?? 'all'}
       onClick={onSelect}
       className={`flex w-full items-center justify-between border-b border-gray-100 py-3.5 pl-1 pr-2 text-left last:border-b-0 ${
         active ? 'bg-slate-50' : 'active:bg-gray-50'
       }`}
     >
       <span className="flex min-w-0 items-center gap-3">
-        <CourseCategorySidebarIcon categoryName={name} />
-        <span className="truncate text-sm font-bold text-gray-900">{name ? name : 'All categories'}</span>
+        <CourseCategorySidebarIcon categoryName={cat?.name ?? null} icon={cat?.icon} />
+        <span className="truncate text-sm font-bold text-gray-900">{cat ? cat.name : 'All categories'}</span>
       </span>
       <Chevron active={active} />
     </button>
   )
+
+  const selectedCategoryLabel = useMemo(() => {
+    if (!selectedCategoryId) return ''
+    return categoryOptions.find((c) => c.id === selectedCategoryId)?.name ?? ''
+  }, [categoryOptions, selectedCategoryId])
 
   return (
     <>
@@ -153,9 +169,9 @@ export default function Courses() {
         <div className="px-0 pb-2">
           <h2 className="mb-2 text-base font-bold text-slate-900">Categories</h2>
           <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-            {mobileCategoryRow(null, selectedCategory === '', () => setSelectedCategory(''))}
-            {categoryOptions.map((name) =>
-              mobileCategoryRow(name, selectedCategory === name, () => setSelectedCategory(name))
+            {mobileCategoryRow(null, selectedCategoryId === '', () => setSelectedCategoryId(''))}
+            {categoryOptions.map((cat) =>
+              mobileCategoryRow(cat, selectedCategoryId === cat.id, () => setSelectedCategoryId(cat.id))
             )}
           </div>
         </div>
@@ -181,21 +197,21 @@ export default function Courses() {
             <nav className="flex flex-col gap-1">
               <button
                 type="button"
-                onClick={() => setSelectedCategory('')}
-                className={categoryRowClass(selectedCategory === '')}
+                onClick={() => setSelectedCategoryId('')}
+                className={categoryRowClass(selectedCategoryId === '')}
               >
                 <CourseCategorySidebarIcon categoryName={null} />
                 <span className="text-sm font-bold leading-tight text-black">All categories</span>
               </button>
-              {categoryOptions.map((name) => (
+              {categoryOptions.map((cat) => (
                 <button
                   type="button"
-                  key={name}
-                  onClick={() => setSelectedCategory(name)}
-                  className={categoryRowClass(selectedCategory === name)}
+                  key={cat.id}
+                  onClick={() => setSelectedCategoryId(cat.id)}
+                  className={categoryRowClass(selectedCategoryId === cat.id)}
                 >
-                  <CourseCategorySidebarIcon categoryName={name} />
-                  <span className="text-sm font-bold leading-tight text-black">{name}</span>
+                  <CourseCategorySidebarIcon categoryName={cat.name} icon={cat.icon} />
+                  <span className="text-sm font-bold leading-tight text-black">{cat.name}</span>
                 </button>
               ))}
             </nav>
@@ -206,9 +222,9 @@ export default function Courses() {
               <div>
                 <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900 md:text-base">Available courses</h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  {selectedCategory ? (
+                  {selectedCategoryLabel ? (
                     <>
-                      <span className="font-medium text-slate-800">{selectedCategory}</span>
+                      <span className="font-medium text-slate-800">{selectedCategoryLabel}</span>
                       {' · '}
                     </>
                   ) : null}
@@ -245,7 +261,7 @@ export default function Courses() {
                   type="button"
                   onClick={() => {
                     setSearchTerm('')
-                    setSelectedCategory('')
+                    setSelectedCategoryId('')
                   }}
                   className="mt-4 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
                 >

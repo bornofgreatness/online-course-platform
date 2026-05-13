@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 const base = {
   className: 'h-6 w-6 shrink-0 text-black',
   width: 24,
@@ -117,11 +119,33 @@ function IconFolder() {
   )
 }
 
-/** Monochrome sidebar icon; empty / null name means “all categories”. */
-export function CourseCategorySidebarIcon({ categoryName }: { categoryName?: string | null }) {
-  const c = (categoryName ?? '').trim()
-  if (!c) return <IconAllCategories />
-  const n = c.toLowerCase()
+const ICON_BY_KEY: Record<string, ReactNode> = {
+  laptop: <IconLaptop />,
+  tech: <IconLaptop />,
+  design: <IconDesign />,
+  marketing: <IconMegaphone />,
+  megaphone: <IconMegaphone />,
+  globe: <IconGlobe />,
+  language: <IconGlobe />,
+  business: <IconBusiness />,
+  camera: <IconCamera />,
+  health: <IconHealth />,
+  palette: <IconPalette />,
+  art: <IconPalette />,
+  document: <IconDocument />,
+  pdf: <IconDocument />,
+  folder: <IconFolder />,
+  all: <IconAllCategories />,
+  grid: <IconAllCategories />,
+}
+
+function IconFromStoredKey(icon: string): ReactNode | null {
+  const k = icon.trim().toLowerCase()
+  return ICON_BY_KEY[k] ?? null
+}
+
+function heuristicFromName(categoryName: string): ReactNode {
+  const n = categoryName.toLowerCase()
   if (n.includes('technology') || n.includes('program') || n.includes('tech') || n.includes('web'))
     return <IconLaptop />
   if (n.includes('design') || n.includes('digital') || n.includes('ux') || n.includes('ui'))
@@ -134,4 +158,33 @@ export function CourseCategorySidebarIcon({ categoryName }: { categoryName?: str
   if (n.includes('art') || n.includes('creativ') || n.includes('arte')) return <IconPalette />
   if (n.includes('pdf') || n.includes('product')) return <IconDocument />
   return <IconFolder />
+}
+
+/** Monochrome sidebar icon; empty / null name means “all categories”. Stored `icon` overrides name heuristics. */
+export function CourseCategorySidebarIcon({
+  categoryName,
+  icon,
+}: {
+  categoryName?: string | null
+  icon?: string | null
+}) {
+  const rawIcon = (icon ?? '').trim()
+  if (rawIcon) {
+    const fromKey = IconFromStoredKey(rawIcon)
+    if (fromKey) return fromKey
+    if (!/^[a-z_]+$/i.test(rawIcon)) {
+      return (
+        <span
+          className="flex h-6 w-6 shrink-0 items-center justify-center text-lg leading-none text-black"
+          aria-hidden
+        >
+          {rawIcon}
+        </span>
+      )
+    }
+  }
+
+  const c = (categoryName ?? '').trim()
+  if (!c) return <IconAllCategories />
+  return heuristicFromName(c)
 }

@@ -9,7 +9,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   try {
     await requireAdmin()
 
-    const { name } = await request.json()
+    const body = await request.json()
+    const { name, icon, imageUrl } = body as { name?: string; icon?: string | null; imageUrl?: string | null }
     if (!name || typeof name !== 'string') {
       return NextResponse.json({ error: 'Category name is required' }, { status: 400 })
     }
@@ -18,7 +19,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     const category = await prisma.category.update({
       where: { id: params.id },
-      data: { name },
+      data: {
+        name,
+        icon: typeof icon === 'string' && icon.trim() ? icon.trim() : null,
+        imageUrl: typeof imageUrl === 'string' && imageUrl.trim() ? imageUrl.trim() : null,
+      },
     })
 
     return NextResponse.json({ category })

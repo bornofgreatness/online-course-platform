@@ -7,7 +7,13 @@ import { getPrisma } from '../../lib/prisma'
 export const dynamic = 'force-dynamic'
 
 export default async function CategoriesPage() {
-  let categories: { id: string; name: string; _count: { courses: number } }[] = []
+  let categories: {
+    id: string
+    name: string
+    icon: string | null
+    imageUrl: string | null
+    _count: { courses: number }
+  }[] = []
 
   if (process.env.DATABASE_URL) {
     try {

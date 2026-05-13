@@ -37,6 +37,10 @@ model User {
 model Category {
   id        String   @id @default(cuid())
   name      String   @unique
+  /// Optional icon key (laptop, folder, …) or a short emoji for sidebar
+  icon      String?
+  /// Optional hero image URL for category cards
+  imageUrl  String?
   courses   Course[]
   createdAt DateTime @default(now())
 }

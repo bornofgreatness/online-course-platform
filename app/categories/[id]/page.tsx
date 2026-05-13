@@ -14,6 +14,8 @@ export default async function CategoryPage({ params }: Props) {
   let category: {
     id: string
     name: string
+    icon: string | null
+    imageUrl: string | null
     courses: Array<{
       id: string
       title: string
@@ -76,6 +78,13 @@ export default async function CategoryPage({ params }: Props) {
             </Link>
           </div>
         </div>
+
+        {category.imageUrl ? (
+          <div className="mb-8 overflow-hidden rounded-2xl bg-slate-200 shadow-md ring-1 ring-black/5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={category.imageUrl} alt="" className="max-h-56 w-full object-cover" />
+          </div>
+        ) : null}
 
         {category.courses.length === 0 ? (
           <div className={`${siteCardClass} p-10 text-center ${siteMutedClass}`}>No courses in this category yet.</div>

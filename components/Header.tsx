@@ -4,8 +4,9 @@ import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { CourseCategorySidebarIcon } from './CourseCategorySidebarIcon'
 
-type NavCategory = { id: string; name: string; courseCount: number }
+type NavCategory = { id: string; name: string; courseCount: number; icon?: string | null; imageUrl?: string | null }
 
 export default function Header() {
   const { data: session, status } = useSession()
@@ -238,12 +239,17 @@ export default function Header() {
                         <Link
                           key={c.id}
                           href={`/categories/${c.id}`}
-                          className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-50"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-800 hover:bg-gray-50"
                           role="menuitem"
                           onClick={() => setCategoriesOpen(false)}
                         >
-                          <span className="font-medium">{c.name}</span>
-                          <span className="ml-1 text-xs text-gray-400">({c.courseCount})</span>
+                          <span className="flex shrink-0 items-center justify-center text-black">
+                            <CourseCategorySidebarIcon categoryName={c.name} icon={c.icon} />
+                          </span>
+                          <span>
+                            <span className="font-medium">{c.name}</span>
+                            <span className="ml-1 text-xs text-gray-400">({c.courseCount})</span>
+                          </span>
                         </Link>
                       ))}
                     </>

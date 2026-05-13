@@ -6,10 +6,15 @@ const prisma = new PrismaClient()
 async function main() {
   const category = await prisma.category.upsert({
     where: { name: 'PDF Productivity' },
-    update: {},
+    update: {
+      icon: 'document',
+      imageUrl: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=800&q=80',
+    },
     create: {
-      name: 'PDF Productivity'
-    }
+      name: 'PDF Productivity',
+      icon: 'document',
+      imageUrl: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=800&q=80',
+    },
   })
 
   const existingCourse = await prisma.course.findFirst({
@@ -18,18 +23,28 @@ async function main() {
 
   const category2 = await prisma.category.upsert({
     where: { name: 'Business Skills' },
-    update: {},
+    update: {
+      icon: 'business',
+      imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80',
+    },
     create: {
-      name: 'Business Skills'
-    }
+      name: 'Business Skills',
+      icon: 'business',
+      imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80',
+    },
   })
 
   const category3 = await prisma.category.upsert({
     where: { name: 'Technology' },
-    update: {},
+    update: {
+      icon: 'laptop',
+      imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80',
+    },
     create: {
-      name: 'Technology'
-    }
+      name: 'Technology',
+      icon: 'laptop',
+      imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80',
+    },
   })
 
   if (!existingCourse) {

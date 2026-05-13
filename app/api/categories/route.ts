@@ -18,6 +18,8 @@ export async function GET() {
       categories.map((c) => ({
         id: c.id,
         name: c.name,
+        icon: c.icon,
+        imageUrl: c.imageUrl,
         courseCount: c._count.courses,
       }))
     )

@@ -13,12 +13,19 @@ function StarRating({ value }: { value: number }) {
   )
 }
 
-type Category = { id: string; name: string; _count: { courses: number } }
+type Category = {
+  id: string
+  name: string
+  icon?: string | null
+  imageUrl?: string | null
+  _count: { courses: number }
+}
 
 /** Same horizontal card layout as course catalog; links to category detail. */
 export default function CategoryListCard({ category }: { category: Category }) {
   const d = getCategoryListCardDisplay(category.id, category._count.courses)
   const initials = initialsFromName(category.name)
+  const imageUrl = category.imageUrl?.trim() || null
 
   const blurb =
     category._count.courses === 0
@@ -30,10 +37,19 @@ export default function CategoryListCard({ category }: { category: Category }) {
       href={`/categories/${category.id}`}
       className="group flex flex-row overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-black/5 transition hover:shadow-lg"
     >
-      <div className="relative flex w-[34%] min-w-[100px] max-w-[130px] shrink-0 items-center justify-center self-stretch bg-gradient-to-br from-slate-100 to-slate-200 sm:w-[40%] sm:max-w-[220px]">
-        <div className="scale-110 text-black sm:scale-125">
-          <CourseCategorySidebarIcon categoryName={category.name} />
-        </div>
+      <div className="relative flex min-h-[112px] w-[34%] min-w-[100px] max-w-[130px] shrink-0 items-center justify-center self-stretch overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 sm:min-h-[168px] sm:w-[40%] sm:max-w-[220px] sm:rounded-l-xl">
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="scale-110 text-black sm:scale-125">
+            <CourseCategorySidebarIcon categoryName={category.name} icon={category.icon} />
+          </div>
+        )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-between p-3 sm:p-5">
         <div>
