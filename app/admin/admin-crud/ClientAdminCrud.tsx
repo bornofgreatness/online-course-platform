@@ -39,6 +39,16 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export default function ClientAdminCrud() {
   const [tab, setTab] = useState<'categories' | 'courses'>('categories')
   const [toast, setToast] = useState<Toast>(null)
+  const [stats, setStats] = useState<{
+    totalUsers: number
+    revenueUsd: number
+    activeSubscriptions: number
+    totalEnrollments: number
+    completedEnrollments: number
+    completionRatePercent: number
+    affiliateReferrals: number
+    pendingCommissionUsd: number
+  } | null>(null)
 
   // Categories
   const [categories, setCategories] = useState<Category[]>([])
@@ -95,6 +105,12 @@ export default function ClientAdminCrud() {
   useEffect(() => {
     fetchCategories().catch(() => showToast({ type: 'error', message: 'Could not load categories' }))
     fetchCourses().catch(() => showToast({ type: 'error', message: 'Could not load courses' }))
+    fetch('/api/admin/stats')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d && typeof d.totalUsers === 'number') setStats(d)
+      })
+      .catch(() => {})
   }, [])
 
   async function createCategory() {
@@ -288,6 +304,41 @@ export default function ClientAdminCrud() {
           }`}
         >
           {toast.message}
+        </div>
+      )}
+
+      {stats && (
+        <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className={`${siteCardClass} p-4`}>
+            <p className="text-xs font-bold uppercase text-blue-900">Users</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{stats.totalUsers}</p>
+          </div>
+          <div className={`${siteCardClass} p-4`}>
+            <p className="text-xs font-bold uppercase text-blue-900">Revenue (USD)</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">${stats.revenueUsd.toFixed(2)}</p>
+          </div>
+          <div className={`${siteCardClass} p-4`}>
+            <p className="text-xs font-bold uppercase text-blue-900">Active subscriptions</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{stats.activeSubscriptions}</p>
+          </div>
+          <div className={`${siteCardClass} p-4`}>
+            <p className="text-xs font-bold uppercase text-blue-900">Completion rate</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{stats.completionRatePercent}%</p>
+          </div>
+          <div className={`${siteCardClass} p-4`}>
+            <p className="text-xs font-bold uppercase text-blue-900">Enrollments</p>
+            <p className="mt-1 text-sm text-slate-700">
+              {stats.completedEnrollments} / {stats.totalEnrollments} completed
+            </p>
+          </div>
+          <div className={`${siteCardClass} p-4`}>
+            <p className="text-xs font-bold uppercase text-blue-900">Affiliate referrals</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{stats.affiliateReferrals}</p>
+          </div>
+          <div className={`${siteCardClass} p-4 sm:col-span-2`}>
+            <p className="text-xs font-bold uppercase text-blue-900">Pending affiliate commissions (USD)</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">${stats.pendingCommissionUsd.toFixed(2)}</p>
+          </div>
         </div>
       )}
 

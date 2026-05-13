@@ -1,0 +1,25 @@
+/**
+ * Simple in-memory rate limiter for API routes (best-effort; resets on cold start).
+ * For production at scale, prefer Redis or edge rate limits.
+ */
+const buckets = new Map<string, { count: number; resetAt: number }>()
+
+export function rateLimit(key: string, max: number, windowMs: number): { ok: true } | { ok: false; retryAfterMs: number } {
+  const now = Date.now()
+  const b = buckets.get(key)
+  if (!b || now >= b.resetAt) {
+    buckets.set(key, { count: 1, resetAt: now + windowMs })
+    return { ok: true }
+  }
+  if (b.count >= max) {
+    return { ok: false, retryAfterMs: Math.max(0, b.resetAt - now) }
+  }
+  b.count += 1
+  return { ok: true }
+}
+
+export function clientIp(request: Request) {
+  const xf = request.headers.get('x-forwarded-for')
+  if (xf) return xf.split(',')[0]?.trim() || 'unknown'
+  return request.headers.get('x-real-ip') || 'unknown'
+}

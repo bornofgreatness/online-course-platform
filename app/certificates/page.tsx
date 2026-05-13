@@ -96,15 +96,23 @@ export default function Certificates() {
 
                 <div className="mb-4 text-center text-xs text-slate-500">Issued {new Date(certificate.issuedAt).toLocaleDateString()}</div>
 
-                <div className="flex gap-2">
-                  <a
-                    href={certificatePdfDownloadPath(certificate.certificateNumber, certificate.pdfUrl)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
-                  >
-                    Download PDF
-                  </a>
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <a
+                      href={certificatePdfDownloadPath(certificate.certificateNumber, certificate.pdfUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
+                    >
+                      Download PDF
+                    </a>
+                    <Link
+                      href={`/verify/certificate/${encodeURIComponent(certificate.certificateNumber)}`}
+                      className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-center text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+                    >
+                      Verify
+                    </Link>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {

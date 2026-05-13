@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
@@ -16,7 +16,14 @@ export default function SignUp() {
   const [name, setName] = useState('')
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [referralCode, setReferralCode] = useState('')
   const router = useRouter()
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const ref = new URLSearchParams(window.location.search).get('ref')
+    if (ref) setReferralCode(ref.trim())
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,7 +31,7 @@ export default function SignUp() {
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ email, password, name, referralCode: referralCode || undefined }),
     })
 
     const data = await res.json().catch(() => null)

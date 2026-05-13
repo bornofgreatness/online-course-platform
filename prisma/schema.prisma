@@ -77,6 +77,8 @@ model Enrollment {
   progress  String?
 
   @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
 }
 
 model Subscription {
@@ -88,6 +90,9 @@ model Subscription {
   endDate   DateTime
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, active, endDate])
 }
 
 model Payment {

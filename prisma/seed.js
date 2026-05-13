@@ -129,6 +129,49 @@ async function main() {
     }
   })
 
+  const student = await prisma.user.findUnique({ where: { email: 'student@courseplatform.test' } })
+  if (student) {
+    await prisma.subscription.updateMany({
+      where: { userId: student.id, active: true },
+      data: { active: false },
+    })
+    const end = new Date()
+    end.setMonth(end.getMonth() + 12)
+    await prisma.subscription.create({
+      data: {
+        userId: student.id,
+        plan: '1y',
+        startDate: new Date(),
+        endDate: end,
+        active: true,
+      },
+    })
+  }
+
+  const mkQuiz = () =>
+    JSON.stringify({
+      questions: Array.from({ length: 10 }, (_, i) => ({
+        id: `q${i + 1}`,
+        prompt: `Knowledge check ${i + 1}: What best describes completing courses on this platform?`,
+        options: [
+          'Study materials, pass the quiz when assigned, then request a certificate',
+          'Only watch the homepage',
+          'Skip enrollment',
+          'Ignore subscription status',
+        ],
+        correctIndex: 0,
+      })),
+    })
+
+  const allCourses = await prisma.course.findMany({ select: { id: true } })
+  for (const c of allCourses) {
+    await prisma.quiz.upsert({
+      where: { courseId: c.id },
+      update: { questions: mkQuiz() },
+      create: { courseId: c.id, questions: mkQuiz() },
+    })
+  }
+
   console.log('Seed data created.')
 }
 

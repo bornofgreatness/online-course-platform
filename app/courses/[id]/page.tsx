@@ -6,10 +6,39 @@ import PDFViewer from '../../../components/PDFViewer'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]/options'
 import CourseActions from '../../../components/CourseActions'
+import CourseQuizPanel from '../../../components/CourseQuizPanel'
+import { getActiveSubscription, isPrivilegedRole } from '../../../lib/subscription'
+import type { Metadata } from 'next'
 
 interface Props {
-  params: {
-    id: string
+  params: { id: string }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  if (!process.env.DATABASE_URL) {
+    return { title: 'Course' }
+  }
+  try {
+    const prisma = getPrisma()
+    const course = await prisma.course.findUnique({
+      where: { id: params.id },
+      include: { category: true },
+    })
+    if (!course) return { title: 'Course not found' }
+    const title = course.seoTitle || `${course.title} | Online Course Platform`
+    const description = course.seoDescription || course.description.slice(0, 160)
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: 'article',
+        images: course.thumbnailUrl ? [{ url: course.thumbnailUrl }] : undefined,
+      },
+    }
+  } catch {
+    return { title: 'Course' }
   }
 }
 
@@ -36,14 +65,23 @@ export default async function CourseDetails({ params }: Props) {
     )
   }
 
-  let enrollment: any = null
+  let enrollment: { progress: string | null } | null = null
   let progress = { completed: false, lastPage: 0 }
-  let certificate: any = null
+  let certificate: { id: string } | null = null
+  let user: { id: string; role: string | null } | null = null
+  let hasAccess = false
+  let quizRecord: { id: string } | null = null
+  let quizPassed = false
 
   if (session?.user?.email) {
-    const user = await prisma.user.findUnique({ where: { email: session.user.email } })
+    const u = await prisma.user.findUnique({ where: { email: session.user.email } })
+    user = u ? { id: u.id, role: u.role } : null
 
     if (user) {
+      const role = user.role ?? ''
+      const sub = await getActiveSubscription(prisma, user.id)
+      hasAccess = isPrivilegedRole(role) || !!sub
+
       enrollment = await prisma.enrollment.findUnique({
         where: {
           userId_courseId: {
@@ -54,7 +92,11 @@ export default async function CourseDetails({ params }: Props) {
       })
 
       if (enrollment?.progress) {
-        progress = JSON.parse(enrollment.progress)
+        try {
+          progress = JSON.parse(enrollment.progress)
+        } catch {
+          progress = { completed: false, lastPage: 0 }
+        }
       }
 
       certificate = await prisma.certificate.findUnique({
@@ -65,8 +107,20 @@ export default async function CourseDetails({ params }: Props) {
           },
         },
       })
+
+      const q = await prisma.quiz.findUnique({ where: { courseId: params.id } })
+      if (q) {
+        quizRecord = { id: q.id }
+        const passedAttempt = await prisma.quizAttempt.findFirst({
+          where: { userId: user.id, quizId: q.id, passed: true },
+        })
+        quizPassed = !!passedAttempt
+      }
     }
   }
+
+  const canViewPdf = !!enrollment && hasAccess
+  const showQuizPanel = !!enrollment && hasAccess && !!quizRecord
 
   return (
     <>
@@ -89,17 +143,34 @@ export default async function CourseDetails({ params }: Props) {
               <h2 className="mb-3 text-lg font-bold uppercase tracking-wide text-blue-900 sm:text-xl">About this course</h2>
               <p className="text-slate-700">{course.description}</p>
               <p className={`${siteMutedClass} mt-4`}>Workload: {course.workloadHours} hours</p>
-              <div className="mt-4 whitespace-pre-line text-slate-700">{course.syllabus}</div>
+              {course.syllabus ? (
+                <div className="mt-4 whitespace-pre-line text-slate-700">{course.syllabus}</div>
+              ) : null}
             </div>
 
-            {enrollment && course.pdfUrl && (
+            {showQuizPanel ? <CourseQuizPanel courseId={course.id} /> : null}
+
+            {enrollment && course.pdfUrl && canViewPdf ? (
               <PDFViewer
                 url={course.pdfUrl}
-                title={`${course.title} - Course Material`}
+                title={`${course.title} - Course material`}
                 courseId={course.id}
                 initialProgress={progress}
               />
-            )}
+            ) : null}
+
+            {enrollment && course.pdfUrl && !canViewPdf ? (
+              <div className={`${siteCardClass} border-amber-200 bg-amber-50 p-5 text-sm text-amber-950`}>
+                <p className="font-semibold">Course materials are locked</p>
+                <p className="mt-2 text-amber-900/90">
+                  Renew your subscription on the{' '}
+                  <Link href="/pricing" className="font-semibold text-blue-700 underline">
+                    pricing
+                  </Link>{' '}
+                  page to view the PDF and use progress tracking.
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <aside className="space-y-6">
@@ -108,29 +179,31 @@ export default async function CourseDetails({ params }: Props) {
                 <p className={`${siteMutedClass} text-xs uppercase tracking-wide`}>Instructor</p>
                 <h3 className="mt-1 text-lg font-bold text-blue-950">PDF Learning Team</h3>
               </div>
-              <div className="mt-4">
-                <p className={`${siteMutedClass} text-xs uppercase tracking-wide`}>SEO title</p>
-                <p className="text-slate-800">{course.seoTitle ?? 'PDF Learning Course'}</p>
-              </div>
               <div className="mt-6">
                 <CourseActions
                   courseId={course.id}
                   isEnrolled={!!enrollment}
+                  subscriptionBlocked={!!enrollment && !hasAccess}
                   progress={progress}
                   hasCertificate={!!certificate}
+                  quizExists={!!quizRecord}
+                  quizPassed={quizPassed}
                 />
               </div>
             </div>
 
-            {course.thumbnailUrl && (
+            {course.thumbnailUrl ? (
               <div className={`${siteCardClass} p-5 sm:p-6`}>
                 <h3 className="mb-3 text-lg font-bold text-blue-950">Course preview</h3>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={course.thumbnailUrl} alt={course.title} className="h-48 w-full rounded-lg object-cover" />
               </div>
-            )}
+            ) : null}
           </aside>
         </div>
       </PageShell>
     </>
   )
 }
+
+export const dynamic = 'force-dynamic'

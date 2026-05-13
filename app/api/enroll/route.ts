@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]/options'
 import { getPrisma } from '../../../lib/prisma'
+import { getActiveSubscription, isPrivilegedRole } from '../../../lib/subscription'
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
@@ -18,6 +19,17 @@ export async function POST(request: Request) {
   const user = await prisma.user.findUnique({ where: { email: session.user.email } })
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
+  }
+
+  const role = (user.role ?? '').toString()
+  if (!isPrivilegedRole(role)) {
+    const sub = await getActiveSubscription(prisma, user.id)
+    if (!sub) {
+      return NextResponse.json(
+        { error: 'An active subscription is required to enroll. Visit pricing to subscribe.' },
+        { status: 403 }
+      )
+    }
   }
 
   const existing = await prisma.enrollment.findUnique({

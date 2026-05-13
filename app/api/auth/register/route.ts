@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { getPrisma } from '../../../../lib/prisma'
+import { clientIp, rateLimit } from '../../../../lib/rateLimit'
 
 export async function POST(request: NextRequest) {
-  const { email, password, name } = await request.json()
+  const ip = clientIp(request)
+  const rl = rateLimit(`register:${ip}`, 10, 60 * 60 * 1000)
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'Too many registration attempts. Try again later.' }, { status: 429 })
+  }
+
+  const { email, password, name, referralCode } = await request.json()
 
   if (!process.env.DATABASE_URL) {
     return NextResponse.json({ error: 'Database connection is not configured' }, { status: 500 })
@@ -28,6 +35,26 @@ export async function POST(request: NextRequest) {
       name,
     }
   })
+
+  if (referralCode && typeof referralCode === 'string') {
+    const code = referralCode.trim()
+    if (code.length >= 4) {
+      const affiliate = await prisma.affiliate.findFirst({
+        where: { referralCode: { equals: code, mode: 'insensitive' } },
+      })
+      if (affiliate && affiliate.userId !== user.id) {
+        const already = await prisma.referral.findFirst({ where: { referredUserId: user.id } })
+        if (!already) {
+          await prisma.referral.create({
+            data: {
+              affiliateId: affiliate.id,
+              referredUserId: user.id,
+            },
+          })
+        }
+      }
+    }
+  }
 
   let verifyUrl: string | null = null
 

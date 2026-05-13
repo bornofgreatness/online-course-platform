@@ -136,7 +136,10 @@ export default function Header() {
                   <Link href="/dashboard" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
                     Dashboard
                   </Link>
-                  {(session.user as { role?: string })?.role === 'ADMIN' && (
+                  <Link href="/affiliate" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
+                    Affiliate
+                  </Link>
+                  {['ADMIN', 'SUPER_ADMIN'].includes(((session.user as { role?: string })?.role ?? '').toUpperCase()) && (
                     <Link href="/admin" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
                       Admin
                     </Link>
@@ -290,10 +293,13 @@ export default function Header() {
 
             {status === 'loading' ? null : session ? (
               <>
+                <Link href="/affiliate" className={navText(pathname.startsWith('/affiliate'))}>
+                  Affiliate
+                </Link>
                 <Link href="/dashboard" className={navText(dashboardActive)}>
                   Dashboard
                 </Link>
-                {(session.user as { role?: string })?.role === 'ADMIN' && (
+                {['ADMIN', 'SUPER_ADMIN'].includes(((session.user as { role?: string })?.role ?? '').toUpperCase()) && (
                   <Link href="/admin" className={navText(pathname.startsWith('/admin'))}>
                     Admin
                   </Link>

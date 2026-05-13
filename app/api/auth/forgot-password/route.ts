@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { getPrisma } from '../../../../lib/prisma'
-
+import { clientIp, rateLimit } from '../../../../lib/rateLimit'
 
 function generateToken() {
   return crypto.randomBytes(32).toString('hex')
@@ -10,6 +10,12 @@ function generateToken() {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = clientIp(request)
+    const rl = rateLimit(`forgot:${ip}`, 8, 60 * 60 * 1000)
+    if (!rl.ok) {
+      return NextResponse.json({ error: 'Too many requests. Try again later.' }, { status: 429 })
+    }
+
     const { email } = await request.json()
 
     if (!email || typeof email !== 'string') {

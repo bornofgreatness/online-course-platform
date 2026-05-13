@@ -3,6 +3,15 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]/options'
 import { getPrisma } from '../../../lib/prisma'
 
+async function userPassedCourseQuiz(prisma: ReturnType<typeof getPrisma>, userId: string, courseId: string) {
+  const quiz = await prisma.quiz.findUnique({ where: { courseId } })
+  if (!quiz) return true
+  const passed = await prisma.quizAttempt.findFirst({
+    where: { userId, quizId: quiz.id, passed: true },
+  })
+  return !!passed
+}
+
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) {
@@ -40,6 +49,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Course not completed yet' }, { status: 400 })
   }
 
+  const okQuiz = await userPassedCourseQuiz(prisma, user.id, courseId)
+  if (!okQuiz) {
+    return NextResponse.json({ error: 'Pass the course quiz before requesting a certificate.' }, { status: 400 })
+  }
+
   // Check if certificate already exists
   const existingCertificate = await prisma.certificate.findUnique({
     where: {
@@ -57,6 +71,11 @@ export async function POST(request: Request) {
   // Generate certificate number
   const certificateNumber = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
   const pdfPath = `/api/certificates/pdf/${encodeURIComponent(certificateNumber)}`
+  const base =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||
+    'http://localhost:3000'
+  const verifyUrl = `${base}/verify/certificate/${encodeURIComponent(certificateNumber)}`
 
   // Create certificate
   const certificate = await prisma.certificate.create({
@@ -65,8 +84,8 @@ export async function POST(request: Request) {
       courseId,
       certificateNumber,
       pdfUrl: pdfPath,
-      qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`Certificate: ${certificateNumber}`)}`
-    }
+      qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}`,
+    },
   })
 
   return NextResponse.json({ certificate })
