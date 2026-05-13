@@ -54,8 +54,10 @@ export default function Header() {
   const pricingActive = pathname.startsWith('/pricing')
   const dashboardActive = pathname.startsWith('/dashboard')
 
+  const isCoursesListPage = pathname === '/courses'
+
   return (
-    <header className="bg-white">
+    <header className={`bg-white ${isCoursesListPage ? 'hidden lg:block' : ''}`}>
       <div className="flex items-center justify-between gap-4 border-b border-gray-200 px-4 py-3 md:px-6 md:py-4">
         <Link
           href="/"
