@@ -1,14 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Header from '../../components/Header'
+import { CourseCategorySidebarIcon } from '../../components/CourseCategorySidebarIcon'
 
 interface Course {
   id: string
   title: string
   description: string
-  category: { name: string }
+  category: { id: string; name: string }
   workloadHours: number
   thumbnailUrl?: string | null
   enrollments: Array<{ id: string }>
@@ -19,7 +20,6 @@ export default function Courses() {
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
-  const [categories, setCategories] = useState<string[]>([])
 
   useEffect(() => {
     fetch('/api/courses')
@@ -33,9 +33,11 @@ export default function Courses() {
       })
   }, [])
 
-  useEffect(() => {
-    const uniqueCategories = Array.from(new Set(courses.map(course => course.category.name)))
-    setCategories(uniqueCategories)
+  const categoryOptions = useMemo(() => {
+    const names = Array.from(
+      new Set(courses.map((c) => c.category?.name).filter(Boolean))
+    ) as string[]
+    return names.sort((a, b) => a.localeCompare(b))
   }, [courses])
 
   useEffect(() => {
@@ -55,32 +57,44 @@ export default function Courses() {
     setFilteredCourses(filtered)
   }, [courses, searchTerm, selectedCategory])
 
+  const categoryRowClass = (active: boolean) =>
+    [
+      'flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition',
+      active
+        ? 'border-l-4 border-teal-700 bg-teal-50 pl-2'
+        : 'border-l-4 border-transparent hover:bg-gray-50',
+    ].join(' ')
+
   return (
     <>
       <Header />
-      <div className="min-h-screen p-8">
-        <h1 className="text-3xl font-bold mb-6">Courses</h1>
+      <div className="min-h-screen bg-slate-100/80 p-6 md:p-8">
+        <h1 className="mb-6 text-3xl font-bold text-slate-900">Courses</h1>
 
-        <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">Categories</h2>
-            <div className="space-y-2">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
+          <aside className="h-fit rounded-2xl bg-white p-5 shadow-md ring-1 ring-black/5">
+            <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-blue-900">Categories</h2>
+            <nav className="flex flex-col gap-1">
               <button
+                type="button"
                 onClick={() => setSelectedCategory('')}
-                className={`w-full rounded-lg px-4 py-3 text-left transition ${selectedCategory === '' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={categoryRowClass(selectedCategory === '')}
               >
-                All Categories
+                <CourseCategorySidebarIcon categoryName={null} />
+                <span className="text-sm font-bold leading-tight text-black">All categories</span>
               </button>
-              {categories.map(category => (
+              {categoryOptions.map((name) => (
                 <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`w-full rounded-lg px-4 py-3 text-left transition ${selectedCategory === category ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                  type="button"
+                  key={name}
+                  onClick={() => setSelectedCategory(name)}
+                  className={categoryRowClass(selectedCategory === name)}
                 >
-                  {category}
+                  <CourseCategorySidebarIcon categoryName={name} />
+                  <span className="text-sm font-bold leading-tight text-black">{name}</span>
                 </button>
               ))}
-            </div>
+            </nav>
           </aside>
 
           <section>
