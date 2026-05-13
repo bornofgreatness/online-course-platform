@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
+import { certificatePdfDownloadPath } from '../../lib/certificateDownload'
 
 interface Certificate {
   id: string
@@ -96,20 +97,23 @@ export default function Certificates() {
                 <div className="mb-4 text-center text-xs text-slate-500">Issued {new Date(certificate.issuedAt).toLocaleDateString()}</div>
 
                 <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => window.open(certificate.pdfUrl, '_blank')}
-                    className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+                  <a
+                    href={certificatePdfDownloadPath(certificate.certificateNumber, certificate.pdfUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
                   >
                     Download PDF
-                  </button>
+                  </a>
                   <button
                     type="button"
                     onClick={() => {
+                      const path = certificatePdfDownloadPath(certificate.certificateNumber, certificate.pdfUrl)
+                      const url = typeof window !== 'undefined' ? `${window.location.origin}${path}` : path
                       navigator.share?.({
                         title: `Certificate for ${certificate.course.title}`,
                         text: `I completed the course: ${certificate.course.title}`,
-                        url: window.location.origin + certificate.pdfUrl,
+                        url,
                       })
                     }}
                     className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"

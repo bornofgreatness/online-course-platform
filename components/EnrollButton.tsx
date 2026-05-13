@@ -27,12 +27,12 @@ export default function EnrollButton({ courseId }: EnrollButtonProps) {
     })
 
     setIsLoading(false)
-    if (res.ok) {
-      router.push('/dashboard')
-    } else {
-      const data = await res.json()
-      alert(data.error || 'Enrollment failed')
+    if (res.ok || res.status === 409) {
+      router.refresh()
+      return
     }
+    const data = await res.json().catch(() => ({}))
+    alert((data as { error?: string }).error || 'Enrollment failed')
   }
 
   return (

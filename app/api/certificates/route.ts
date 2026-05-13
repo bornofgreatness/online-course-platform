@@ -56,6 +56,7 @@ export async function POST(request: Request) {
 
   // Generate certificate number
   const certificateNumber = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+  const pdfPath = `/api/certificates/pdf/${encodeURIComponent(certificateNumber)}`
 
   // Create certificate
   const certificate = await prisma.certificate.create({
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
       userId: user.id,
       courseId,
       certificateNumber,
-      pdfUrl: `/certificates/${certificateNumber}.pdf`, // Placeholder - would need actual PDF generation
+      pdfUrl: pdfPath,
       qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`Certificate: ${certificateNumber}`)}`
     }
   })
