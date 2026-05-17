@@ -14,6 +14,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       title,
       description,
       categoryId,
+      subcategoryId,
       pdfUrl,
       thumbnailUrl,
       syllabus,
@@ -29,12 +30,22 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     const prisma = getPrisma()
 
+    if (subcategoryId && typeof subcategoryId === 'string') {
+      const sub = await prisma.subcategory.findFirst({
+        where: { id: subcategoryId, categoryId },
+      })
+      if (!sub) {
+        return NextResponse.json({ error: 'Subcategory does not belong to category' }, { status: 400 })
+      }
+    }
+
     const course = await prisma.course.update({
       where: { id: params.id },
       data: {
         title,
         description,
         categoryId,
+        subcategoryId: typeof subcategoryId === 'string' && subcategoryId ? subcategoryId : null,
         pdfUrl,
         thumbnailUrl: thumbnailUrl || null,
         syllabus: syllabus || null,

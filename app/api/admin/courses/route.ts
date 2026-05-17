@@ -10,7 +10,7 @@ export async function GET() {
 
     const prisma = getPrisma()
     const courses = await prisma.course.findMany({
-      include: { category: true },
+      include: { category: true, subcategory: true },
       orderBy: { createdAt: 'desc' },
     })
 
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
       title,
       description,
       categoryId,
+      subcategoryId,
       pdfUrl,
       thumbnailUrl,
       syllabus,
@@ -43,11 +44,21 @@ export async function POST(request: Request) {
 
     const prisma = getPrisma()
 
+    if (subcategoryId && typeof subcategoryId === 'string') {
+      const sub = await prisma.subcategory.findFirst({
+        where: { id: subcategoryId, categoryId },
+      })
+      if (!sub) {
+        return NextResponse.json({ error: 'Subcategory does not belong to category' }, { status: 400 })
+      }
+    }
+
     const course = await prisma.course.create({
       data: {
         title,
         description,
         categoryId,
+        subcategoryId: typeof subcategoryId === 'string' && subcategoryId ? subcategoryId : null,
         pdfUrl,
         thumbnailUrl: thumbnailUrl || null,
         syllabus: syllabus || null,

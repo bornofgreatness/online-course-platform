@@ -4,11 +4,12 @@ import CategoryDetailView from '../../../components/views/CategoryDetailView'
 
 interface Props {
   params: { id: string }
+  searchParams: { sub?: string }
 }
 
 export const dynamic = 'force-dynamic'
 
-export default async function CategoryPage({ params }: Props) {
+export default async function CategoryPage({ params, searchParams }: Props) {
   let category: Parameters<typeof CategoryDetailView>[0]['category'] | null = null
 
   if (process.env.DATABASE_URL) {
@@ -50,7 +51,7 @@ export default async function CategoryPage({ params }: Props) {
   return (
     <>
       <Header />
-      <CategoryDetailView category={category} />
+      <CategoryDetailView category={category} initialSubcategoryId={searchParams.sub ?? ''} />
     </>
   )
 }

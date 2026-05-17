@@ -1,10 +1,12 @@
 'use client'
 
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../PageShell'
 import CourseListCard from '../CourseListCard'
 import { useI18n } from '../LanguageProvider'
 import { translateCategoryName } from '../../lib/i18n/translations'
+import { catalogNavRowClass } from '../CatalogSidebar'
 
 type CourseRow = {
   id: string
@@ -22,8 +24,38 @@ type CategoryData = {
   subcategories: { id: string; name: string; courses: CourseRow[] }[]
 }
 
-export default function CategoryDetailView({ category }: { category: CategoryData | null }) {
+export default function CategoryDetailView({
+  category,
+  initialSubcategoryId = '',
+}: {
+  category: CategoryData | null
+  initialSubcategoryId?: string
+}) {
   const { t } = useI18n()
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>(initialSubcategoryId)
+
+  const uncategorizedCourses = useMemo(() => {
+    if (!category) return []
+    const inSub = new Set(category.subcategories.flatMap((s) => s.courses.map((c) => c.id)))
+    return category.courses.filter((c) => !inSub.has(c.id))
+  }, [category])
+
+  useEffect(() => {
+    if (!category?.subcategories.length) {
+      setSelectedSubcategoryId('')
+      return
+    }
+    if (
+      initialSubcategoryId &&
+      (initialSubcategoryId === '__uncategorized__' ||
+        category.subcategories.some((s) => s.id === initialSubcategoryId))
+    ) {
+      setSelectedSubcategoryId(initialSubcategoryId)
+      return
+    }
+    const firstWithCourses = category.subcategories.find((s) => s.courses.length > 0)
+    setSelectedSubcategoryId(firstWithCourses?.id ?? category.subcategories[0].id)
+  }, [category?.id, category?.subcategories, initialSubcategoryId])
 
   if (!category?.id) {
     return (
@@ -38,17 +70,27 @@ export default function CategoryDetailView({ category }: { category: CategoryDat
 
   const displayName = translateCategoryName(category.name, t)
 
+  const selectedSub = category.subcategories.find((s) => s.id === selectedSubcategoryId)
+  const displayedCourses =
+    category.subcategories.length > 0
+      ? selectedSubcategoryId === '__uncategorized__'
+        ? uncategorizedCourses
+        : (selectedSub?.courses ?? [])
+      : category.courses
+
+  const panelTitle =
+    selectedSubcategoryId === '__uncategorized__'
+      ? t('category.uncategorized')
+      : selectedSub?.name ?? displayName
+
   const totalCourses =
     category.subcategories.length > 0
-      ? category.subcategories.reduce((n, s) => n + s.courses.length, 0) +
-        category.courses.filter(
-          (c) => !category.subcategories.some((s) => s.courses.some((sc) => sc.id === c.id))
-        ).length
+      ? category.subcategories.reduce((n, s) => n + s.courses.length, 0) + uncategorizedCourses.length
       : category.courses.length
 
   return (
     <PageShell>
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('common.category')}</p>
           <h1 className={`${siteTitleClass} mt-1`}>{displayName}</h1>
@@ -67,49 +109,65 @@ export default function CategoryDetailView({ category }: { category: CategoryDat
       </div>
 
       {category.imageUrl ? (
-        <div className="mb-8 overflow-hidden rounded-2xl bg-slate-200 shadow-md ring-1 ring-black/5">
+        <div className="mb-6 overflow-hidden rounded-2xl bg-slate-200 shadow-md ring-1 ring-black/5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={category.imageUrl} alt="" className="max-h-56 w-full object-cover" />
+          <img src={category.imageUrl} alt="" className="max-h-48 w-full object-cover" />
         </div>
       ) : null}
 
       {category.subcategories.length > 0 ? (
-        <div className="space-y-10">
-          {category.subcategories.map((sub) => (
-            <section key={sub.id}>
-              <h2 className="text-lg font-bold text-slate-900">{sub.name}</h2>
-              <p className={`${siteMutedClass} mt-1 text-sm`}>
-                {sub.courses.length}{' '}
-                {sub.courses.length === 1 ? t('common.course') : t('common.coursesCount')}
-              </p>
-              {sub.courses.length > 0 ? (
-                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {sub.courses.map((course) => (
-                    <CourseListCard key={course.id} course={course} />
-                  ))}
-                </div>
-              ) : (
-                <p className={`${siteMutedClass} mt-3 text-sm`}>{t('category.noCoursesSub')}</p>
-              )}
-            </section>
-          ))}
-          {(() => {
-            const inSub = new Set(
-              category.subcategories.flatMap((s) => s.courses.map((c) => c.id))
-            )
-            const uncategorized = category.courses.filter((c) => !inSub.has(c.id))
-            if (uncategorized.length === 0) return null
-            return (
-              <section>
-                <h2 className="text-lg font-bold text-slate-900">{t('category.uncategorized')}</h2>
-                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {uncategorized.map((course) => (
-                    <CourseListCard key={course.id} course={course} />
-                  ))}
-                </div>
-              </section>
-            )
-          })()}
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
+          <aside className="h-fit rounded-2xl bg-white p-4 shadow-md ring-1 ring-black/5 lg:sticky lg:top-24">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-blue-900">
+              {t('common.subcategories')}
+            </h2>
+            <nav className="flex max-h-[min(70vh,560px)] flex-col gap-0.5 overflow-y-auto">
+              {category.subcategories.map((sub) => (
+                <button
+                  type="button"
+                  key={sub.id}
+                  onClick={() => setSelectedSubcategoryId(sub.id)}
+                  className={catalogNavRowClass(selectedSubcategoryId === sub.id)}
+                >
+                  <span className="min-w-0 flex-1 truncate text-left text-sm font-medium text-slate-900">
+                    {sub.name}
+                  </span>
+                  <span className="shrink-0 text-xs tabular-nums text-slate-500">{sub.courses.length}</span>
+                </button>
+              ))}
+              {uncategorizedCourses.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setSelectedSubcategoryId('__uncategorized__')}
+                  className={catalogNavRowClass(selectedSubcategoryId === '__uncategorized__')}
+                >
+                  <span className="min-w-0 flex-1 truncate text-left text-sm font-medium text-slate-900">
+                    {t('category.uncategorized')}
+                  </span>
+                  <span className="shrink-0 text-xs tabular-nums text-slate-500">{uncategorizedCourses.length}</span>
+                </button>
+              ) : null}
+            </nav>
+          </aside>
+
+          <section>
+            <h2 className="text-lg font-bold text-slate-900 md:text-xl">{panelTitle}</h2>
+            <p className={`${siteMutedClass} mt-1 text-sm`}>
+              {displayedCourses.length}{' '}
+              {displayedCourses.length === 1 ? t('common.course') : t('common.coursesCount')}
+            </p>
+            {displayedCourses.length > 0 ? (
+              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {displayedCourses.map((course) => (
+                  <CourseListCard key={course.id} course={course} />
+                ))}
+              </div>
+            ) : (
+              <div className={`${siteCardClass} mt-4 p-10 text-center ${siteMutedClass}`}>
+                {t('category.noCoursesSub')}
+              </div>
+            )}
+          </section>
         </div>
       ) : category.courses.length === 0 ? (
         <div className={`${siteCardClass} p-10 text-center ${siteMutedClass}`}>{t('category.noCourses')}</div>

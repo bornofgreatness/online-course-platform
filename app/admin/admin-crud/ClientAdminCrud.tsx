@@ -6,12 +6,20 @@ import AdminMarketing from '../../../components/AdminMarketing'
 import { useI18n } from '../../../components/LanguageProvider'
 import { formatMoney } from '../../../lib/i18n/format'
 
+type Subcategory = {
+  id: string
+  name: string
+  categoryId: string
+  _count?: { courses: number }
+}
+
 type Category = {
   id: string
   name: string
   icon: string | null
   imageUrl: string | null
   createdAt: string
+  subcategories?: Subcategory[]
 }
 
 type Course = {
@@ -26,6 +34,8 @@ type Course = {
   seoDescription: string | null
   category: { id: string; name: string; icon?: string | null; imageUrl?: string | null }
   categoryId: string
+  subcategory?: { id: string; name: string } | null
+  subcategoryId: string | null
 }
 
 type Toast = { type: 'success' | 'error'; message: string } | null
@@ -76,12 +86,20 @@ export default function ClientAdminCrud() {
   const [editingCategoryIcon, setEditingCategoryIcon] = useState('')
   const [editingCategoryImageUrl, setEditingCategoryImageUrl] = useState('')
 
+  // Subcategories
+  const [subCatParentId, setSubCatParentId] = useState('')
+  const [subCatName, setSubCatName] = useState('')
+  const [subCatBusy, setSubCatBusy] = useState(false)
+  const [editingSubcategoryId, setEditingSubcategoryId] = useState<string | null>(null)
+  const [editingSubcategoryName, setEditingSubcategoryName] = useState('')
+
   // Courses
   const [courses, setCourses] = useState<any[]>([])
   const [courseForm, setCourseForm] = useState({
     title: '',
     description: '',
     categoryId: '',
+    subcategoryId: '',
     pdfUrl: '',
     thumbnailUrl: '',
     syllabus: '',
@@ -95,6 +113,17 @@ export default function ClientAdminCrud() {
   const selectedCategoryName = useMemo(() => {
     return categories.find((c) => c.id === courseForm.categoryId)?.name ?? ''
   }, [categories, courseForm.categoryId])
+
+  const subcategoriesForCourseCategory = useMemo(() => {
+    const cat = categories.find((c) => c.id === courseForm.categoryId)
+    return cat?.subcategories ?? []
+  }, [categories, courseForm.categoryId])
+
+  const allSubcategories = useMemo(() => {
+    return categories.flatMap((c) =>
+      (c.subcategories ?? []).map((s) => ({ ...s, categoryName: c.name }))
+    )
+  }, [categories])
 
   const displayToast = (toast: Toast) => {
     setToast(toast)
@@ -224,6 +253,94 @@ export default function ClientAdminCrud() {
     }
   }
 
+  async function createSubcategory() {
+    if (!subCatName.trim()) {
+      displayToast({ type: 'error', message: t('admin.subcategoryNameRequired') })
+      return
+    }
+    if (!subCatParentId) {
+      displayToast({ type: 'error', message: t('admin.categoryRequired') })
+      return
+    }
+
+    setSubCatBusy(true)
+    try {
+      const res = await fetch('/api/admin/subcategories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: subCatName.trim(), categoryId: subCatParentId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || t('admin.failedCreateSubcategory'))
+
+      setSubCatName('')
+      await fetchCategories()
+      displayToast({ type: 'success', message: t('admin.subcategoryCreated') })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('admin.failedCreateSubcategory'),
+      })
+    } finally {
+      setSubCatBusy(false)
+    }
+  }
+
+  async function updateSubcategory() {
+    if (!editingSubcategoryId || !editingSubcategoryName.trim()) {
+      displayToast({ type: 'error', message: t('admin.subcategoryNameRequired') })
+      return
+    }
+
+    setSubCatBusy(true)
+    try {
+      const res = await fetch(`/api/admin/subcategories/${editingSubcategoryId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editingSubcategoryName.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || t('admin.failedUpdateSubcategory'))
+
+      setEditingSubcategoryId(null)
+      setEditingSubcategoryName('')
+      await fetchCategories()
+      displayToast({ type: 'success', message: t('admin.subcategoryUpdated') })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('admin.failedUpdateSubcategory'),
+      })
+    } finally {
+      setSubCatBusy(false)
+    }
+  }
+
+  async function deleteSubcategory(subcategoryId: string) {
+    if (!window.confirm(t('admin.confirmDeleteSubcategory'))) return
+
+    setSubCatBusy(true)
+    try {
+      const res = await fetch(`/api/admin/subcategories/${subcategoryId}`, { method: 'DELETE' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error || t('admin.failedDeleteSubcategory'))
+
+      if (courseForm.subcategoryId === subcategoryId) {
+        setCourseForm((p) => ({ ...p, subcategoryId: '' }))
+      }
+      await fetchCategories()
+      await fetchCourses()
+      displayToast({ type: 'success', message: t('admin.subcategoryDeleted') })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('admin.failedDeleteSubcategory'),
+      })
+    } finally {
+      setSubCatBusy(false)
+    }
+  }
+
   async function deleteCategory(categoryId: string) {
     if (!window.confirm(t('admin.confirmDeleteCategory'))) return
 
@@ -253,6 +370,7 @@ export default function ClientAdminCrud() {
       title: course.title || '',
       description: course.description || '',
       categoryId: course.categoryId || course.category?.id || '',
+      subcategoryId: course.subcategoryId || course.subcategory?.id || '',
       pdfUrl: course.pdfUrl || '',
       thumbnailUrl: course.thumbnailUrl || '',
       syllabus: course.syllabus || '',
@@ -268,6 +386,7 @@ export default function ClientAdminCrud() {
       title: '',
       description: '',
       categoryId: '',
+      subcategoryId: '',
       pdfUrl: '',
       thumbnailUrl: '',
       syllabus: '',
@@ -289,6 +408,7 @@ export default function ClientAdminCrud() {
         title: courseForm.title.trim(),
         description: courseForm.description.trim(),
         categoryId: courseForm.categoryId,
+        subcategoryId: courseForm.subcategoryId || null,
         pdfUrl: courseForm.pdfUrl.trim(),
         thumbnailUrl: courseForm.thumbnailUrl.trim() ? courseForm.thumbnailUrl.trim() : null,
         syllabus: courseForm.syllabus.trim() ? courseForm.syllabus.trim() : null,
@@ -625,6 +745,116 @@ export default function ClientAdminCrud() {
               )}
             </div>
           </div>
+
+          <div className="rounded-xl border bg-white p-6 shadow-sm lg:col-span-2">
+            <h2 className="mb-4 text-xl font-semibold">{t('admin.allSubcategories')}</h2>
+            <div className="mb-6 grid gap-4 lg:grid-cols-2">
+              <div className="space-y-3">
+                <Field label={t('admin.parentCategory')}>
+                  <select
+                    value={subCatParentId}
+                    onChange={(e) => setSubCatParentId(e.target.value)}
+                    className="mt-1 w-full rounded border px-3 py-2"
+                  >
+                    <option value="">{t('admin.selectParentCategory')}</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label={t('admin.name')}>
+                  <input
+                    value={subCatName}
+                    onChange={(e) => setSubCatName(e.target.value)}
+                    className="mt-1 w-full rounded border px-3 py-2"
+                    placeholder={t('admin.namePlaceholder')}
+                  />
+                </Field>
+                <button
+                  type="button"
+                  disabled={subCatBusy}
+                  onClick={createSubcategory}
+                  className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {subCatBusy ? t('admin.working') : t('admin.createSubcategory')}
+                </button>
+              </div>
+            </div>
+
+            <div className="max-h-96 space-y-2 overflow-y-auto">
+              {allSubcategories.length === 0 ? (
+                <p className="text-gray-600">{t('admin.noSubcategories')}</p>
+              ) : (
+                allSubcategories.map((s) => (
+                  <div key={s.id} className="flex flex-col gap-2 rounded border p-3 sm:flex-row sm:items-center sm:justify-between">
+                    {editingSubcategoryId === s.id ? (
+                      <>
+                        <input
+                          value={editingSubcategoryName}
+                          onChange={(e) => setEditingSubcategoryName(e.target.value)}
+                          className="w-full rounded border px-3 py-2"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={subCatBusy}
+                            onClick={updateSubcategory}
+                            className="rounded bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700 disabled:opacity-50"
+                          >
+                            {t('admin.save')}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={subCatBusy}
+                            onClick={() => {
+                              setEditingSubcategoryId(null)
+                              setEditingSubcategoryName('')
+                            }}
+                            className="rounded border px-3 py-2 text-sm hover:bg-gray-50"
+                          >
+                            {t('admin.cancel')}
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="min-w-0">
+                          <div className="font-medium">{s.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {s.categoryName}
+                            {typeof s._count?.courses === 'number' ? ` · ${s._count.courses} courses` : ''}
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={subCatBusy}
+                            onClick={() => {
+                              setEditingSubcategoryId(s.id)
+                              setEditingSubcategoryName(s.name)
+                            }}
+                            className="rounded border px-3 py-2 text-sm hover:bg-gray-50"
+                          >
+                            {t('admin.edit')}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={subCatBusy}
+                            onClick={() => deleteSubcategory(s.id)}
+                            className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100"
+                          >
+                            {t('admin.delete')}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       )}
 
@@ -657,13 +887,35 @@ export default function ClientAdminCrud() {
                 <Field label={t('admin.category')}>
                   <select
                     value={courseForm.categoryId}
-                    onChange={(e) => setCourseForm((p) => ({ ...p, categoryId: e.target.value }))}
+                    onChange={(e) =>
+                      setCourseForm((p) => ({
+                        ...p,
+                        categoryId: e.target.value,
+                        subcategoryId: '',
+                      }))
+                    }
                     className="mt-1 w-full rounded border px-3 py-2"
                   >
                     <option value="">{t('admin.selectCategory')}</option>
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field label={t('admin.subcategory')}>
+                  <select
+                    value={courseForm.subcategoryId}
+                    onChange={(e) => setCourseForm((p) => ({ ...p, subcategoryId: e.target.value }))}
+                    className="mt-1 w-full rounded border px-3 py-2"
+                    disabled={!courseForm.categoryId}
+                  >
+                    <option value="">{t('admin.subcategoryNone')}</option>
+                    {subcategoriesForCourseCategory.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
                       </option>
                     ))}
                   </select>
@@ -759,7 +1011,8 @@ export default function ClientAdminCrud() {
                       <div className="min-w-0">
                         <div className="font-semibold truncate">{c.title}</div>
                         <div className="text-sm text-gray-500 mt-1">
-                          {c.category?.name} • {c.workloadHours}h
+                          {c.category?.name}
+                          {c.subcategory?.name ? ` / ${c.subcategory.name}` : ''} • {c.workloadHours}h
                         </div>
                         <div className="text-xs text-gray-400 mt-2 break-all">{c.pdfUrl}</div>
                       </div>
