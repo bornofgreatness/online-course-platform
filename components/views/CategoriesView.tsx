@@ -11,6 +11,7 @@ type Category = {
   icon: string | null
   imageUrl: string | null
   _count: { courses: number }
+  subcategories: { id: string; name: string; _count: { courses: number } }[]
 }
 
 export default function CategoriesView({ categories }: { categories: Category[] }) {

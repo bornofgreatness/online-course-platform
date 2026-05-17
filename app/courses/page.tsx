@@ -16,14 +16,40 @@ interface CourseCategory {
   imageUrl?: string | null
 }
 
+interface CourseSubcategory {
+  id: string
+  name: string
+}
+
+interface CatalogSubcategory {
+  id: string
+  name: string
+  courseCount: number
+}
+
+interface CatalogCategory {
+  id: string
+  name: string
+  icon?: string | null
+  imageUrl?: string | null
+  subcategories: CatalogSubcategory[]
+}
+
 interface Course {
   id: string
   title: string
   description: string
   category: CourseCategory
+  subcategory?: CourseSubcategory | null
   workloadHours: number
   thumbnailUrl?: string | null
   enrollments: Array<{ id: string }>
+}
+
+type SubcategoryGroup = {
+  id: string
+  name: string
+  courses: Course[]
 }
 
 function Chevron({ active }: { active: boolean }) {
@@ -46,19 +72,23 @@ export default function Courses() {
   const { t } = useI18n()
   const [courses, setCourses] = useState<Course[]>([])
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
+  const [catalogCategories, setCatalogCategories] = useState<CatalogCategory[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const coursesListRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    fetch('/api/courses')
-      .then((res) => res.json())
-      .then((courses) => {
-        const withEnrollments = courses.map((c: any) => ({
+    Promise.all([fetch('/api/courses'), fetch('/api/categories')])
+      .then(([coursesRes, categoriesRes]) =>
+        Promise.all([coursesRes.json(), categoriesRes.json()])
+      )
+      .then(([coursesData, categoriesData]) => {
+        const withEnrollments = coursesData.map((c: Course) => ({
           ...c,
           enrollments: c.enrollments || [],
         }))
         setCourses(withEnrollments)
+        setCatalogCategories(Array.isArray(categoriesData) ? categoriesData : [])
       })
   }, [])
 
@@ -120,6 +150,41 @@ export default function Courses() {
     if (!selectedCategoryId) return ''
     return categoryOptions.find((c) => c.id === selectedCategoryId)?.name ?? ''
   }, [categoryOptions, selectedCategoryId])
+
+  const subcategoryGroups = useMemo((): SubcategoryGroup[] | null => {
+    if (!selectedCategoryId) return null
+    const catalog = catalogCategories.find((c) => c.id === selectedCategoryId)
+    if (!catalog?.subcategories.length) return null
+
+    const groups: SubcategoryGroup[] = catalog.subcategories.map((sub) => ({
+      id: sub.id,
+      name: sub.name,
+      courses: filteredCourses.filter((c) => c.subcategory?.id === sub.id),
+    }))
+
+    const uncategorized = filteredCourses.filter((c) => !c.subcategory?.id)
+    if (uncategorized.length > 0) {
+      groups.push({
+        id: '__uncategorized__',
+        name: t('category.uncategorized'),
+        courses: uncategorized,
+      })
+    }
+
+    return groups
+  }, [catalogCategories, selectedCategoryId, filteredCourses, t])
+
+  const renderCourseCard = (course: Course) => (
+    <CourseListCard
+      key={course.id}
+      course={{
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        thumbnailUrl: course.thumbnailUrl,
+      }}
+    />
+  )
 
   return (
     <>
@@ -245,18 +310,31 @@ export default function Courses() {
               />
             </div>
 
-            <div ref={coursesListRef} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredCourses.map((course) => (
-                <CourseListCard
-                  key={course.id}
-                  course={{
-                    id: course.id,
-                    title: course.title,
-                    description: course.description,
-                    thumbnailUrl: course.thumbnailUrl,
-                  }}
-                />
-              ))}
+            <div ref={coursesListRef}>
+              {subcategoryGroups ? (
+                <div className="space-y-10">
+                  {subcategoryGroups.map((group) => (
+                    <section key={group.id}>
+                      <h3 className="text-base font-bold text-slate-900 md:text-lg">{group.name}</h3>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {group.courses.length}{' '}
+                        {group.courses.length === 1 ? t('common.course') : t('common.coursesCount')}
+                      </p>
+                      {group.courses.length > 0 ? (
+                        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                          {group.courses.map(renderCourseCard)}
+                        </div>
+                      ) : (
+                        <p className="mt-3 text-sm text-slate-500">{t('category.noCoursesSub')}</p>
+                      )}
+                    </section>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredCourses.map(renderCourseCard)}
+                </div>
+              )}
             </div>
 
             {filteredCourses.length === 0 && courses.length > 0 && (

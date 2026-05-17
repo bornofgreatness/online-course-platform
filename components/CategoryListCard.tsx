@@ -11,15 +11,24 @@ type Category = {
   icon?: string | null
   imageUrl?: string | null
   _count: { courses: number }
+  subcategories?: { id: string; name: string; _count: { courses: number } }[]
 }
 
 export default function CategoryListCard({ category }: { category: Category }) {
   const { t } = useI18n()
   const imageUrl = category.imageUrl?.trim() || null
-  const n = category._count.courses
+  const subs = category.subcategories ?? []
+  const n =
+    subs.length > 0
+      ? subs.reduce((sum, s) => sum + s._count.courses, 0)
+      : category._count.courses
   const displayName = translateCategoryName(category.name, t)
   const footerLabel =
     n === 1 ? `1 ${t('common.course')}` : `${n} ${t('common.coursesCount')}`
+  const metaLabel =
+    subs.length > 0
+      ? t('landing.subcategoriesCourses', { subs: subs.length, courses: n })
+      : null
 
   const blurb =
     n === 0
@@ -46,6 +55,9 @@ export default function CategoryListCard({ category }: { category: Category }) {
           <h2 className="line-clamp-2 text-sm font-bold leading-snug text-blue-950 sm:text-base group-hover:text-blue-800">
             {displayName}
           </h2>
+          {metaLabel ? (
+            <p className="mt-1 text-xs font-medium text-slate-500">{metaLabel}</p>
+          ) : null}
           <p className="mt-2 hidden text-sm leading-relaxed text-slate-600 lg:line-clamp-2 lg:block">{blurb}</p>
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 sm:mt-4 sm:gap-3 sm:pt-4">

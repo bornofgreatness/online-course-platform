@@ -40,7 +40,10 @@ export default function CategoryDetailView({ category }: { category: CategoryDat
 
   const totalCourses =
     category.subcategories.length > 0
-      ? category.subcategories.reduce((n, s) => n + s.courses.length, 0)
+      ? category.subcategories.reduce((n, s) => n + s.courses.length, 0) +
+        category.courses.filter(
+          (c) => !category.subcategories.some((s) => s.courses.some((sc) => sc.id === c.id))
+        ).length
       : category.courses.length
 
   return (
@@ -79,15 +82,34 @@ export default function CategoryDetailView({ category }: { category: CategoryDat
                 {sub.courses.length}{' '}
                 {sub.courses.length === 1 ? t('common.course') : t('common.coursesCount')}
               </p>
-              {sub.courses.length > 0 && (
+              {sub.courses.length > 0 ? (
                 <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {sub.courses.map((course) => (
                     <CourseListCard key={course.id} course={course} />
                   ))}
                 </div>
+              ) : (
+                <p className={`${siteMutedClass} mt-3 text-sm`}>{t('category.noCoursesSub')}</p>
               )}
             </section>
           ))}
+          {(() => {
+            const inSub = new Set(
+              category.subcategories.flatMap((s) => s.courses.map((c) => c.id))
+            )
+            const uncategorized = category.courses.filter((c) => !inSub.has(c.id))
+            if (uncategorized.length === 0) return null
+            return (
+              <section>
+                <h2 className="text-lg font-bold text-slate-900">{t('category.uncategorized')}</h2>
+                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {uncategorized.map((course) => (
+                    <CourseListCard key={course.id} course={course} />
+                  ))}
+                </div>
+              </section>
+            )
+          })()}
         </div>
       ) : category.courses.length === 0 ? (
         <div className={`${siteCardClass} p-10 text-center ${siteMutedClass}`}>{t('category.noCourses')}</div>

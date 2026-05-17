@@ -221,7 +221,8 @@ export const translations = {
     'catalog.jobs': 'Employability',
     'catalog.social': 'Social Assistance',
 
-    'category.browseIntro': 'Browse courses grouped by topic. Select a category to see all courses in that area.',
+    'category.browseIntro':
+      'Browse courses by topic. Each category is organized into subcategories — open one to see its courses.',
     'category.notFound': 'Category not found.',
     'category.noCourses': 'No courses in this category yet.',
     'category.noCoursesSub': 'No courses in this subcategory.',
@@ -229,6 +230,7 @@ export const translations = {
     'category.browseUnder': 'Browse every course filed under {name}.',
     'category.emptySoon': 'No courses yet — check back soon.',
     'category.coursesInCategory': '{count} course(s) in this category',
+    'category.uncategorized': 'General',
 
     'pricing.intro':
       'Choose a plan for unlimited access to the full catalog, quizzes, and certificates while your subscription is active.',
@@ -620,7 +622,8 @@ export const translations = {
     'catalog.jobs': 'Empregabilidade',
     'catalog.social': 'Assistência Social',
 
-    'category.browseIntro': 'Navegue pelos cursos por tema. Selecione uma categoria para ver todos os cursos da área.',
+    'category.browseIntro':
+      'Navegue pelos cursos por tema. Cada categoria está organizada em subcategorias — abra uma para ver os cursos.',
     'category.notFound': 'Categoria não encontrada.',
     'category.noCourses': 'Nenhum curso nesta categoria ainda.',
     'category.noCoursesSub': 'Nenhum curso nesta subcategoria.',
@@ -628,6 +631,7 @@ export const translations = {
     'category.browseUnder': 'Veja todos os cursos em {name}.',
     'category.emptySoon': 'Nenhum curso ainda — volte em breve.',
     'category.coursesInCategory': '{count} curso(s) nesta categoria',
+    'category.uncategorized': 'Geral',
 
     'pricing.intro':
       'Escolha um plano para acesso ilimitado ao catálogo, quizzes e certificados enquanto sua assinatura estiver ativa.',

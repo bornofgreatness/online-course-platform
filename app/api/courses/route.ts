@@ -15,8 +15,10 @@ export async function GET() {
     const courses = await prisma.course.findMany({
       include: {
         category: true,
+        subcategory: { select: { id: true, name: true } },
         enrollments: true,
       },
+      orderBy: [{ category: { name: 'asc' } }, { title: 'asc' }],
     })
     return NextResponse.json(courses)
   } catch (error: any) {
