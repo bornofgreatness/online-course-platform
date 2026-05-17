@@ -53,7 +53,7 @@ export async function POST(request: Request) {
           },
         },
       ],
-      success_url: `${baseUrl}/dashboard?checkout=success&provider=stripe`,
+      success_url: `${baseUrl}/dashboard?checkout=success&provider=stripe&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/pricing`,
       metadata: {
         userId,

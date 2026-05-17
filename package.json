@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
-    "seed": "node prisma/seed.js"
+    "seed": "node prisma/seed.js",
+    "stripe:listen": "stripe listen --forward-to localhost:3000/api/billing/webhook"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",

@@ -84,6 +84,22 @@ Student account includes a **12-month active subscription** for testing enrollme
 | `/admin` | Admin CRUD & analytics |
 | `/verify/certificate/[id]` | Public certificate verification |
 
+## Payments (Stripe — recommended)
+
+See **[docs/STRIPE_SETUP.md](docs/STRIPE_SETUP.md)** for API keys and test card `4242 4242 4242 4242`.
+
+After checkout, the dashboard calls `/api/billing/stripe/confirm` so subscriptions activate on localhost without webhooks.
+
+Optional webhook forwarding:
+
+```bash
+npm run stripe:listen
+```
+
+## End-to-end testing
+
+Full walkthrough (enroll → quiz → certificate): **[docs/E2E_TESTING.md](docs/E2E_TESTING.md)**
+
 ## Webhooks
 
 - Stripe: `POST /api/billing/webhook`

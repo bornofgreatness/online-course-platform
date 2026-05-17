@@ -28,6 +28,10 @@ export const translations = {
     'common.completeCourseToEarn': 'Complete a course to earn your first certificate.',
     'common.continueLearning': 'Continue learning',
     'common.recentlyViewed': 'Recently viewed',
+
+    'dashboard.paymentConfirmed': 'Payment confirmed. Your subscription is now active.',
+    'dashboard.paymentConfirmFailed': 'Payment received but activation failed. Contact support or try again.',
+    'dashboard.paymentPending': 'Payment pending. Access will unlock when payment is approved.',
     'common.courseCompletion': 'Course completion',
     'common.courseNotFound': 'Course not found.',
     'common.courses': 'Courses',
@@ -430,6 +434,10 @@ export const translations = {
     'common.completeCourseToEarn': 'Complete um curso para ganhar seu primeiro certificado.',
     'common.continueLearning': 'Continuar aprendendo',
     'common.recentlyViewed': 'Vistos recentemente',
+
+    'dashboard.paymentConfirmed': 'Pagamento confirmado. Sua assinatura está ativa.',
+    'dashboard.paymentConfirmFailed': 'Pagamento recebido, mas a ativação falhou. Tente novamente ou fale com o suporte.',
+    'dashboard.paymentPending': 'Pagamento pendente. O acesso será liberado após aprovação.',
     'common.courseCompletion': 'Conclusão do curso',
     'common.courseNotFound': 'Curso não encontrado.',
     'common.courses': 'Cursos',

@@ -19,6 +19,7 @@ const planKeys: Record<BillingPlan, TranslationKey> = {
 
 type PaymentProvider = 'stripe' | 'mercadopago'
 const mpEnabled = process.env.NEXT_PUBLIC_MERCADOPAGO_ENABLED === 'true'
+const stripeEnabled = process.env.NEXT_PUBLIC_STRIPE_ENABLED !== 'false'
 
 export default function PricingPlans() {
   const { t, language } = useI18n()
@@ -33,7 +34,9 @@ export default function PricingPlans() {
     discountCents?: number
     error?: string
   } | null>(null)
-  const [provider, setProvider] = useState<PaymentProvider>(mpEnabled ? 'mercadopago' : 'stripe')
+  const [provider, setProvider] = useState<PaymentProvider>(
+    stripeEnabled ? 'stripe' : mpEnabled ? 'mercadopago' : 'stripe'
+  )
 
   async function validateCoupon(plan: BillingPlan) {
     if (!couponCode.trim()) {
@@ -140,15 +143,17 @@ export default function PricingPlans() {
             {t('pricing.mercadoPago')}
           </button>
         )}
-        <button
-          type="button"
-          onClick={() => setProvider('stripe')}
-          className={`rounded-full px-4 py-1.5 text-xs font-bold ${
-            provider === 'stripe' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
-          }`}
-        >
-          {t('pricing.stripe')}
-        </button>
+        {stripeEnabled && (
+          <button
+            type="button"
+            onClick={() => setProvider('stripe')}
+            className={`rounded-full px-4 py-1.5 text-xs font-bold ${
+              provider === 'stripe' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
+            }`}
+          >
+            {t('pricing.stripe')}
+          </button>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

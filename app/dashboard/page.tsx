@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
 import { useI18n } from '../../components/LanguageProvider'
@@ -44,10 +44,12 @@ interface CertificateRow {
   course: { title: string }
 }
 
-export default function Dashboard() {
+function DashboardContent() {
   const { data: session, status } = useSession()
   const { t } = useI18n()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null)
   const [enrollments, setEnrollments] = useState<Enrollment[]>([])
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [activeSubscription, setActiveSubscription] = useState<Subscription | null>(null)
@@ -66,19 +68,48 @@ export default function Dashboard() {
       return
     }
 
-    fetch('/api/dashboard')
-      .then((res) => res.json())
-      .then((data) => {
-        setEnrollments(data.enrollments || [])
-        setSubscriptions(data.subscriptions || [])
-        setActiveSubscription(data.activeSubscription || null)
-        setPayments(data.payments || [])
-        setCertificates(data.certificates || [])
-        setCompletionPercent(typeof data.completionPercent === 'number' ? data.completionPercent : 0)
-        setRecentlyViewed(Array.isArray(data.recentlyViewed) ? data.recentlyViewed : [])
-      })
-      .finally(() => setLoading(false))
-  }, [session, status, router])
+    const checkout = searchParams.get('checkout')
+    const provider = searchParams.get('provider')
+    const sessionId = searchParams.get('session_id')
+
+    async function run() {
+      if (checkout === 'success' && provider === 'stripe' && sessionId) {
+        try {
+          const res = await fetch(
+            `/api/billing/stripe/confirm?session_id=${encodeURIComponent(sessionId)}`
+          )
+          const data = await res.json().catch(() => ({}))
+          if (res.ok) {
+            setCheckoutMessage(t('dashboard.paymentConfirmed'))
+          } else {
+            setCheckoutMessage((data as { error?: string }).error || t('dashboard.paymentConfirmFailed'))
+          }
+        } catch {
+          setCheckoutMessage(t('dashboard.paymentConfirmFailed'))
+        }
+        router.replace('/dashboard', { scroll: false })
+      } else if (checkout === 'success') {
+        setCheckoutMessage(t('dashboard.paymentConfirmed'))
+        router.replace('/dashboard', { scroll: false })
+      } else if (checkout === 'pending') {
+        setCheckoutMessage(t('dashboard.paymentPending'))
+        router.replace('/dashboard', { scroll: false })
+      }
+
+      const res = await fetch('/api/dashboard')
+      const data = await res.json()
+      setEnrollments(data.enrollments || [])
+      setSubscriptions(data.subscriptions || [])
+      setActiveSubscription(data.activeSubscription || null)
+      setPayments(data.payments || [])
+      setCertificates(data.certificates || [])
+      setCompletionPercent(typeof data.completionPercent === 'number' ? data.completionPercent : 0)
+      setRecentlyViewed(Array.isArray(data.recentlyViewed) ? data.recentlyViewed : [])
+      setLoading(false)
+    }
+
+    void run()
+  }, [session, status, router, searchParams, t])
 
   if (status === 'loading' || loading) {
     return (
@@ -108,6 +139,12 @@ export default function Dashboard() {
     <>
       <Header />
       <PageShell>
+        {checkoutMessage ? (
+          <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
+            {checkoutMessage}
+          </div>
+        ) : null}
+
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className={siteTitleClass}>{t('common.dashboard')}</h1>
@@ -322,5 +359,22 @@ export default function Dashboard() {
         </div>
       </PageShell>
     </>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <Header />
+          <PageShell>
+            <p className={siteMutedClass}>Loading…</p>
+          </PageShell>
+        </>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   )
 }
