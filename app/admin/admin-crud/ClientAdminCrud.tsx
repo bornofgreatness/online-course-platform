@@ -41,7 +41,18 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export default function ClientAdminCrud() {
   const { t, language } = useI18n()
-  const [tab, setTab] = useState<'categories' | 'courses' | 'marketing'>('categories')
+  const [tab, setTab] = useState<'categories' | 'courses' | 'marketing' | 'affiliates'>('categories')
+  const [commissions, setCommissions] = useState<
+    Array<{
+      id: string
+      amount: number
+      status: string
+      createdAt: string
+      affiliate: { user: { name: string; email: string } }
+      referredUser: { name: string; email: string }
+    }>
+  >([])
+  const [commissionBusy, setCommissionBusy] = useState<string | null>(null)
   const [toast, setToast] = useState<Toast>(null)
   const [stats, setStats] = useState<{
     totalUsers: number
@@ -104,6 +115,34 @@ export default function ClientAdminCrud() {
     if (!res.ok) throw new Error('Failed to load courses')
     const data = await res.json()
     setCourses(data.courses || [])
+  }
+
+  async function fetchCommissions() {
+    const res = await fetch('/api/admin/commissions')
+    if (!res.ok) throw new Error('Failed to load commissions')
+    const data = await res.json()
+    setCommissions(data.commissions || [])
+  }
+
+  async function approveCommission(id: string) {
+    setCommissionBusy(id)
+    try {
+      const res = await fetch('/api/admin/commissions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: 'PAID' }),
+      })
+      if (!res.ok) throw new Error('Failed to update commission')
+      await fetchCommissions()
+      displayToast({ type: 'success', message: t('admin.approveCommission') })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : 'Error',
+      })
+    } finally {
+      setCommissionBusy(null)
+    }
   }
 
   useEffect(() => {
@@ -395,10 +434,58 @@ export default function ClientAdminCrud() {
           >
             {t('admin.tabMarketing')}
           </button>
+          <button
+            onClick={() => {
+              setTab('affiliates')
+              fetchCommissions().catch(() =>
+                displayToast({ type: 'error', message: t('admin.noCommissions') })
+              )
+            }}
+            className={`rounded px-3 py-2 text-sm border ${
+              tab === 'affiliates' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
+            }`}
+          >
+            {t('admin.tabAffiliates')}
+          </button>
         </div>
       </div>
 
       {tab === 'marketing' && <AdminMarketing />}
+
+      {tab === 'affiliates' && (
+        <div className={`${siteCardClass} p-6`}>
+          <h2 className="text-xl font-semibold mb-4">{t('admin.tabAffiliates')}</h2>
+          {commissions.length === 0 ? (
+            <p className={siteMutedClass}>{t('admin.noCommissions')}</p>
+          ) : (
+            <ul className="divide-y divide-slate-100 text-sm">
+              {commissions.map((c) => (
+                <li key={c.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="font-medium text-slate-900">
+                      {c.affiliate.user.name} → {c.referredUser.name}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {formatMoney(Math.round(c.amount * 100), language)} · {c.status} ·{' '}
+                      {new Date(c.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  {c.status === 'PENDING' ? (
+                    <button
+                      type="button"
+                      disabled={commissionBusy === c.id}
+                      onClick={() => approveCommission(c.id)}
+                      className="rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                    >
+                      {t('admin.approveCommission')}
+                    </button>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {tab === 'categories' && (
         <div className="grid gap-6 lg:grid-cols-2">

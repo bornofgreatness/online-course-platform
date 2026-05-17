@@ -126,6 +126,21 @@ async function main() {
   })
 
   await prisma.user.upsert({
+    where: { email: 'superadmin@courseplatform.test' },
+    update: { role: 'SUPER_ADMIN' },
+    create: {
+      name: 'Super Administrador',
+      email: 'superadmin@courseplatform.test',
+      password,
+      role: 'SUPER_ADMIN',
+      emailVerifiedAt: new Date(),
+      whatsapp: '5511999990000',
+      city: 'São Paulo',
+      state: 'SP',
+    },
+  })
+
+  await prisma.user.upsert({
     where: { email: 'student@courseplatform.test' },
     update: {},
     create: {

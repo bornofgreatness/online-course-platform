@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import SessionProvider from '../components/SessionProvider'
+import { organizationJsonLd, websiteJsonLd } from '../lib/structuredData'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -34,8 +35,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const jsonLd = [organizationJsonLd(), websiteJsonLd()]
+
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`${inter.className} bg-slate-100 antialiased`}>
         <SessionProvider>{children}</SessionProvider>
       </body>

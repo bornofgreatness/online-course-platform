@@ -1,5 +1,6 @@
 import type { PrismaClient } from './generated/prisma'
-import { addMonths, isBillingPlan, PLAN_MONTHS, type BillingPlan } from './billingPlans'
+import { addMonths, isBillingPlan, PLAN_LABEL_PT, PLAN_MONTHS, type BillingPlan } from './billingPlans'
+import { sendEmail } from './email'
 
 export type ActivateSubscriptionInput = {
   userId: string
@@ -80,4 +81,21 @@ export async function activateSubscription(prisma: PrismaClient, input: Activate
       }
     }
   })
+
+  const user = await prisma.user.findUnique({ where: { id: input.userId }, select: { email: true, name: true } })
+  if (user?.email && isBillingPlan(input.plan)) {
+    const planLabel = PLAN_LABEL_PT[input.plan as BillingPlan]
+    const end = addMonths(new Date(), PLAN_MONTHS[input.plan as BillingPlan])
+    void sendEmail({
+      to: user.email,
+      subject: 'Pagamento confirmado — Plataforma de Cursos',
+      html: `
+        <p>Olá ${user.name || ''},</p>
+        <p>Seu pagamento foi confirmado. Sua assinatura <strong>${planLabel}</strong> está ativa até
+        <strong>${end.toLocaleDateString('pt-BR')}</strong>.</p>
+        <p>Valor: R$ ${input.amountBrl.toFixed(2).replace('.', ',')}</p>
+        <p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard">Acessar o painel</a></p>
+      `,
+    })
+  }
 }

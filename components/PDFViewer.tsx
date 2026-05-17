@@ -180,7 +180,7 @@ export default function PDFViewer({
           <a
             href={url}
             target="_blank"
-            rel="noreferrer"
+            rel="noreferrer noopener"
             className="text-blue-600 hover:underline text-sm"
           >
             {t('course.openPdf')}

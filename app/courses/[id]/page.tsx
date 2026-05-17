@@ -10,6 +10,8 @@ import CourseQuizPanel from '../../../components/CourseQuizPanel'
 import { LocalizedText } from '../../../components/LanguageProvider'
 import { getActiveSubscription, isPrivilegedRole } from '../../../lib/subscription'
 import type { Metadata } from 'next'
+import { courseJsonLd } from '../../../lib/structuredData'
+import { parseCourseProgress } from '../../../lib/progress'
 
 interface Props {
   params: { id: string }
@@ -93,11 +95,7 @@ export default async function CourseDetails({ params }: Props) {
       })
 
       if (enrollment?.progress) {
-        try {
-          progress = JSON.parse(enrollment.progress)
-        } catch {
-          progress = { completed: false, lastPage: 0 }
-        }
+        progress = parseCourseProgress(enrollment.progress)
       }
 
       certificate = await prisma.certificate.findUnique({
@@ -122,9 +120,23 @@ export default async function CourseDetails({ params }: Props) {
 
   const canViewPdf = !!enrollment && hasAccess
   const showQuizPanel = !!enrollment && hasAccess && !!quizRecord
+  const securePdfUrl = canViewPdf ? `/api/courses/${course.id}/pdf` : ''
+
+  const jsonLd = courseJsonLd({
+    id: course.id,
+    title: course.title,
+    description: course.description,
+    workloadHours: course.workloadHours,
+    thumbnailUrl: course.thumbnailUrl,
+    categoryName: course.category.name,
+  })
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Header />
       <PageShell>
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -155,7 +167,7 @@ export default async function CourseDetails({ params }: Props) {
 
             {enrollment && course.pdfUrl && canViewPdf ? (
               <PDFViewer
-                url={course.pdfUrl}
+                url={securePdfUrl}
                 title={course.title}
                 courseId={course.id}
                 initialProgress={progress}

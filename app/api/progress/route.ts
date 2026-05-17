@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]/options'
 import { getPrisma } from '../../../lib/prisma'
 import { getActiveSubscription, isPrivilegedRole } from '../../../lib/subscription'
+import { touchLastViewed, parseCourseProgress } from '../../../lib/progress'
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
@@ -57,6 +58,16 @@ export async function POST(request: Request) {
     }
   }
 
+  const current = parseCourseProgress(enrollment.progress)
+  const incoming =
+    typeof progress === 'object' && progress !== null
+      ? (progress as { completed?: boolean; lastPage?: number })
+      : {}
+  const merged = touchLastViewed({
+    completed: typeof incoming.completed === 'boolean' ? incoming.completed : current.completed,
+    lastPage: typeof incoming.lastPage === 'number' ? incoming.lastPage : current.lastPage,
+  })
+
   await prisma.enrollment.update({
     where: {
       userId_courseId: {
@@ -65,7 +76,7 @@ export async function POST(request: Request) {
       }
     },
     data: {
-      progress: JSON.stringify(progress)
+      progress: JSON.stringify(merged)
     }
   })
 

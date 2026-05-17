@@ -32,8 +32,14 @@ export default function SignUp() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const ref = new URLSearchParams(window.location.search).get('ref')
-    if (ref) setReferralCode(ref.trim())
+    const params = new URLSearchParams(window.location.search)
+    const ref = params.get('ref')
+    if (ref) {
+      setReferralCode(ref.trim())
+      return
+    }
+    const match = document.cookie.match(/(?:^|;\s*)referral_code=([^;]+)/)
+    if (match?.[1]) setReferralCode(decodeURIComponent(match[1]).trim())
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {

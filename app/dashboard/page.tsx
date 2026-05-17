@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
 import { useI18n } from '../../components/LanguageProvider'
+import { parseCourseProgress } from '../../lib/progress'
 
 interface Enrollment {
   id: string
@@ -53,6 +54,9 @@ export default function Dashboard() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [certificates, setCertificates] = useState<CertificateRow[]>([])
   const [completionPercent, setCompletionPercent] = useState(0)
+  const [recentlyViewed, setRecentlyViewed] = useState<
+    Array<{ courseId: string; title: string; lastViewedAt?: string }>
+  >([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -71,6 +75,7 @@ export default function Dashboard() {
         setPayments(data.payments || [])
         setCertificates(data.certificates || [])
         setCompletionPercent(typeof data.completionPercent === 'number' ? data.completionPercent : 0)
+        setRecentlyViewed(Array.isArray(data.recentlyViewed) ? data.recentlyViewed : [])
       })
       .finally(() => setLoading(false))
   }, [session, status, router])
@@ -97,6 +102,7 @@ export default function Dashboard() {
   }
 
   const continueCourse = enrollments[0]
+  const recentAside = recentlyViewed.filter((r) => r.courseId !== continueCourse?.course.id)
 
   return (
     <>
@@ -172,6 +178,21 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {recentAside.length > 0 ? (
+          <div className={`${siteCardClass} mb-6 p-5`}>
+            <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900">{t('common.recentlyViewed')}</h2>
+            <ul className="mt-3 space-y-2 text-sm">
+              {recentAside.map((r) => (
+                <li key={r.courseId}>
+                  <Link href={`/courses/${r.courseId}`} className="font-semibold text-blue-600 hover:underline">
+                    {r.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
         {continueCourse ? (
           <div className={`${siteCardClass} mb-6 p-5`}>
             <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900">{t('common.continueLearning')}</h2>
@@ -190,12 +211,7 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-4">
                 {enrollments.map((enrollment) => {
-                  let progress = { completed: false, lastPage: 0 }
-                  try {
-                    progress = enrollment.progress ? JSON.parse(enrollment.progress) : progress
-                  } catch {
-                    /* ignore */
-                  }
+                  const progress = parseCourseProgress(enrollment.progress)
                   const progressPercent = progress.completed ? 100 : Math.min((progress.lastPage / 10) * 100, 90)
 
                   return (
