@@ -8,6 +8,13 @@ interface Props {
   params: { id: string }
 }
 
+type CourseRow = {
+  id: string
+  title: string
+  description: string
+  thumbnailUrl: string | null
+}
+
 export const dynamic = 'force-dynamic'
 
 export default async function CategoryPage({ params }: Props) {
@@ -16,14 +23,8 @@ export default async function CategoryPage({ params }: Props) {
     name: string
     icon: string | null
     imageUrl: string | null
-    courses: Array<{
-      id: string
-      title: string
-      description: string
-      workloadHours: number
-      thumbnailUrl: string | null
-      enrollments: Array<{ id: string }>
-    }>
+    courses: CourseRow[]
+    subcategories: { id: string; name: string; courses: CourseRow[] }[]
   } | null = null
 
   if (process.env.DATABASE_URL) {
@@ -32,9 +33,28 @@ export default async function CategoryPage({ params }: Props) {
       category = await prisma.category.findUnique({
         where: { id: params.id },
         include: {
+          subcategories: {
+            orderBy: { name: 'asc' },
+            include: {
+              courses: {
+                orderBy: { title: 'asc' },
+                select: {
+                  id: true,
+                  title: true,
+                  description: true,
+                  thumbnailUrl: true,
+                },
+              },
+            },
+          },
           courses: {
             orderBy: { title: 'asc' },
-            include: { enrollments: true },
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              thumbnailUrl: true,
+            },
           },
         },
       })
@@ -48,14 +68,19 @@ export default async function CategoryPage({ params }: Props) {
       <>
         <Header />
         <PageShell>
-          <p className={siteMutedClass}>Category not found.</p>
+          <p className={siteMutedClass}>Categoria não encontrada.</p>
           <Link href="/categories" className="mt-4 inline-block text-sm font-semibold text-blue-600 hover:underline">
-            Back to categories
+            Voltar às categorias
           </Link>
         </PageShell>
       </>
     )
   }
+
+  const totalCourses =
+    category.subcategories.length > 0
+      ? category.subcategories.reduce((n, s) => n + s.courses.length, 0)
+      : category.courses.length
 
   return (
     <>
@@ -63,18 +88,18 @@ export default async function CategoryPage({ params }: Props) {
       <PageShell>
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">Category</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">Categoria</p>
             <h1 className={`${siteTitleClass} mt-1`}>{category.name}</h1>
             <p className={`${siteMutedClass} mt-2`}>
-              {category.courses.length} course{category.courses.length !== 1 ? 's' : ''}
+              {totalCourses} curso{totalCourses !== 1 ? 's' : ''}
             </p>
           </div>
           <div className="flex flex-wrap gap-4 text-sm font-semibold">
             <Link href="/categories" className="text-blue-600 hover:underline">
-              All categories
+              Todas as categorias
             </Link>
             <Link href="/courses" className="text-blue-600 hover:underline">
-              All courses
+              Todos os cursos
             </Link>
           </div>
         </div>
@@ -86,20 +111,30 @@ export default async function CategoryPage({ params }: Props) {
           </div>
         ) : null}
 
-        {category.courses.length === 0 ? (
-          <div className={`${siteCardClass} p-10 text-center ${siteMutedClass}`}>No courses in this category yet.</div>
+        {category.subcategories.length > 0 ? (
+          <div className="space-y-10">
+            {category.subcategories.map((sub) => (
+              <section key={sub.id}>
+                <h2 className="text-lg font-bold text-slate-900">{sub.name}</h2>
+                <p className={`${siteMutedClass} mt-1 text-sm`}>
+                  {sub.courses.length} curso{sub.courses.length !== 1 ? 's' : ''}
+                </p>
+                {sub.courses.length > 0 && (
+                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {sub.courses.map((course) => (
+                      <CourseListCard key={course.id} course={course} />
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+          </div>
+        ) : category.courses.length === 0 ? (
+          <div className={`${siteCardClass} p-10 text-center ${siteMutedClass}`}>Nenhum curso nesta categoria ainda.</div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {category.courses.map((course) => (
-              <CourseListCard
-                key={course.id}
-                course={{
-                  id: course.id,
-                  title: course.title,
-                  description: course.description,
-                  thumbnailUrl: course.thumbnailUrl,
-                }}
-              />
+              <CourseListCard key={course.id} course={course} />
             ))}
           </div>
         )}

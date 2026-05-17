@@ -32,7 +32,7 @@ export async function GET(
       userId: user.id,
     },
     include: {
-      course: { select: { title: true } },
+      course: { select: { title: true, workloadHours: true } },
     },
   })
 
@@ -48,14 +48,26 @@ export async function GET(
   const margin = 56
   let y = 720
 
-  page.drawText('Certificate of completion', {
+  const hours = certificate.course.workloadHours || 100
+  const issuedDate = certificate.issuedAt.toLocaleDateString('pt-BR')
+
+  page.drawText('Certificado de Conclusao', {
     x: margin,
     y,
     size: 22,
     font: fontBold,
     color: rgb(0.1, 0.15, 0.35),
   })
-  y -= 48
+  y -= 28
+
+  page.drawText(`Carga horaria: ${hours} horas`, {
+    x: margin,
+    y,
+    size: 12,
+    font,
+    color: rgb(0.3, 0.3, 0.3),
+  })
+  y -= 36
 
   page.drawText(certificate.course.title, {
     x: margin,
@@ -68,7 +80,7 @@ export async function GET(
   })
   y -= 56
 
-  page.drawText(`Issued to: ${user.name}`, {
+  page.drawText(`Certificamos que: ${user.name}`, {
     x: margin,
     y,
     size: 12,
@@ -86,7 +98,7 @@ export async function GET(
   })
   y -= 36
 
-  page.drawText(`Certificate number: ${certificate.certificateNumber}`, {
+  page.drawText(`Codigo de verificacao: ${certificate.certificateNumber}`, {
     x: margin,
     y,
     size: 11,
@@ -95,7 +107,7 @@ export async function GET(
   })
   y -= 20
 
-  page.drawText(`Issued on: ${certificate.issuedAt.toISOString().slice(0, 10)}`, {
+  page.drawText(`Data de conclusao: ${issuedDate}`, {
     x: margin,
     y,
     size: 11,

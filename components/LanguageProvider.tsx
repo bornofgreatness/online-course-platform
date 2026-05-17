@@ -358,12 +358,14 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | null>(null)
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('en')
+  const [language, setLanguageState] = useState<Language>('pt')
 
   useEffect(() => {
     const stored = window.localStorage.getItem('language')
     if (stored === 'en' || stored === 'pt') {
       setLanguageState(stored)
+    } else {
+      setLanguageState('pt')
     }
   }, [])
 

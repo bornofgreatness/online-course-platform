@@ -11,21 +11,22 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
   ),
   title: {
-    default: 'Online Course Platform',
-    template: '%s | Online Course Platform',
+    default: 'Plataforma de Cursos Online',
+    template: '%s | Plataforma de Cursos Online',
   },
-  description: 'Professional online course platform for PDF-based educational content, subscriptions, and certificates.',
+  description:
+    'Mais de 140 cursos com certificado de 100 horas. Educação, informática, IA, saúde, marketing e mais. Assinatura em reais (R$).',
   openGraph: {
     type: 'website',
-    locale: 'en_US',
-    siteName: 'Online Course Platform',
-    title: 'Online Course Platform',
-    description: 'PDF courses, quizzes, certificates, and subscriptions.',
+    locale: 'pt_BR',
+    siteName: 'Plataforma de Cursos Online',
+    title: 'Plataforma de Cursos Online',
+    description: 'Cursos online, certificados, quizzes e assinatura com acesso a todo o catálogo.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Online Course Platform',
-    description: 'PDF courses, quizzes, certificates, and subscriptions.',
+    title: 'Plataforma de Cursos Online',
+    description: 'Cursos online, certificados e assinatura em BRL.',
   },
 }
 
@@ -35,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${inter.className} bg-slate-100 antialiased`}>
         <LanguageProvider>
           <SessionProvider>{children}</SessionProvider>

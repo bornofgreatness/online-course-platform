@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Too many registration attempts. Try again later.' }, { status: 429 })
   }
 
-  const { email, password, name, referralCode } = await request.json()
+  const { email, password, name, whatsapp, address, city, state, referralCode } = await request.json()
 
   if (!process.env.DATABASE_URL) {
     return NextResponse.json({ error: 'Database connection is not configured' }, { status: 500 })
@@ -33,7 +33,11 @@ export async function POST(request: NextRequest) {
       email,
       password: hashedPassword,
       name,
-    }
+      whatsapp: typeof whatsapp === 'string' ? whatsapp.trim() : undefined,
+      address: typeof address === 'string' ? address.trim() : undefined,
+      city: typeof city === 'string' ? city.trim() : undefined,
+      state: typeof state === 'string' ? state.trim().toUpperCase().slice(0, 2) : undefined,
+    },
   })
 
   if (referralCode && typeof referralCode === 'string') {

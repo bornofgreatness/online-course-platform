@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import Stripe from 'stripe'
 import { authOptions } from '../../auth/[...nextauth]/options'
-import { isBillingPlan, PLAN_AMOUNT_CENTS, PLAN_LABEL, PLAN_MONTHS } from '../../../../lib/billingPlans'
+import { isBillingPlan, PLAN_TOTAL_CENTS_BRL, PLAN_LABEL_PT, PLAN_MONTHS } from '../../../../lib/billingPlans'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,17 +36,18 @@ export async function POST(request: Request) {
 
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: 'payment',
-    payment_method_types: ['card'],
+    payment_method_types: ['card', 'boleto'],
     customer_email: session.user.email,
+    locale: 'pt-BR',
     line_items: [
       {
         quantity: 1,
         price_data: {
-          currency: 'usd',
-          unit_amount: PLAN_AMOUNT_CENTS[plan],
+          currency: 'brl',
+          unit_amount: PLAN_TOTAL_CENTS_BRL[plan],
           product_data: {
-            name: `Course platform — ${PLAN_LABEL[plan]}`,
-            description: `${PLAN_MONTHS[plan]} month(s) of full catalog access`,
+            name: `Plataforma de Cursos — ${PLAN_LABEL_PT[plan]}`,
+            description: `${PLAN_MONTHS[plan]} mês(es) de acesso a todo o catálogo`,
           },
         },
       },

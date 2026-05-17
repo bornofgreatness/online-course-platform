@@ -307,6 +307,15 @@ export default function ClientAdminCrud() {
         </div>
       )}
 
+      <div className="mb-4 flex flex-wrap gap-3">
+        <a
+          href="/api/admin/leads"
+          className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+        >
+          Exportar leads (CSV)
+        </a>
+      </div>
+
       {stats && (
         <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className={`${siteCardClass} p-4`}>
@@ -314,8 +323,10 @@ export default function ClientAdminCrud() {
             <p className="mt-1 text-2xl font-bold tabular-nums">{stats.totalUsers}</p>
           </div>
           <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">Revenue (USD)</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums">${stats.revenueUsd.toFixed(2)}</p>
+            <p className="text-xs font-bold uppercase text-blue-900">Receita (BRL)</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">
+              {stats.revenueUsd.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </p>
           </div>
           <div className={`${siteCardClass} p-4`}>
             <p className="text-xs font-bold uppercase text-blue-900">Active subscriptions</p>

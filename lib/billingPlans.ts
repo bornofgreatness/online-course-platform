@@ -1,4 +1,4 @@
-/** Plan keys sent from pricing UI and Stripe Checkout metadata. */
+/** Plan keys sent from pricing UI and checkout metadata. */
 export const BILLING_PLANS = ['1m', '3m', '6m', '1y'] as const
 export type BillingPlan = (typeof BILLING_PLANS)[number]
 
@@ -9,19 +9,34 @@ export const PLAN_MONTHS: Record<BillingPlan, number> = {
   '1y': 12,
 }
 
-/** One-time checkout amounts in USD cents (configure Stripe Prices later if preferred). */
-export const PLAN_AMOUNT_CENTS: Record<BillingPlan, number> = {
-  '1m': 1900,
-  '3m': 4900,
-  '6m': 8900,
-  '1y': 14900,
+/** Total plan price in BRL centavos (one-time checkout). */
+export const PLAN_TOTAL_CENTS_BRL: Record<BillingPlan, number> = {
+  '1m': 2990,
+  '3m': 4500,
+  '6m': 7800,
+  '1y': 11880,
 }
 
-export const PLAN_LABEL: Record<BillingPlan, string> = {
-  '1m': '1 month access',
-  '3m': '3 months access',
-  '6m': '6 months access',
-  '1y': '1 year access',
+/** @deprecated Use PLAN_TOTAL_CENTS_BRL — kept for Stripe webhook compatibility */
+export const PLAN_AMOUNT_CENTS: Record<BillingPlan, number> = PLAN_TOTAL_CENTS_BRL
+
+export const PLAN_LABEL_PT: Record<BillingPlan, string> = {
+  '1m': 'Acesso por 1 mês',
+  '3m': 'Acesso por 3 meses',
+  '6m': 'Acesso por 6 meses',
+  '1y': 'Acesso por 12 meses',
+}
+
+export const PLAN_LABEL: Record<BillingPlan, string> = PLAN_LABEL_PT
+
+export function formatBrl(cents: number): string {
+  return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+export function monthlyInstallmentCents(plan: BillingPlan): number {
+  const total = PLAN_TOTAL_CENTS_BRL[plan]
+  const months = PLAN_MONTHS[plan]
+  return Math.round(total / months)
 }
 
 export function isBillingPlan(v: string): v is BillingPlan {

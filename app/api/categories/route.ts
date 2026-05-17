@@ -11,8 +11,14 @@ export async function GET() {
   try {
     const prisma = getPrisma()
     const categories = await prisma.category.findMany({
-      orderBy: { name: 'asc' },
-      include: { _count: { select: { courses: true } } },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      include: {
+        _count: { select: { courses: true } },
+        subcategories: {
+          orderBy: { name: 'asc' },
+          include: { _count: { select: { courses: true } } },
+        },
+      },
     })
     return NextResponse.json(
       categories.map((c) => ({
@@ -21,6 +27,11 @@ export async function GET() {
         icon: c.icon,
         imageUrl: c.imageUrl,
         courseCount: c._count.courses,
+        subcategories: c.subcategories.map((s) => ({
+          id: s.id,
+          name: s.name,
+          courseCount: s._count.courses,
+        })),
       }))
     )
   } catch (error) {
