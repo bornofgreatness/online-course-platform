@@ -18,12 +18,14 @@ export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [needsVerification, setNeedsVerification] = useState(false)
   const [resendMessage, setResendMessage] = useState<string | null>(null)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage(null)
+    setNeedsVerification(false)
     setResendMessage(null)
 
     const result = await signIn('credentials', {
@@ -34,18 +36,27 @@ export default function SignIn() {
 
     if (result?.ok) {
       router.push('/dashboard')
+      return
+    }
+
+    const err = result?.error || ''
+    if (err === 'Email not verified' || err.includes('not verified')) {
+      setNeedsVerification(true)
+      setErrorMessage('Seu e-mail ainda não foi verificado. Confirme o link enviado ou reenvie abaixo.')
+    } else if (err === 'CredentialsSignin') {
+      setErrorMessage('E-mail ou senha incorretos.')
     } else {
-      setErrorMessage(result?.error || t('common.password'))
+      setErrorMessage(err || 'Não foi possível entrar. Tente novamente.')
     }
   }
 
   const handleResend = async () => {
     if (!email) {
-      setResendMessage(t('common.password'))
+      setResendMessage('Informe seu e-mail acima.')
       return
     }
 
-    setResendMessage(t('common.saving'))
+    setResendMessage('Enviando...')
 
     const res = await fetch('/api/auth/send-verification-email', {
       method: 'POST',
@@ -56,14 +67,13 @@ export default function SignIn() {
     const data = await res.json().catch(() => null)
 
     if (res.ok) {
-      setResendMessage(data?.verifyUrl ? t('common.verify') : t('common.verify'))
-
       if (data?.verifyUrl) {
-        setErrorMessage(null)
-        setResendMessage(`Verification link: ${data.verifyUrl}`)
+        setResendMessage(`Link de verificação (dev): ${data.verifyUrl}`)
+      } else {
+        setResendMessage('E-mail de verificação enviado. Verifique sua caixa de entrada.')
       }
     } else {
-      setResendMessage(data?.error || 'Failed to resend verification email.')
+      setResendMessage(data?.error || 'Falha ao reenviar e-mail.')
     }
   }
 
@@ -76,14 +86,13 @@ export default function SignIn() {
             <h1 className={`${siteTitleClass} mb-6 text-center`}>{t('common.login')}</h1>
 
             <div className="mb-4">
-              <label className={labelClass}>{t('common.login')}</label>
+              <label className={labelClass}>E-mail</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={inputClass}
                 required
-                aria-label={t('common.login')}
               />
             </div>
 
@@ -107,14 +116,14 @@ export default function SignIn() {
 
             {errorMessage && <div className="mt-4 text-center text-sm text-red-600">{errorMessage}</div>}
 
-            {errorMessage === 'Email not verified' && (
+            {needsVerification && (
               <div className="mt-4 text-center">
                 <button
                   type="button"
                   onClick={handleResend}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                 >
-                  Resend verification email
+                  Reenviar e-mail de verificação
                 </button>
               </div>
             )}
@@ -125,12 +134,12 @@ export default function SignIn() {
 
             <div className="mt-4 flex flex-col items-center gap-2">
               <Link href="/auth/forgot-password" className="text-sm font-semibold text-blue-600 hover:underline">
-                Forgot password?
+                Esqueceu a senha?
               </Link>
               <p className="text-center text-sm text-slate-600">
-                No account?{' '}
+                Não tem conta?{' '}
                 <Link href="/auth/signup" className="font-semibold text-blue-600 hover:underline">
-                  {t('common.signup')}
+                  Cadastro Grátis
                 </Link>
               </p>
             </div>
@@ -140,4 +149,3 @@ export default function SignIn() {
     </>
   )
 }
-

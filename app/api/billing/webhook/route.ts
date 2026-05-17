@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getPrisma } from '../../../../lib/prisma'
-import { addMonths, isBillingPlan, PLAN_MONTHS, type BillingPlan } from '../../../../lib/billingPlans'
+import { activateSubscription } from '../../../../lib/activateSubscription'
+import { isBillingPlan } from '../../../../lib/billingPlans'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,8 +23,9 @@ export async function POST(request: Request) {
   let event: Stripe.Event
   try {
     event = stripe.webhooks.constructEvent(rawBody, sig, whSecret)
-  } catch (e: any) {
-    console.error('Stripe webhook signature error', e?.message)
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Invalid signature'
+    console.error('Stripe webhook signature error', message)
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
@@ -34,61 +36,29 @@ export async function POST(request: Request) {
   const session = event.data.object as Stripe.Checkout.Session
   const userId = session.metadata?.userId
   const plan = session.metadata?.plan
+  const couponId = session.metadata?.couponId || undefined
+
   if (!userId || !plan || !isBillingPlan(plan)) {
     console.warn('checkout.session.completed missing metadata', session.id)
     return NextResponse.json({ received: true })
   }
 
   const prisma = getPrisma()
-  const months = PLAN_MONTHS[plan as BillingPlan]
-  const amountUsd = (session.amount_total ?? 0) / 100
+  const amountBrl = (session.amount_total ?? 0) / 100
 
-  await prisma.$transaction(async (tx) => {
-    await tx.subscription.updateMany({
-      where: { userId, active: true },
-      data: { active: false },
+  try {
+    await activateSubscription(prisma, {
+      userId,
+      plan,
+      amountBrl,
+      currency: session.currency || 'brl',
+      provider: 'stripe',
+      externalId: session.id,
+      couponId: couponId || null,
     })
-
-    const start = new Date()
-    const end = addMonths(start, months)
-    await tx.subscription.create({
-      data: {
-        userId,
-        plan,
-        startDate: start,
-        endDate: end,
-        active: true,
-      },
-    })
-
-    await tx.payment.create({
-      data: {
-        userId,
-        amount: amountUsd,
-        currency: (session.currency || 'usd').toLowerCase(),
-        status: 'succeeded',
-        stripeId: session.id,
-      },
-    })
-
-    const referral = await tx.referral.findFirst({
-      where: { referredUserId: userId },
-      orderBy: { createdAt: 'desc' },
-    })
-    if (referral && amountUsd > 0) {
-      const commission = Math.round(amountUsd * 10) / 100
-      if (commission > 0) {
-        await tx.affiliateCommission.create({
-          data: {
-            affiliateId: referral.affiliateId,
-            referredUserId: userId,
-            amount: commission,
-            status: 'PENDING',
-          },
-        })
-      }
-    }
-  })
+  } catch (e) {
+    console.error('activateSubscription failed', e)
+  }
 
   return NextResponse.json({ received: true })
 }

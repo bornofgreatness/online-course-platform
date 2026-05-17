@@ -34,11 +34,11 @@ export const authOptions: AuthOptions = {
           return null
         }
 
-        // Block sign-in for unverified users (except admins)
+        const requireVerification = process.env.REQUIRE_EMAIL_VERIFICATION !== 'false'
         const role = (user.role ?? '').toString().trim().toUpperCase()
         const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN'
-        const emailVerifiedAt = (user as any).emailVerifiedAt as Date | null | undefined
-        if (!isAdmin && !emailVerifiedAt) {
+        const emailVerifiedAt = user.emailVerifiedAt
+        if (requireVerification && !isAdmin && !emailVerifiedAt) {
           throw new Error('Email not verified')
         }
 

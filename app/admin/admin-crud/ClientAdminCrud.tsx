@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
+import AdminMarketing from '../../../components/AdminMarketing'
 
 type Category = {
   id: string
@@ -37,7 +38,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export default function ClientAdminCrud() {
-  const [tab, setTab] = useState<'categories' | 'courses'>('categories')
+  const [tab, setTab] = useState<'categories' | 'courses' | 'marketing'>('categories')
   const [toast, setToast] = useState<Toast>(null)
   const [stats, setStats] = useState<{
     totalUsers: number
@@ -376,8 +377,18 @@ export default function ClientAdminCrud() {
           >
             Courses
           </button>
+          <button
+            onClick={() => setTab('marketing')}
+            className={`rounded px-3 py-2 text-sm border ${
+              tab === 'marketing' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
+            }`}
+          >
+            Marketing
+          </button>
         </div>
       </div>
+
+      {tab === 'marketing' && <AdminMarketing />}
 
       {tab === 'categories' && (
         <div className="grid gap-6 lg:grid-cols-2">

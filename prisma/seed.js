@@ -168,6 +168,30 @@ async function main() {
     })
   }
 
+  await prisma.coupon.upsert({
+    where: { code: 'PROMO20' },
+    update: { active: true },
+    create: {
+      code: 'PROMO20',
+      description: '20% de desconto na primeira assinatura',
+      discountPercent: 20,
+      maxUses: 500,
+      active: true,
+    },
+  })
+
+  await prisma.coupon.upsert({
+    where: { code: 'BEMVINDO10' },
+    update: { active: true },
+    create: {
+      code: 'BEMVINDO10',
+      description: 'R$ 10,00 de desconto',
+      discountCents: 1000,
+      maxUses: 1000,
+      active: true,
+    },
+  })
+
   console.log('Seed concluído.')
 }
 
