@@ -167,7 +167,7 @@ export default function Header() {
                     {t('common.login')}
                   </Link>
                   <Link href="/auth/signup" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                    {t('common.signup')}
+                    {t('common.signupFreeCta')}
                   </Link>
                 </>
               )}
@@ -208,7 +208,7 @@ export default function Header() {
                   href="/auth/signup"
                   className="rounded-full bg-black px-4 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-gray-900 sm:px-5 sm:text-sm"
                 >
-                  {t('common.signup')}
+                  {t('common.signupFreeCta')}
                 </Link>
               </>
             )}
@@ -286,7 +286,7 @@ export default function Header() {
 
             {!session && status !== 'loading' && (
               <Link href="/auth/signup" className={navText(signupActive)}>
-                {t('common.signup')}
+                {t('common.signupFreeCta')}
               </Link>
             )}
 

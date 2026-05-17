@@ -42,21 +42,21 @@ export default function SignIn() {
     const err = result?.error || ''
     if (err === 'Email not verified' || err.includes('not verified')) {
       setNeedsVerification(true)
-      setErrorMessage('Seu e-mail ainda não foi verificado. Confirme o link enviado ou reenvie abaixo.')
+      setErrorMessage(t('auth.emailNotVerified'))
     } else if (err === 'CredentialsSignin') {
-      setErrorMessage('E-mail ou senha incorretos.')
+      setErrorMessage(t('auth.wrongCredentials'))
     } else {
-      setErrorMessage(err || 'Não foi possível entrar. Tente novamente.')
+      setErrorMessage(err || t('auth.signInFailed'))
     }
   }
 
   const handleResend = async () => {
     if (!email) {
-      setResendMessage('Informe seu e-mail acima.')
+      setResendMessage(t('auth.enterEmailAbove'))
       return
     }
 
-    setResendMessage('Enviando...')
+    setResendMessage(t('common.saving'))
 
     const res = await fetch('/api/auth/send-verification-email', {
       method: 'POST',
@@ -68,12 +68,12 @@ export default function SignIn() {
 
     if (res.ok) {
       if (data?.verifyUrl) {
-        setResendMessage(`Link de verificação (dev): ${data.verifyUrl}`)
+        setResendMessage(`${t('auth.verificationDevLink')} ${data.verifyUrl}`)
       } else {
-        setResendMessage('E-mail de verificação enviado. Verifique sua caixa de entrada.')
+        setResendMessage(t('auth.verificationSent'))
       }
     } else {
-      setResendMessage(data?.error || 'Falha ao reenviar e-mail.')
+      setResendMessage(data?.error || t('common.error'))
     }
   }
 
@@ -86,7 +86,7 @@ export default function SignIn() {
             <h1 className={`${siteTitleClass} mb-6 text-center`}>{t('common.login')}</h1>
 
             <div className="mb-4">
-              <label className={labelClass}>E-mail</label>
+              <label className={labelClass}>{t('common.email')}</label>
               <input
                 type="email"
                 value={email}
@@ -123,7 +123,7 @@ export default function SignIn() {
                   onClick={handleResend}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                 >
-                  Reenviar e-mail de verificação
+                  {t('auth.resendVerification')}
                 </button>
               </div>
             )}
@@ -134,12 +134,12 @@ export default function SignIn() {
 
             <div className="mt-4 flex flex-col items-center gap-2">
               <Link href="/auth/forgot-password" className="text-sm font-semibold text-blue-600 hover:underline">
-                Esqueceu a senha?
+                {t('auth.forgotPassword')}
               </Link>
               <p className="text-center text-sm text-slate-600">
-                Não tem conta?{' '}
+                {t('auth.noAccount')}{' '}
                 <Link href="/auth/signup" className="font-semibold text-blue-600 hover:underline">
-                  Cadastro Grátis
+                  {t('common.signupFree')}
                 </Link>
               </p>
             </div>

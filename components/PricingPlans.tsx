@@ -4,20 +4,24 @@ import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import type { BillingPlan } from '../lib/billingPlans'
-import {
-  PLAN_LABEL_PT,
-  PLAN_MONTHS,
-  PLAN_TOTAL_CENTS_BRL,
-  formatBrl,
-} from '../lib/billingPlans'
+import { PLAN_MONTHS, PLAN_TOTAL_CENTS_BRL } from '../lib/billingPlans'
+import { formatMoney } from '../lib/i18n/format'
+import { useI18n } from './LanguageProvider'
+import type { TranslationKey } from '../lib/i18n/translations'
 
 const plans: BillingPlan[] = ['1m', '3m', '6m', '1y']
+const planKeys: Record<BillingPlan, TranslationKey> = {
+  '1m': 'pricing.plan.1m',
+  '3m': 'pricing.plan.3m',
+  '6m': 'pricing.plan.6m',
+  '1y': 'pricing.plan.1y',
+}
 
 type PaymentProvider = 'stripe' | 'mercadopago'
-
 const mpEnabled = process.env.NEXT_PUBLIC_MERCADOPAGO_ENABLED === 'true'
 
 export default function PricingPlans() {
+  const { t, language } = useI18n()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [busy, setBusy] = useState<BillingPlan | null>(null)
@@ -64,7 +68,7 @@ export default function PricingPlans() {
       const data = await res.json().catch(() => null)
 
       if (!res.ok) {
-        throw new Error(data?.error || 'Falha no checkout')
+        throw new Error(data?.error || t('pricing.checkoutFailed'))
       }
 
       if (data?.url) {
@@ -72,9 +76,9 @@ export default function PricingPlans() {
         return
       }
 
-      throw new Error('URL de checkout não retornada')
+      throw new Error(t('pricing.noCheckoutUrl'))
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Falha no checkout')
+      setError(e instanceof Error ? e.message : t('pricing.checkoutFailed'))
     } finally {
       setBusy(null)
     }
@@ -88,20 +92,19 @@ export default function PricingPlans() {
   }
 
   function displayMonthly(plan: BillingPlan) {
-    const total = displayTotal(plan)
-    return Math.round(total / PLAN_MONTHS[plan])
+    return Math.round(displayTotal(plan) / PLAN_MONTHS[plan])
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-end">
         <div className="flex-1">
-          <label className="block text-sm font-medium text-slate-700">Cupom de desconto</label>
+          <label className="block text-sm font-medium text-slate-700">{t('pricing.couponLabel')}</label>
           <input
             type="text"
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-            placeholder="EX: PROMO20"
+            placeholder={t('pricing.couponPlaceholder')}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm uppercase"
           />
         </div>
@@ -110,20 +113,22 @@ export default function PricingPlans() {
           onClick={() => validateCoupon('3m')}
           className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50"
         >
-          Validar cupom
+          {t('pricing.validateCoupon')}
         </button>
       </div>
 
       {couponPreview && (
         <p className={`text-sm ${couponPreview.valid ? 'text-green-700' : 'text-red-600'}`}>
           {couponPreview.valid
-            ? `Cupom aplicado! Desconto de ${formatBrl(couponPreview.discountCents || 0)}`
-            : couponPreview.error || 'Cupom inválido'}
+            ? t('pricing.couponApplied', {
+                amount: formatMoney(couponPreview.discountCents || 0, language),
+              })
+            : couponPreview.error || t('pricing.couponInvalid')}
         </p>
       )}
 
       <div className="flex flex-wrap gap-2">
-        <span className="text-sm font-medium text-slate-600">Pagamento:</span>
+        <span className="text-sm font-medium text-slate-600">{t('pricing.paymentMethod')}</span>
         {mpEnabled && (
           <button
             type="button"
@@ -132,7 +137,7 @@ export default function PricingPlans() {
               provider === 'mercadopago' ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-700'
             }`}
           >
-            Mercado Pago (PIX + cartão)
+            {t('pricing.mercadoPago')}
           </button>
         )}
         <button
@@ -142,7 +147,7 @@ export default function PricingPlans() {
             provider === 'stripe' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
           }`}
         >
-          Stripe (cartão + boleto)
+          {t('pricing.stripe')}
         </button>
       </div>
 
@@ -162,17 +167,19 @@ export default function PricingPlans() {
             >
               {highlight ? (
                 <span className="mb-2 w-fit rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-800">
-                  Mais popular
+                  {t('pricing.mostPopular')}
                 </span>
               ) : null}
-              <h2 className="text-lg font-bold text-blue-950">{PLAN_LABEL_PT[plan]}</h2>
+              <h2 className="text-lg font-bold text-blue-950">{t(planKeys[plan])}</h2>
               <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900">
-                {formatBrl(monthly)}
-                <span className="text-base font-semibold text-slate-600"> / mês</span>
+                {formatMoney(monthly, language)}
+                <span className="text-base font-semibold text-slate-600">{t('pricing.perMonth')}</span>
               </p>
-              <p className="mt-1 text-xs text-slate-500">Total: {formatBrl(total)}</p>
+              <p className="mt-1 text-xs text-slate-500">
+                {t('pricing.total')} {formatMoney(total, language)}
+              </p>
               <p className="mt-2 text-xs text-slate-500">
-                {months} {months === 1 ? 'mês' : 'meses'} · Acesso a todos os cursos
+                {months} {months === 1 ? t('common.month') : t('common.months')} {t('pricing.fullAccess')}
               </p>
 
               <button
@@ -181,7 +188,7 @@ export default function PricingPlans() {
                 onClick={() => checkout(plan)}
                 className="mt-auto w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
               >
-                {busy === plan ? 'Aguarde...' : 'Assinar agora'}
+                {busy === plan ? t('pricing.wait') : t('pricing.subscribeNow')}
               </button>
             </div>
           )
@@ -194,4 +201,3 @@ export default function PricingPlans() {
     </div>
   )
 }
-

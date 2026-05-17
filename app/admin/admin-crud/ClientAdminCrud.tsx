@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
 import AdminMarketing from '../../../components/AdminMarketing'
+import { useI18n } from '../../../components/LanguageProvider'
+import { formatMoney } from '../../../lib/i18n/format'
 
 type Category = {
   id: string
@@ -38,6 +40,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export default function ClientAdminCrud() {
+  const { t, language } = useI18n()
   const [tab, setTab] = useState<'categories' | 'courses' | 'marketing'>('categories')
   const [toast, setToast] = useState<Toast>(null)
   const [stats, setStats] = useState<{
@@ -82,9 +85,9 @@ export default function ClientAdminCrud() {
     return categories.find((c) => c.id === courseForm.categoryId)?.name ?? ''
   }, [categories, courseForm.categoryId])
 
-  const showToast = (t: Toast) => {
-    setToast(t)
-    if (t) {
+  const displayToast = (toast: Toast) => {
+    setToast(toast)
+    if (toast) {
       window.setTimeout(() => setToast(null), 2500)
     }
   }
@@ -104,8 +107,8 @@ export default function ClientAdminCrud() {
   }
 
   useEffect(() => {
-    fetchCategories().catch(() => showToast({ type: 'error', message: 'Could not load categories' }))
-    fetchCourses().catch(() => showToast({ type: 'error', message: 'Could not load courses' }))
+    fetchCategories().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadCategories') }))
+    fetchCourses().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadCourses') }))
     fetch('/api/admin/stats')
       .then((r) => r.json())
       .then((d) => {
@@ -116,7 +119,7 @@ export default function ClientAdminCrud() {
 
   async function createCategory() {
     if (!catName.trim()) {
-      showToast({ type: 'error', message: 'Category name is required' })
+      displayToast({ type: 'error', message: t('admin.categoryNameRequired') })
       return
     }
 
@@ -133,15 +136,15 @@ export default function ClientAdminCrud() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data?.error || 'Failed to create category')
+      if (!res.ok) throw new Error(data?.error || t('admin.failedCreateCategory'))
 
       setCatName('')
       setCatIcon('')
       setCatImageUrl('')
       await fetchCategories()
-      showToast({ type: 'success', message: 'Category created' })
+      displayToast({ type: 'success', message: t('admin.categoryCreated') })
     } catch (e: any) {
-      showToast({ type: 'error', message: e?.message || 'Failed to create category' })
+      displayToast({ type: 'error', message: e?.message || t('admin.failedCreateCategory') })
     } finally {
       setCatBusy(false)
     }
@@ -150,7 +153,7 @@ export default function ClientAdminCrud() {
   async function updateCategory() {
     if (!editingCategoryId) return
     if (!editingCategoryName.trim()) {
-      showToast({ type: 'error', message: 'Category name is required' })
+      displayToast({ type: 'error', message: t('admin.categoryNameRequired') })
       return
     }
 
@@ -167,29 +170,29 @@ export default function ClientAdminCrud() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data?.error || 'Failed to update category')
+      if (!res.ok) throw new Error(data?.error || t('admin.failedUpdateCategory'))
 
       setEditingCategoryId(null)
       setEditingCategoryName('')
       setEditingCategoryIcon('')
       setEditingCategoryImageUrl('')
       await fetchCategories()
-      showToast({ type: 'success', message: 'Category updated' })
+      displayToast({ type: 'success', message: t('admin.categoryUpdated') })
     } catch (e: any) {
-      showToast({ type: 'error', message: e?.message || 'Failed to update category' })
+      displayToast({ type: 'error', message: e?.message || t('admin.failedUpdateCategory') })
     } finally {
       setCatBusy(false)
     }
   }
 
   async function deleteCategory(categoryId: string) {
-    if (!window.confirm('Delete this category? This may break existing courses if not handled.')) return
+    if (!window.confirm(t('admin.confirmDeleteCategory'))) return
 
     setCatBusy(true)
     try {
       const res = await fetch(`/api/admin/categories/${categoryId}`, { method: 'DELETE' })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data?.error || 'Failed to delete category')
+      if (!res.ok) throw new Error(data?.error || t('admin.failedDeleteCategory'))
 
       if (courseForm.categoryId === categoryId) {
         setCourseForm((p) => ({ ...p, categoryId: '' }))
@@ -197,9 +200,9 @@ export default function ClientAdminCrud() {
 
       await fetchCategories()
       await fetchCourses()
-      showToast({ type: 'success', message: 'Category deleted' })
+      displayToast({ type: 'success', message: t('admin.categoryDeleted') })
     } catch (e: any) {
-      showToast({ type: 'error', message: e?.message || 'Failed to delete category' })
+      displayToast({ type: 'error', message: e?.message || t('admin.failedDeleteCategory') })
     } finally {
       setCatBusy(false)
     }
@@ -236,10 +239,10 @@ export default function ClientAdminCrud() {
   }
 
   async function submitCourse() {
-    if (!courseForm.title.trim()) return showToast({ type: 'error', message: 'Title is required' })
-    if (!courseForm.description.trim()) return showToast({ type: 'error', message: 'Description is required' })
-    if (!courseForm.categoryId) return showToast({ type: 'error', message: 'Category is required' })
-    if (!courseForm.pdfUrl.trim()) return showToast({ type: 'error', message: 'pdfUrl is required' })
+    if (!courseForm.title.trim()) return displayToast({ type: 'error', message: t('admin.titleRequired') })
+    if (!courseForm.description.trim()) return displayToast({ type: 'error', message: t('admin.descriptionRequired') })
+    if (!courseForm.categoryId) return displayToast({ type: 'error', message: t('admin.categoryRequired') })
+    if (!courseForm.pdfUrl.trim()) return displayToast({ type: 'error', message: t('admin.pdfUrlRequired') })
 
     setCourseBusy(true)
     try {
@@ -265,32 +268,35 @@ export default function ClientAdminCrud() {
       })
 
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data?.error || 'Failed to save course')
+      if (!res.ok) throw new Error(data?.error || t('admin.failedSaveCourse'))
 
       await fetchCourses()
       resetCourseForm()
-      showToast({ type: 'success', message: editingCourseId ? 'Course updated' : 'Course created' })
+      displayToast({
+        type: 'success',
+        message: editingCourseId ? t('admin.courseUpdated') : t('admin.courseCreated'),
+      })
     } catch (e: any) {
-      showToast({ type: 'error', message: e?.message || 'Failed to save course' })
+      displayToast({ type: 'error', message: e?.message || t('admin.failedSaveCourse') })
     } finally {
       setCourseBusy(false)
     }
   }
 
   async function deleteCourse(courseId: string) {
-    if (!window.confirm('Delete this course?')) return
+    if (!window.confirm(t('admin.confirmDeleteCourse'))) return
 
     setCourseBusy(true)
     try {
       const res = await fetch(`/api/admin/courses/${courseId}`, { method: 'DELETE' })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data?.error || 'Failed to delete course')
+      if (!res.ok) throw new Error(data?.error || t('admin.failedDeleteCourse'))
 
       await fetchCourses()
       if (editingCourseId === courseId) resetCourseForm()
-      showToast({ type: 'success', message: 'Course deleted' })
+      displayToast({ type: 'success', message: t('admin.courseDeleted') })
     } catch (e: any) {
-      showToast({ type: 'error', message: e?.message || 'Failed to delete course' })
+      displayToast({ type: 'error', message: e?.message || t('admin.failedDeleteCourse') })
     } finally {
       setCourseBusy(false)
     }
@@ -313,51 +319,55 @@ export default function ClientAdminCrud() {
           href="/api/admin/leads"
           className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
         >
-          Exportar leads (CSV)
+          {t('admin.exportLeads')}
         </a>
       </div>
 
       {stats && (
         <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">Users</p>
+            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.users')}</p>
             <p className="mt-1 text-2xl font-bold tabular-nums">{stats.totalUsers}</p>
           </div>
           <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">Receita (BRL)</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums">
-              {stats.revenueUsd.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </p>
+            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.revenue')}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{formatMoney(stats.revenueUsd, language)}</p>
           </div>
           <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">Active subscriptions</p>
+            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.activeSubscriptions')}</p>
             <p className="mt-1 text-2xl font-bold tabular-nums">{stats.activeSubscriptions}</p>
           </div>
           <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">Completion rate</p>
+            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.completionRate')}</p>
             <p className="mt-1 text-2xl font-bold tabular-nums">{stats.completionRatePercent}%</p>
           </div>
           <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">Enrollments</p>
+            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.enrollments')}</p>
             <p className="mt-1 text-sm text-slate-700">
-              {stats.completedEnrollments} / {stats.totalEnrollments} completed
+              {t('admin.enrollmentsSummary', {
+                completed: stats.completedEnrollments,
+                total: stats.totalEnrollments,
+                completedLabel: t('admin.completed'),
+              })}
             </p>
           </div>
           <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">Affiliate referrals</p>
+            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.affiliateReferrals')}</p>
             <p className="mt-1 text-2xl font-bold tabular-nums">{stats.affiliateReferrals}</p>
           </div>
           <div className={`${siteCardClass} p-4 sm:col-span-2`}>
-            <p className="text-xs font-bold uppercase text-blue-900">Pending affiliate commissions (USD)</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums">${stats.pendingCommissionUsd.toFixed(2)}</p>
+            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.pendingCommissions')}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">
+              {formatMoney(Math.round(stats.pendingCommissionUsd * 100), language)}
+            </p>
           </div>
         </div>
       )}
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className={siteTitleClass}>Admin panel</h1>
-          <p className={`${siteMutedClass} mt-2`}>Manage categories and PDF courses.</p>
+          <h1 className={siteTitleClass}>{t('admin.panel')}</h1>
+          <p className={`${siteMutedClass} mt-2`}>{t('admin.panelSubtitle')}</p>
         </div>
 
         <div className="flex gap-2">
@@ -367,7 +377,7 @@ export default function ClientAdminCrud() {
               tab === 'categories' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
             }`}
           >
-            Categories
+            {t('admin.tabCategories')}
           </button>
           <button
             onClick={() => setTab('courses')}
@@ -375,7 +385,7 @@ export default function ClientAdminCrud() {
               tab === 'courses' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
             }`}
           >
-            Courses
+            {t('admin.tabCourses')}
           </button>
           <button
             onClick={() => setTab('marketing')}
@@ -383,7 +393,7 @@ export default function ClientAdminCrud() {
               tab === 'marketing' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
             }`}
           >
-            Marketing
+            {t('admin.tabMarketing')}
           </button>
         </div>
       </div>
@@ -393,26 +403,26 @@ export default function ClientAdminCrud() {
       {tab === 'categories' && (
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">Create Category</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('admin.createCategory')}</h2>
 
             <div className="space-y-3">
-              <Field label="Name">
+              <Field label={t('admin.name')}>
                 <input
                   value={catName}
                   onChange={(e) => setCatName(e.target.value)}
                   className="mt-1 w-full rounded border px-3 py-2"
-                  placeholder="e.g. Programming"
+                  placeholder={t('admin.namePlaceholder')}
                 />
               </Field>
-              <Field label="Icon (optional)">
+              <Field label={t('admin.iconOptional')}>
                 <input
                   value={catIcon}
                   onChange={(e) => setCatIcon(e.target.value)}
                   className="mt-1 w-full rounded border px-3 py-2"
-                  placeholder="Key: laptop, business, folder — or an emoji"
+                  placeholder={t('admin.iconPlaceholder')}
                 />
               </Field>
-              <Field label="Card image URL (optional)">
+              <Field label={t('admin.cardImageUrl')}>
                 <input
                   value={catImageUrl}
                   onChange={(e) => setCatImageUrl(e.target.value)}
@@ -426,16 +436,16 @@ export default function ClientAdminCrud() {
                 onClick={createCategory}
                 className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {catBusy ? 'Working...' : 'Create'}
+                {catBusy ? t('admin.working') : t('admin.create')}
               </button>
             </div>
           </div>
 
           <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">All Categories</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('admin.allCategories')}</h2>
             <div className="space-y-3">
               {categories.length === 0 ? (
-                <p className="text-gray-600">No categories yet.</p>
+                <p className="text-gray-600">{t('admin.noCategories')}</p>
               ) : (
                 categories.map((c) => (
                   <div key={c.id} className="flex flex-col gap-2 rounded border p-3">
@@ -445,19 +455,19 @@ export default function ClientAdminCrud() {
                           value={editingCategoryName}
                           onChange={(e) => setEditingCategoryName(e.target.value)}
                           className="w-full rounded border px-3 py-2"
-                          placeholder="Name"
+                          placeholder={t('admin.name')}
                         />
                         <input
                           value={editingCategoryIcon}
                           onChange={(e) => setEditingCategoryIcon(e.target.value)}
                           className="w-full rounded border px-3 py-2"
-                          placeholder="Icon key or emoji"
+                          placeholder={t('admin.iconPlaceholder')}
                         />
                         <input
                           value={editingCategoryImageUrl}
                           onChange={(e) => setEditingCategoryImageUrl(e.target.value)}
                           className="w-full rounded border px-3 py-2"
-                          placeholder="Card image URL"
+                          placeholder={t('admin.cardImageUrl')}
                         />
                         <div className="flex gap-2">
                           <button
@@ -465,7 +475,7 @@ export default function ClientAdminCrud() {
                             onClick={updateCategory}
                             className="flex-1 rounded bg-green-600 px-3 py-2 text-white hover:bg-green-700 disabled:opacity-50"
                           >
-                            Save
+                            {t('admin.save')}
                           </button>
                           <button
                             disabled={catBusy}
@@ -477,7 +487,7 @@ export default function ClientAdminCrud() {
                             }}
                             className="rounded border px-3 py-2 hover:bg-gray-50"
                           >
-                            Cancel
+                            {t('admin.cancel')}
                           </button>
                         </div>
                       </>
@@ -488,9 +498,13 @@ export default function ClientAdminCrud() {
                             <div className="font-medium">{c.name}</div>
                             {(c.icon || c.imageUrl) && (
                               <div className="mt-1 text-xs text-gray-500">
-                                {c.icon ? <span>Icon: {c.icon}</span> : null}
+                                {c.icon ? (
+                                  <span>
+                                    {t('admin.iconLabel')} {c.icon}
+                                  </span>
+                                ) : null}
                                 {c.icon && c.imageUrl ? ' · ' : null}
-                                {c.imageUrl ? <span className="break-all">Image set</span> : null}
+                                {c.imageUrl ? <span className="break-all">{t('admin.imageSet')}</span> : null}
                               </div>
                             )}
                             <div className="text-xs text-gray-500">{c.id}</div>
@@ -506,14 +520,14 @@ export default function ClientAdminCrud() {
                               }}
                               className="rounded border px-3 py-2 text-sm hover:bg-gray-50"
                             >
-                              Edit
+                              {t('admin.edit')}
                             </button>
                             <button
                               disabled={catBusy}
                               onClick={() => deleteCategory(c.id)}
                               className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100"
                             >
-                              Delete
+                              {t('admin.delete')}
                             </button>
                           </div>
                         </div>
@@ -530,10 +544,12 @@ export default function ClientAdminCrud() {
       {tab === 'courses' && (
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">{editingCourseId ? 'Edit Course' : 'Create Course'}</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {editingCourseId ? t('admin.editCourse') : t('admin.createCourse')}
+            </h2>
 
             <div className="space-y-4">
-              <Field label="Title">
+              <Field label={t('admin.title')}>
                 <input
                   value={courseForm.title}
                   onChange={(e) => setCourseForm((p) => ({ ...p, title: e.target.value }))}
@@ -541,7 +557,7 @@ export default function ClientAdminCrud() {
                 />
               </Field>
 
-              <Field label="Description">
+              <Field label={t('admin.description')}>
                 <textarea
                   value={courseForm.description}
                   onChange={(e) => setCourseForm((p) => ({ ...p, description: e.target.value }))}
@@ -551,13 +567,13 @@ export default function ClientAdminCrud() {
               </Field>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Category">
+                <Field label={t('admin.category')}>
                   <select
                     value={courseForm.categoryId}
                     onChange={(e) => setCourseForm((p) => ({ ...p, categoryId: e.target.value }))}
                     className="mt-1 w-full rounded border px-3 py-2"
                   >
-                    <option value="">Select category</option>
+                    <option value="">{t('admin.selectCategory')}</option>
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
@@ -566,7 +582,7 @@ export default function ClientAdminCrud() {
                   </select>
                 </Field>
 
-                <Field label="Workload Hours">
+                <Field label={t('admin.workloadHours')}>
                   <input
                     type="number"
                     min={0}
@@ -577,7 +593,7 @@ export default function ClientAdminCrud() {
                 </Field>
               </div>
 
-              <Field label="PDF URL">
+              <Field label={t('admin.pdfUrl')}>
                 <input
                   value={courseForm.pdfUrl}
                   onChange={(e) => setCourseForm((p) => ({ ...p, pdfUrl: e.target.value }))}
@@ -586,7 +602,7 @@ export default function ClientAdminCrud() {
                 />
               </Field>
 
-              <Field label="Thumbnail URL (optional)">
+              <Field label={t('admin.thumbnailOptional')}>
                 <input
                   value={courseForm.thumbnailUrl}
                   onChange={(e) => setCourseForm((p) => ({ ...p, thumbnailUrl: e.target.value }))}
@@ -594,7 +610,7 @@ export default function ClientAdminCrud() {
                 />
               </Field>
 
-              <Field label="Syllabus (optional)">
+              <Field label={t('admin.syllabusOptional')}>
                 <textarea
                   value={courseForm.syllabus}
                   onChange={(e) => setCourseForm((p) => ({ ...p, syllabus: e.target.value }))}
@@ -604,7 +620,7 @@ export default function ClientAdminCrud() {
               </Field>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="SEO Title (optional)">
+                <Field label={t('admin.seoTitleOptional')}>
                   <input
                     value={courseForm.seoTitle}
                     onChange={(e) => setCourseForm((p) => ({ ...p, seoTitle: e.target.value }))}
@@ -612,7 +628,7 @@ export default function ClientAdminCrud() {
                   />
                 </Field>
 
-                <Field label="SEO Description (optional)">
+                <Field label={t('admin.seoDescOptional')}>
                   <input
                     value={courseForm.seoDescription}
                     onChange={(e) => setCourseForm((p) => ({ ...p, seoDescription: e.target.value }))}
@@ -627,28 +643,28 @@ export default function ClientAdminCrud() {
                   onClick={submitCourse}
                   className="flex-1 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {courseBusy ? 'Saving...' : editingCourseId ? 'Update' : 'Create'}
+                  {courseBusy ? t('admin.saving') : editingCourseId ? t('admin.update') : t('admin.create')}
                 </button>
                 <button
                   disabled={courseBusy}
                   onClick={resetCourseForm}
                   className="rounded border px-4 py-2 hover:bg-gray-50"
                 >
-                  Reset
+                  {t('admin.reset')}
                 </button>
               </div>
 
               <div className="text-xs text-gray-500">
-                Selected category: {selectedCategoryName || '—'}
+                {t('admin.selectedCategory')} {selectedCategoryName || '—'}
               </div>
             </div>
           </div>
 
           <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">All Courses</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('admin.allCourses')}</h2>
             <div className="space-y-3">
               {courses.length === 0 ? (
-                <p className="text-gray-600">No courses yet.</p>
+                <p className="text-gray-600">{t('admin.noCourses')}</p>
               ) : (
                 courses.map((c) => (
                   <div key={c.id} className="rounded border p-3">
@@ -666,14 +682,14 @@ export default function ClientAdminCrud() {
                           onClick={() => beginEditCourse(c)}
                           className="rounded border px-3 py-2 text-sm hover:bg-gray-50"
                         >
-                          Edit
+                          {t('admin.edit')}
                         </button>
                         <button
                           disabled={courseBusy}
                           onClick={() => deleteCourse(c.id)}
                           className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100"
                         >
-                          Delete
+                          {t('admin.delete')}
                         </button>
                       </div>
                     </div>

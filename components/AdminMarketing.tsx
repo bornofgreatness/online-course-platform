@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { siteCardClass } from './PageShell'
+import { useI18n } from './LanguageProvider'
 
 type Coupon = {
   id: string
@@ -25,6 +26,7 @@ type Campaign = {
 }
 
 export default function AdminMarketing() {
+  const { t } = useI18n()
   const [coupons, setCoupons] = useState<Coupon[]>([])
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [busy, setBusy] = useState(false)
@@ -73,11 +75,11 @@ export default function AdminMarketing() {
     const data = await res.json()
     setBusy(false)
     if (res.ok) {
-      setMessage(`Cupom ${data.coupon.code} criado`)
+      setMessage(t('marketing.couponCreated', { code: data.coupon.code }))
       setCouponForm({ code: '', description: '', discountPercent: 20, maxUses: 100 })
       load()
     } else {
-      setMessage(data.error || 'Erro')
+      setMessage(data.error || t('common.error'))
     }
   }
 
@@ -92,20 +94,24 @@ export default function AdminMarketing() {
     const data = await res.json()
     setBusy(false)
     if (res.ok) {
-      setMessage('Campanha criada')
+      setMessage(t('marketing.campaignCreated'))
       load()
     } else {
-      setMessage(data.error || 'Erro')
+      setMessage(data.error || t('common.error'))
     }
   }
 
   async function sendCampaign(id: string) {
-    if (!window.confirm('Enviar e-mail para todos os destinatários?')) return
+    if (!window.confirm(t('marketing.confirmSend'))) return
     setBusy(true)
     const res = await fetch(`/api/admin/campaigns/${id}/send`, { method: 'POST' })
     const data = await res.json()
     setBusy(false)
-    setMessage(res.ok ? `Enviados: ${data.sent} de ${data.total}` : data.error || 'Erro')
+    setMessage(
+      res.ok
+        ? t('marketing.sent', { sent: data.sent, total: data.total })
+        : data.error || t('common.error')
+    )
     load()
   }
 
@@ -124,7 +130,7 @@ export default function AdminMarketing() {
       setUploadResult(data.url)
       await navigator.clipboard.writeText(data.url).catch(() => {})
     } else {
-      setMessage(data.error || 'Upload falhou')
+      setMessage(data.error || t('marketing.uploadFailed'))
     }
     e.target.value = ''
   }
@@ -134,8 +140,8 @@ export default function AdminMarketing() {
       {message && <p className="rounded-lg bg-blue-50 p-3 text-sm text-blue-900">{message}</p>}
 
       <section className={`${siteCardClass} p-6`}>
-        <h2 className="text-lg font-bold">Upload S3 (vídeos / PDFs)</h2>
-        <p className="mt-1 text-sm text-slate-600">Envie arquivos e use a URL no curso ou aula.</p>
+        <h2 className="text-lg font-bold">{t('marketing.uploadTitle')}</h2>
+        <p className="mt-1 text-sm text-slate-600">{t('marketing.uploadSubtitle')}</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <select
             value={uploadFolder}
@@ -151,37 +157,40 @@ export default function AdminMarketing() {
         </div>
         {uploadResult && (
           <p className="mt-3 break-all text-sm text-green-700">
-            URL copiada: <a href={uploadResult} className="underline">{uploadResult}</a>
+            {t('marketing.urlCopied')}{' '}
+            <a href={uploadResult} className="underline">
+              {uploadResult}
+            </a>
           </p>
         )}
       </section>
 
       <section className={`${siteCardClass} p-6`}>
-        <h2 className="text-lg font-bold">Cupons</h2>
+        <h2 className="text-lg font-bold">{t('marketing.coupons')}</h2>
         <form onSubmit={createCoupon} className="mt-4 grid gap-3 sm:grid-cols-2">
           <input
-            placeholder="Código (ex: PROMO20)"
+            placeholder={t('marketing.couponCode')}
             value={couponForm.code}
             onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })}
             className="rounded border px-3 py-2 text-sm uppercase"
             required
           />
           <input
-            placeholder="Descrição"
+            placeholder={t('marketing.description')}
             value={couponForm.description}
             onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
             className="rounded border px-3 py-2 text-sm"
           />
           <input
             type="number"
-            placeholder="% desconto"
+            placeholder={t('marketing.discountPercent')}
             value={couponForm.discountPercent}
             onChange={(e) => setCouponForm({ ...couponForm, discountPercent: Number(e.target.value) })}
             className="rounded border px-3 py-2 text-sm"
           />
           <input
             type="number"
-            placeholder="Máx. usos"
+            placeholder={t('marketing.maxUses')}
             value={couponForm.maxUses}
             onChange={(e) => setCouponForm({ ...couponForm, maxUses: Number(e.target.value) })}
             className="rounded border px-3 py-2 text-sm"
@@ -191,17 +200,18 @@ export default function AdminMarketing() {
             disabled={busy}
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 sm:col-span-2"
           >
-            Criar cupom
+            {t('marketing.createCoupon')}
           </button>
         </form>
         <ul className="mt-4 space-y-2 text-sm">
           {coupons.map((c) => (
             <li key={c.id} className="flex justify-between rounded border px-3 py-2">
               <span>
-                <strong>{c.code}</strong> — {c.discountPercent}% · {c.usedCount}/{c.maxUses ?? '∞'} usos
+                <strong>{c.code}</strong> — {c.discountPercent}% · {c.usedCount}/{c.maxUses ?? '∞'}{' '}
+                {t('marketing.uses')}
               </span>
               <span className={c.active ? 'text-green-600' : 'text-slate-400'}>
-                {c.active ? 'Ativo' : 'Inativo'}
+                {c.active ? t('marketing.active') : t('marketing.inactive')}
               </span>
             </li>
           ))}
@@ -209,11 +219,11 @@ export default function AdminMarketing() {
       </section>
 
       <section className={`${siteCardClass} p-6`}>
-        <h2 className="text-lg font-bold">Campanhas de e-mail</h2>
-        <p className="text-sm text-slate-600">Use {'{{nome}}'} e {'{{email}}'} no HTML. Requer RESEND_API_KEY.</p>
+        <h2 className="text-lg font-bold">{t('marketing.campaigns')}</h2>
+        <p className="text-sm text-slate-600">{t('marketing.campaignsHint')}</p>
         <form onSubmit={createCampaign} className="mt-4 space-y-3">
           <input
-            placeholder="Assunto"
+            placeholder={t('marketing.subject')}
             value={campaignForm.subject}
             onChange={(e) => setCampaignForm({ ...campaignForm, subject: e.target.value })}
             className="w-full rounded border px-3 py-2 text-sm"
@@ -224,9 +234,9 @@ export default function AdminMarketing() {
             onChange={(e) => setCampaignForm({ ...campaignForm, recipientFilter: e.target.value })}
             className="w-full rounded border px-3 py-2 text-sm"
           >
-            <option value="all_students">Todos os alunos</option>
-            <option value="verified_students">Alunos com e-mail verificado</option>
-            <option value="all_leads">Todos os cadastros (leads)</option>
+            <option value="all_students">{t('marketing.recipientsAll')}</option>
+            <option value="verified_students">{t('marketing.recipientsVerified')}</option>
+            <option value="all_leads">{t('marketing.recipientsLeads')}</option>
           </select>
           <textarea
             rows={6}
@@ -240,7 +250,7 @@ export default function AdminMarketing() {
             disabled={busy}
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
           >
-            Salvar rascunho
+            {t('marketing.saveDraft')}
           </button>
         </form>
         <ul className="mt-6 space-y-3">
@@ -248,7 +258,12 @@ export default function AdminMarketing() {
             <li key={camp.id} className="rounded border p-3 text-sm">
               <p className="font-semibold">{camp.subject}</p>
               <p className="text-slate-500">
-                {camp.status} · {camp.sentCount} enviados · {camp.recipientFilter}
+                {camp.status === 'sent'
+                  ? t('marketing.sentStatus')
+                  : camp.status === 'sending'
+                    ? t('marketing.sending')
+                    : t('marketing.draft')}{' '}
+                · {camp.sentCount} · {camp.recipientFilter}
               </p>
               {camp.status !== 'sent' && (
                 <button
@@ -257,7 +272,7 @@ export default function AdminMarketing() {
                   disabled={busy}
                   className="mt-2 rounded bg-green-600 px-3 py-1 text-xs font-bold text-white"
                 >
-                  Enviar campanha
+                  {t('marketing.sendCampaign')}
                 </button>
               )}
             </li>
