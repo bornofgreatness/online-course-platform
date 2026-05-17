@@ -51,7 +51,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export default function ClientAdminCrud() {
   const { t, language } = useI18n()
-  const [tab, setTab] = useState<'categories' | 'courses' | 'marketing' | 'affiliates'>('categories')
+  const [tab, setTab] = useState<'categories' | 'courses' | 'marketing' | 'affiliates' | 'users' | 'payments' | 'subscriptions' | 'certificates'>('categories')
   const [commissions, setCommissions] = useState<
     Array<{
       id: string
@@ -63,6 +63,68 @@ export default function ClientAdminCrud() {
     }>
   >([])
   const [commissionBusy, setCommissionBusy] = useState<string | null>(null)
+
+  // Users
+  const [users, setUsers] = useState<
+    Array<{
+      id: string
+      email: string
+      name: string
+      whatsapp: string | null
+      address: string | null
+      city: string | null
+      state: string | null
+      role: string
+      emailVerifiedAt: string | null
+      createdAt: string
+      _count: { enrollments: number; subscriptions: number; payments: number; certificates: number }
+    }>
+  >([])
+  const [userBusy, setUserBusy] = useState<string | null>(null)
+
+  // Payments
+  const [payments, setPayments] = useState<
+    Array<{
+      id: string
+      amount: number
+      currency: string
+      status: string
+      provider: string
+      externalId: string | null
+      stripeId: string | null
+      createdAt: string
+      user: { id: string; name: string; email: string }
+      coupon: { code: string } | null
+    }>
+  >([])
+
+  // Subscriptions
+  const [subscriptions, setSubscriptions] = useState<
+    Array<{
+      id: string
+      plan: string
+      startDate: string
+      endDate: string
+      active: boolean
+      createdAt: string
+      user: { id: string; name: string; email: string }
+    }>
+  >([])
+  const [subscriptionBusy, setSubscriptionBusy] = useState<string | null>(null)
+
+  // Certificates
+  const [certificates, setCertificates] = useState<
+    Array<{
+      id: string
+      certificateNumber: string
+      issuedAt: string
+      pdfUrl: string
+      qrCode: string
+      user: { id: string; name: string; email: string }
+      course: { id: string; title: string }
+    }>
+  >([])
+  const [certificateBusy, setCertificateBusy] = useState<string | null>(null)
   const [toast, setToast] = useState<Toast>(null)
   const [stats, setStats] = useState<{
     totalUsers: number
@@ -153,6 +215,34 @@ export default function ClientAdminCrud() {
     setCommissions(data.commissions || [])
   }
 
+  async function fetchUsers() {
+    const res = await fetch('/api/admin/users')
+    if (!res.ok) throw new Error('Failed to load users')
+    const data = await res.json()
+    setUsers(data.users || [])
+  }
+
+  async function fetchPayments() {
+    const res = await fetch('/api/admin/payments')
+    if (!res.ok) throw new Error('Failed to load payments')
+    const data = await res.json()
+    setPayments(data.payments || [])
+  }
+
+  async function fetchSubscriptions() {
+    const res = await fetch('/api/admin/subscriptions')
+    if (!res.ok) throw new Error('Failed to load subscriptions')
+    const data = await res.json()
+    setSubscriptions(data.subscriptions || [])
+  }
+
+  async function fetchCertificates() {
+    const res = await fetch('/api/admin/certificates')
+    if (!res.ok) throw new Error('Failed to load certificates')
+    const data = await res.json()
+    setCertificates(data.certificates || [])
+  }
+
   async function approveCommission(id: string) {
     setCommissionBusy(id)
     try {
@@ -174,6 +264,89 @@ export default function ClientAdminCrud() {
     }
   }
 
+  async function updateUserRole(id: string, role: string) {
+    setUserBusy(id)
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, role }),
+      })
+      if (!res.ok) throw new Error('Failed to update user')
+      await fetchUsers()
+      displayToast({ type: 'success', message: t('admin.userUpdated') })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('admin.failedUpdateUser'),
+      })
+    } finally {
+      setUserBusy(null)
+    }
+  }
+
+  async function deleteUser(id: string) {
+    if (!window.confirm(t('admin.confirmDeleteUser'))) return
+
+    setUserBusy(id)
+    try {
+      const res = await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete user')
+      await fetchUsers()
+      displayToast({ type: 'success', message: t('admin.userDeleted') })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('admin.failedDeleteUser'),
+      })
+    } finally {
+      setUserBusy(null)
+    }
+  }
+
+  async function toggleSubscriptionActive(id: string, active: boolean) {
+    setSubscriptionBusy(id)
+    try {
+      const res = await fetch('/api/admin/subscriptions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, active }),
+      })
+      if (!res.ok) throw new Error('Failed to update subscription')
+      await fetchSubscriptions()
+      displayToast({
+        type: 'success',
+        message: active ? t('admin.subscriptionActivated') : t('admin.subscriptionDeactivated'),
+      })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('admin.failedUpdateSubscription'),
+      })
+    } finally {
+      setSubscriptionBusy(null)
+    }
+  }
+
+  async function deleteCertificate(id: string) {
+    if (!window.confirm(t('admin.confirmDeleteCertificate'))) return
+
+    setCertificateBusy(id)
+    try {
+      const res = await fetch(`/api/admin/certificates?id=${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete certificate')
+      await fetchCertificates()
+      displayToast({ type: 'success', message: t('admin.userDeleted') })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('admin.failedDeleteCertificate'),
+      })
+    } finally {
+      setCertificateBusy(null)
+    }
+  }
+
   useEffect(() => {
     fetchCategories().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadCategories') }))
     fetchCourses().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadCourses') }))
@@ -184,6 +357,18 @@ export default function ClientAdminCrud() {
       })
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (tab === 'users') {
+      fetchUsers().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadUsers') }))
+    } else if (tab === 'payments') {
+      fetchPayments().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadPayments') }))
+    } else if (tab === 'subscriptions') {
+      fetchSubscriptions().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadSubscriptions') }))
+    } else if (tab === 'certificates') {
+      fetchCertificates().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadCertificates') }))
+    }
+  }, [tab])
 
   async function createCategory() {
     if (!catName.trim()) {
@@ -529,7 +714,7 @@ export default function ClientAdminCrud() {
           <p className={`${siteMutedClass} mt-2`}>{t('admin.panelSubtitle')}</p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setTab('categories')}
             className={`rounded px-3 py-2 text-sm border ${
@@ -567,6 +752,38 @@ export default function ClientAdminCrud() {
           >
             {t('admin.tabAffiliates')}
           </button>
+          <button
+            onClick={() => setTab('users')}
+            className={`rounded px-3 py-2 text-sm border ${
+              tab === 'users' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
+            }`}
+          >
+            {t('admin.tabUsers')}
+          </button>
+          <button
+            onClick={() => setTab('payments')}
+            className={`rounded px-3 py-2 text-sm border ${
+              tab === 'payments' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
+            }`}
+          >
+            {t('admin.tabPayments')}
+          </button>
+          <button
+            onClick={() => setTab('subscriptions')}
+            className={`rounded px-3 py-2 text-sm border ${
+              tab === 'subscriptions' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
+            }`}
+          >
+            {t('admin.tabSubscriptions')}
+          </button>
+          <button
+            onClick={() => setTab('certificates')}
+            className={`rounded px-3 py-2 text-sm border ${
+              tab === 'certificates' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
+            }`}
+          >
+            {t('admin.tabCertificates')}
+          </button>
         </div>
       </div>
 
@@ -603,6 +820,222 @@ export default function ClientAdminCrud() {
                 </li>
               ))}
             </ul>
+          )}
+        </div>
+      )}
+
+      {tab === 'users' && (
+        <div className={`${siteCardClass} p-6`}>
+          <h2 className="text-xl font-semibold mb-4">{t('admin.allUsers')}</h2>
+          {users.length === 0 ? (
+            <p className={siteMutedClass}>{t('admin.noUsers')}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userEmail')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userRole')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Enrollments</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Subscriptions</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Payments</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Certificates</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {users.map((u) => (
+                    <tr key={u.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2">{u.name}</td>
+                      <td className="px-4 py-2">{u.email}</td>
+                      <td className="px-4 py-2">
+                        <select
+                          value={u.role}
+                          onChange={(e) => updateUserRole(u.id, e.target.value)}
+                          disabled={userBusy === u.id}
+                          className="rounded border px-2 py-1 text-xs disabled:opacity-50"
+                        >
+                          <option value="STUDENT">STUDENT</option>
+                          <option value="ADMIN">ADMIN</option>
+                          <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                          <option value="AFFILIATE">AFFILIATE</option>
+                        </select>
+                      </td>
+                      <td className="px-4 py-2">{u._count.enrollments}</td>
+                      <td className="px-4 py-2">{u._count.subscriptions}</td>
+                      <td className="px-4 py-2">{u._count.payments}</td>
+                      <td className="px-4 py-2">{u._count.certificates}</td>
+                      <td className="px-4 py-2">
+                        <button
+                          disabled={userBusy === u.id}
+                          onClick={() => deleteUser(u.id)}
+                          className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
+                        >
+                          {t('admin.delete')}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'payments' && (
+        <div className={`${siteCardClass} p-6`}>
+          <h2 className="text-xl font-semibold mb-4">{t('admin.allPayments')}</h2>
+          {payments.length === 0 ? (
+            <p className={siteMutedClass}>{t('admin.noPayments')}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userEmail')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.paymentAmount')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.paymentStatus')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.paymentProvider')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.paymentDate')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {payments.map((p) => (
+                    <tr key={p.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2">{p.user.name}</td>
+                      <td className="px-4 py-2">{p.user.email}</td>
+                      <td className="px-4 py-2">
+                        {formatMoney(Math.round(p.amount * 100), language)} {p.currency.toUpperCase()}
+                      </td>
+                      <td className="px-4 py-2">
+                        <span
+                          className={`rounded px-2 py-1 text-xs ${
+                            p.status === 'succeeded'
+                              ? 'bg-green-100 text-green-800'
+                              : p.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {p.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2">{p.provider}</td>
+                      <td className="px-4 py-2">{new Date(p.createdAt).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'subscriptions' && (
+        <div className={`${siteCardClass} p-6`}>
+          <h2 className="text-xl font-semibold mb-4">{t('admin.allSubscriptions')}</h2>
+          {subscriptions.length === 0 ? (
+            <p className={siteMutedClass}>{t('admin.noSubscriptions')}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userEmail')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.subscriptionPlan')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.subscriptionActive')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.subscriptionStartDate')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.subscriptionEndDate')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {subscriptions.map((s) => (
+                    <tr key={s.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2">{s.user.name}</td>
+                      <td className="px-4 py-2">{s.user.email}</td>
+                      <td className="px-4 py-2">{s.plan}</td>
+                      <td className="px-4 py-2">
+                        <span
+                          className={`rounded px-2 py-1 text-xs ${
+                            s.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {s.active ? t('admin.subscriptionActive') : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2">{new Date(s.startDate).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">{new Date(s.endDate).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">
+                        <button
+                          disabled={subscriptionBusy === s.id}
+                          onClick={() => toggleSubscriptionActive(s.id, !s.active)}
+                          className="rounded border px-2 py-1 text-xs hover:bg-gray-100 disabled:opacity-50"
+                        >
+                          {s.active ? 'Deactivate' : 'Activate'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'certificates' && (
+        <div className={`${siteCardClass} p-6`}>
+          <h2 className="text-xl font-semibold mb-4">{t('admin.allCertificates')}</h2>
+          {certificates.length === 0 ? (
+            <p className={siteMutedClass}>{t('admin.noCertificates')}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userEmail')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Course</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.certificateNumber')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.certificateIssued')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {certificates.map((c) => (
+                    <tr key={c.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2">{c.user.name}</td>
+                      <td className="px-4 py-2">{c.user.email}</td>
+                      <td className="px-4 py-2">{c.course.title}</td>
+                      <td className="px-4 py-2">{c.certificateNumber}</td>
+                      <td className="px-4 py-2">{new Date(c.issuedAt).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">
+                        <a
+                          href={c.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mr-2 rounded border px-2 py-1 text-xs hover:bg-gray-100"
+                        >
+                          View PDF
+                        </a>
+                        <button
+                          disabled={certificateBusy === c.id}
+                          onClick={() => deleteCertificate(c.id)}
+                          className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
+                        >
+                          {t('admin.delete')}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
