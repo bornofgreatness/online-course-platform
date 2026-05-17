@@ -8,9 +8,18 @@ import { resolveCheckoutPricing } from '../../../../lib/billingCheckout'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  const secret = process.env.STRIPE_SECRET_KEY
+  const secret = process.env.STRIPE_SECRET_KEY?.trim()
   if (!secret) {
     return NextResponse.json({ error: 'Stripe não configurado (STRIPE_SECRET_KEY).' }, { status: 503 })
+  }
+  if (secret.includes('your_key') || secret.length < 30) {
+    return NextResponse.json(
+      {
+        error:
+          'STRIPE_SECRET_KEY inválida. Use uma chave real de teste do Stripe Dashboard (sk_test_…), não o placeholder do .env.example. Veja docs/STRIPE_SETUP.md.',
+      },
+      { status: 503 }
+    )
   }
 
   const session = await getServerSession(authOptions)

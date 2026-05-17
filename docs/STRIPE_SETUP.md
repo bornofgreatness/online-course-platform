@@ -10,21 +10,36 @@ This project uses **Stripe Checkout** (one-time BRL payment per plan). After pay
 1. Go to [https://dashboard.stripe.com/register](https://dashboard.stripe.com/register)
 2. Enable **Test mode** (toggle in the dashboard)
 
-## 2. API keys
+## 2. API keys (fix “Invalid API Key provided”)
 
-Developers → API keys:
+If you see `Invalid API Key provided: sk_test_****_key`, you still have the **placeholder** from `.env.example`, not a real key.
 
-- Copy **Publishable key** (optional for this app)
-- Copy **Secret key** → `sk_test_...`
+1. Open [Stripe Dashboard → Developers → API keys](https://dashboard.stripe.com/test/apikeys)
+2. Turn **Test mode** ON (toggle top-right)
+3. Under **Standard keys**, click **Reveal** on **Secret key**
+4. Copy the full value — it looks like `sk_test_51AbCdE...` (about 100+ characters, **not** `sk_test_your_key`)
 
-Add to `.env`:
+Create or edit `.env` in the project root (copy from `.env.example` if needed):
 
 ```env
-STRIPE_SECRET_KEY="sk_test_xxxxxxxx"
-NEXT_PUBLIC_STRIPE_ENABLED="true"
-NEXT_PUBLIC_MERCADOPAGO_ENABLED="false"
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-NEXTAUTH_URL="http://localhost:3000"
+STRIPE_SECRET_KEY=sk_test_51PASTE_THE_FULL_KEY_HERE_NO_QUOTES_NEEDED
+NEXT_PUBLIC_STRIPE_ENABLED=true
+NEXT_PUBLIC_MERCADOPAGO_ENABLED=false
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3000
+```
+
+**Important:**
+
+| Do | Don’t |
+|----|--------|
+| Use **Secret key** (`sk_test_…`) | Use Publishable key (`pk_test_…`) |
+| Use **Test mode** keys | Mix live (`sk_live_`) keys in dev |
+| Restart dev server after editing `.env` | Leave `sk_test_your_key` from the example |
+
+```bash
+# Stop npm run dev (Ctrl+C), then:
+npm run dev
 ```
 
 ## 3. Run the app
