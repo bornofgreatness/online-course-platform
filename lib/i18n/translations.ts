@@ -204,7 +204,7 @@ export const translations = {
     'landing.footer': '© {year} Online Course Platform · BRL currency',
     'landing.faq1q': 'How does the subscription work?',
     'landing.faq1a':
-      'Choose a plan (1, 3, 6, or 12 months), pay by card, PIX, or boleto, and access the full catalog during the period.',
+      'Choose a plan (1, 3, 6, or 12 months), pay by Mercado Pago, Stripe Pix, or Credit Card, and access the full catalog during the period.',
     'landing.faq2q': 'Is the certificate recognized?',
     'landing.faq2a':
       'Each course issues a 100-hour certificate with a unique online verification code, student name, course, and completion date.',
@@ -247,7 +247,7 @@ export const translations = {
     'pricing.couponInvalid': 'Invalid coupon',
     'pricing.paymentMethod': 'Payment:',
     'pricing.mercadoPago': 'Mercado Pago (PIX + card)',
-    'pricing.stripe': 'Stripe (card + boleto)',
+    'pricing.stripe': 'Stripe (Pix + Credit Card)',
     'pricing.mostPopular': 'Most popular',
     'pricing.perMonth': '/ month',
     'pricing.total': 'Total:',
@@ -629,7 +629,7 @@ export const translations = {
     'landing.footer': '© {year} Plataforma de Cursos Online · Moeda: BRL',
     'landing.faq1q': 'Como funciona a assinatura?',
     'landing.faq1a':
-      'Você escolhe um plano (1, 3, 6 ou 12 meses), paga com cartão, PIX ou boleto e tem acesso a todos os cursos do catálogo durante o período.',
+      'Você escolhe um plano (1, 3, 6 ou 12 meses), paga com Mercado Pago, Stripe Pix ou Cartão de Crédito e tem acesso a todos os cursos do catálogo durante o período.',
     'landing.faq2q': 'O certificado é reconhecido?',
     'landing.faq2a':
       'Cada curso emite certificado de 100 horas com código único de verificação online, nome do aluno, curso e data de conclusão.',
