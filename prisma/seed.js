@@ -90,19 +90,89 @@ async function seedCatalog() {
 }
 
 function mkQuiz() {
-  return JSON.stringify({
-    questions: Array.from({ length: 10 }, (_, i) => ({
-      id: `q${i + 1}`,
-      prompt: `Verificação ${i + 1}: O que melhor descreve a conclusão de cursos nesta plataforma?`,
+  const questions = [
+    {
+      id: 'q1',
+      prompt: 'What is the primary format for course materials on this platform?',
+      options: ['PDF documents', 'VHS tapes', 'Printed books only', 'Fax transmissions'],
+      correctIndex: 0,
+    },
+    {
+      id: 'q2',
+      prompt: 'Where should learners track enrolled courses and certificates?',
+      options: ['Dashboard', 'Pricing page', '404 page', 'Sitemap'],
+      correctIndex: 0,
+    },
+    {
+      id: 'q3',
+      prompt: 'A passing quiz score is at least how many correct answers out of 10?',
+      options: ['5', '6', '7', '9'],
+      correctIndex: 2,
+    },
+    {
+      id: 'q4',
+      prompt: 'How many quiz attempts are allowed per course?',
+      options: ['1', '2', '3', 'Unlimited'],
+      correctIndex: 2,
+    },
+    {
+      id: 'q5',
+      prompt: 'Certificates are issued after you:',
       options: [
-        'Estudar os materiais, passar no quiz quando houver, e solicitar o certificado',
-        'Apenas visitar a página inicial',
-        'Pular a inscrição',
-        'Ignorar o status da assinatura',
+        'Enroll only',
+        'Complete requirements including passing the quiz when assigned',
+        'Share on social media',
+        'Open the homepage',
+      ],
+      correctIndex: 1,
+    },
+    {
+      id: 'q6',
+      prompt: 'Subscription access is checked when you:',
+      options: [
+        'Enroll in a course and open protected materials',
+        'Change your avatar color',
+        'Print the syllabus only',
+        'View the public landing page',
       ],
       correctIndex: 0,
-    })),
-  })
+    },
+    {
+      id: 'q7',
+      prompt: 'If you forget your password, you should use:',
+      options: ['Forgot password flow', 'Guess until it works', 'Email the instructor', 'Clear cookies only'],
+      correctIndex: 0,
+    },
+    {
+      id: 'q8',
+      prompt: 'Course workload hours describe:',
+      options: [
+        'Estimated study time',
+        'Server CPU hours',
+        'Number of PDF bytes',
+        'Instructor age',
+      ],
+      correctIndex: 0,
+    },
+    {
+      id: 'q9',
+      prompt: 'Progress while reading is saved when:',
+      options: [
+        'You are signed in and enrolled',
+        'You disable JavaScript',
+        'You use incognito without login',
+        'You refresh before loading',
+      ],
+      correctIndex: 0,
+    },
+    {
+      id: 'q10',
+      prompt: 'Unique certificate numbers help with:',
+      options: ['Public verification', 'Random decoration', 'Hiding completion', 'Deleting courses'],
+      correctIndex: 0,
+    },
+  ]
+  return JSON.stringify({ questions })
 }
 
 async function main() {
