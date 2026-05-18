@@ -44,7 +44,7 @@ export function getCourseCardDisplay(courseId: string) {
   return {
     rating,
     instructor,
-    priceLabel: `$${price.toFixed(2)}`,
+    priceLabel: `R$${price.toFixed(2)}`,
     avatarClass: AVATAR_CLASSES[h % AVATAR_CLASSES.length],
   }
 }
