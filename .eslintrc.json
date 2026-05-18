@@ -1,9 +1,3 @@
 {
-  "extends": ["next/core-web-vitals"],
-  "rules": {
-    "@typescript-eslint/no-require-imports": "off"
-  },
-  "ignorePatterns": ["lib/generated/prisma/**"]
+  "extends": ["next/core-web-vitals"]
 }
-
-
