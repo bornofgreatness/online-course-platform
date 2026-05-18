@@ -2,7 +2,6 @@
  * Canonical course catalog (TypeScript types + re-export from seed catalog).
  */
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const catalog = require('./platformCatalog.cjs') as {
   PLATFORM_CATALOG: CatalogCategory[]
   DEFAULT_WORKLOAD_HOURS: number
