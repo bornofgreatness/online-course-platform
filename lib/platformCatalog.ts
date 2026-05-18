@@ -2,7 +2,8 @@
  * Canonical course catalog (TypeScript types + re-export from seed catalog).
  */
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+// CommonJS require used to load the generated seed catalog in both Next + Node environments.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const catalog = require('./platformCatalog.cjs') as {
   PLATFORM_CATALOG: CatalogCategory[]
   DEFAULT_WORKLOAD_HOURS: number
@@ -10,6 +11,7 @@ const catalog = require('./platformCatalog.cjs') as {
   DEFAULT_THUMBNAIL: string
   countCatalogCourses: () => number
 }
+
 
 export type CatalogCourse = { title: string; description?: string }
 export type CatalogSubcategory = { name: string; courses: CatalogCourse[] }
