@@ -3,8 +3,8 @@
  */
 
 // CommonJS require used to load the generated seed catalog in both Next + Node environments.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const catalog = require('./platformCatalog.cjs') as {
+
   PLATFORM_CATALOG: CatalogCategory[]
   DEFAULT_WORKLOAD_HOURS: number
   DEFAULT_PDF_URL: string
