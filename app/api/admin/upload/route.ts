@@ -41,6 +41,19 @@ export async function POST(request: Request) {
   const buffer = Buffer.from(await file.arrayBuffer())
   const contentType = file.type || 'application/octet-stream'
 
+  const validType =
+    folder === 'pdfs'
+      ? contentType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+      : folder === 'thumbnails'
+        ? contentType.startsWith('image/')
+        : folder === 'videos'
+          ? contentType.startsWith('video/')
+          : true
+
+  if (!validType) {
+    return NextResponse.json({ error: 'Tipo de arquivo inválido para a pasta selecionada' }, { status: 400 })
+  }
+
   const result = await uploadToS3(buffer, {
     folder: folder as S3Folder,
     filename: file.name,

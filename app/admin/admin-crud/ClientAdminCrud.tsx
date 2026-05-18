@@ -30,6 +30,7 @@ type Course = {
   description: string
   workloadHours: number
   pdfUrl: string
+  videoUrl: string | null
   thumbnailUrl: string | null
   syllabus: string | null
   seoTitle: string | null
@@ -175,6 +176,7 @@ export default function ClientAdminCrud() {
   const [editingCategoryName, setEditingCategoryName] = useState('')
   const [editingCategoryIcon, setEditingCategoryIcon] = useState('')
   const [editingCategoryImageUrl, setEditingCategoryImageUrl] = useState('')
+  const [categoryUploadBusy, setCategoryUploadBusy] = useState<'create-icon' | 'edit-icon' | 'create-image' | 'edit-image' | null>(null)
 
   // Subcategories
   const [subCatParentId, setSubCatParentId] = useState('')
@@ -191,6 +193,7 @@ export default function ClientAdminCrud() {
     categoryId: '',
     subcategoryId: '',
     pdfUrl: '',
+    videoUrl: '',
     thumbnailUrl: '',
     syllabus: '',
     workloadHours: 1,
@@ -198,6 +201,7 @@ export default function ClientAdminCrud() {
     seoDescription: '',
   })
   const [courseBusy, setCourseBusy] = useState(false)
+  const [uploadBusy, setUploadBusy] = useState<'pdf' | 'thumbnail' | 'video' | null>(null)
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null)
 
   const selectedCategoryName = useMemo(() => {
@@ -556,6 +560,45 @@ export default function ClientAdminCrud() {
     }
   }
 
+  async function uploadCategoryMedia(
+    file: File | null | undefined,
+    target: 'create' | 'edit',
+    field: 'icon' | 'image'
+  ) {
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      displayToast({ type: 'error', message: 'Invalid image file type' })
+      return
+    }
+
+    setCategoryUploadBusy(`${target}-${field}`)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      form.append('folder', 'thumbnails')
+
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: form })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error || 'Upload failed')
+
+      const uploadedUrl = data.url || data.key
+      if (target === 'create' && field === 'image') {
+        setCatImageUrl(uploadedUrl)
+      } else if (target === 'edit' && field === 'image') {
+        setEditingCategoryImageUrl(uploadedUrl)
+      } else if (target === 'create') {
+        setCatIcon(uploadedUrl)
+      } else {
+        setEditingCategoryIcon(uploadedUrl)
+      }
+      displayToast({ type: 'success', message: 'Upload completed' })
+    } catch (e: unknown) {
+      displayToast({ type: 'error', message: e instanceof Error ? e.message : 'Upload failed' })
+    } finally {
+      setCategoryUploadBusy(null)
+    }
+  }
+
   async function createSubcategory() {
     if (!subCatName.trim()) {
       displayToast({ type: 'error', message: t('admin.subcategoryNameRequired') })
@@ -675,6 +718,7 @@ export default function ClientAdminCrud() {
       categoryId: course.categoryId || course.category?.id || '',
       subcategoryId: course.subcategoryId || course.subcategory?.id || '',
       pdfUrl: course.pdfUrl || '',
+      videoUrl: course.videoUrl || '',
       thumbnailUrl: course.thumbnailUrl || '',
       syllabus: course.syllabus || '',
       workloadHours: course.workloadHours ?? 1,
@@ -691,6 +735,7 @@ export default function ClientAdminCrud() {
       categoryId: '',
       subcategoryId: '',
       pdfUrl: '',
+      videoUrl: '',
       thumbnailUrl: '',
       syllabus: '',
       workloadHours: 1,
@@ -713,6 +758,7 @@ export default function ClientAdminCrud() {
         categoryId: courseForm.categoryId,
         subcategoryId: courseForm.subcategoryId || null,
         pdfUrl: courseForm.pdfUrl.trim(),
+        videoUrl: courseForm.videoUrl.trim() ? courseForm.videoUrl.trim() : null,
         thumbnailUrl: courseForm.thumbnailUrl.trim() ? courseForm.thumbnailUrl.trim() : null,
         syllabus: courseForm.syllabus.trim() ? courseForm.syllabus.trim() : null,
         workloadHours: Number(courseForm.workloadHours || 0),
@@ -742,6 +788,46 @@ export default function ClientAdminCrud() {
       displayToast({ type: 'error', message: e?.message || t('admin.failedSaveCourse') })
     } finally {
       setCourseBusy(false)
+    }
+  }
+
+  async function uploadCourseFile(kind: 'pdf' | 'thumbnail' | 'video', file: File | null | undefined) {
+    if (!file) return
+
+    const expected =
+      kind === 'pdf'
+        ? file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+        : kind === 'thumbnail'
+          ? file.type.startsWith('image/')
+          : file.type.startsWith('video/')
+
+    if (!expected) {
+      displayToast({ type: 'error', message: `Invalid ${kind} file type` })
+      return
+    }
+
+    setUploadBusy(kind)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      form.append('folder', kind === 'pdf' ? 'pdfs' : kind === 'thumbnail' ? 'thumbnails' : 'videos')
+
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: form })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error || 'Upload failed')
+
+      const uploadedUrl = data.url || data.key
+      setCourseForm((p) => ({
+        ...p,
+        ...(kind === 'pdf' ? { pdfUrl: uploadedUrl } : {}),
+        ...(kind === 'thumbnail' ? { thumbnailUrl: uploadedUrl } : {}),
+        ...(kind === 'video' ? { videoUrl: uploadedUrl } : {}),
+      }))
+      displayToast({ type: 'success', message: 'Upload completed' })
+    } catch (e: unknown) {
+      displayToast({ type: 'error', message: e instanceof Error ? e.message : 'Upload failed' })
+    } finally {
+      setUploadBusy(null)
     }
   }
 
@@ -1387,16 +1473,32 @@ export default function ClientAdminCrud() {
                   value={catIcon}
                   onChange={(e) => setCatIcon(e.target.value)}
                   className="mt-1 w-full rounded border px-3 py-2"
-                  placeholder={t('admin.iconPlaceholder')}
+                  placeholder="Upload an icon, paste a URL, emoji, or icon key"
                 />
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={categoryUploadBusy !== null}
+                  onChange={(e) => uploadCategoryMedia(e.target.files?.[0], 'create', 'icon')}
+                  className="mt-2 block w-full text-xs text-slate-600 file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                />
+                {categoryUploadBusy === 'create-icon' ? <p className="mt-1 text-xs text-slate-500">Uploading icon...</p> : null}
               </Field>
               <Field label={t('admin.cardImageUrl')}>
                 <input
                   value={catImageUrl}
                   onChange={(e) => setCatImageUrl(e.target.value)}
                   className="mt-1 w-full rounded border px-3 py-2"
-                  placeholder="https://…"
+                  placeholder="Upload an image or paste a URL"
                 />
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={categoryUploadBusy !== null}
+                  onChange={(e) => uploadCategoryMedia(e.target.files?.[0], 'create', 'image')}
+                  className="mt-2 block w-full text-xs text-slate-600 file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                />
+                {categoryUploadBusy === 'create-image' ? <p className="mt-1 text-xs text-slate-500">Uploading image...</p> : null}
               </Field>
 
               <button
@@ -1429,14 +1531,30 @@ export default function ClientAdminCrud() {
                           value={editingCategoryIcon}
                           onChange={(e) => setEditingCategoryIcon(e.target.value)}
                           className="w-full rounded border px-3 py-2"
-                          placeholder={t('admin.iconPlaceholder')}
+                          placeholder="Upload an icon, paste a URL, emoji, or icon key"
                         />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          disabled={categoryUploadBusy !== null}
+                          onChange={(e) => uploadCategoryMedia(e.target.files?.[0], 'edit', 'icon')}
+                          className="block w-full text-xs text-slate-600 file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                        />
+                        {categoryUploadBusy === 'edit-icon' ? <p className="text-xs text-slate-500">Uploading icon...</p> : null}
                         <input
                           value={editingCategoryImageUrl}
                           onChange={(e) => setEditingCategoryImageUrl(e.target.value)}
                           className="w-full rounded border px-3 py-2"
                           placeholder={t('admin.cardImageUrl')}
                         />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          disabled={categoryUploadBusy !== null}
+                          onChange={(e) => uploadCategoryMedia(e.target.files?.[0], 'edit', 'image')}
+                          className="block w-full text-xs text-slate-600 file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                        />
+                        {categoryUploadBusy === 'edit-image' ? <p className="text-xs text-slate-500">Uploading image...</p> : null}
                         <div className="flex gap-2">
                           <button
                             disabled={catBusy}
@@ -1698,8 +1816,16 @@ export default function ClientAdminCrud() {
                   value={courseForm.pdfUrl}
                   onChange={(e) => setCourseForm((p) => ({ ...p, pdfUrl: e.target.value }))}
                   className="mt-1 w-full rounded border px-3 py-2"
-                  placeholder="https://..."
+                  placeholder="Upload a PDF or paste a URL"
                 />
+                <input
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  disabled={uploadBusy !== null}
+                  onChange={(e) => uploadCourseFile('pdf', e.target.files?.[0])}
+                  className="mt-2 block w-full text-xs text-slate-600 file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                />
+                {uploadBusy === 'pdf' ? <p className="mt-1 text-xs text-slate-500">Uploading PDF...</p> : null}
               </Field>
 
               <Field label={t('admin.thumbnailOptional')}>
@@ -1707,7 +1833,33 @@ export default function ClientAdminCrud() {
                   value={courseForm.thumbnailUrl}
                   onChange={(e) => setCourseForm((p) => ({ ...p, thumbnailUrl: e.target.value }))}
                   className="mt-1 w-full rounded border px-3 py-2"
+                  placeholder="Upload an image or paste a URL"
                 />
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={uploadBusy !== null}
+                  onChange={(e) => uploadCourseFile('thumbnail', e.target.files?.[0])}
+                  className="mt-2 block w-full text-xs text-slate-600 file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                />
+                {uploadBusy === 'thumbnail' ? <p className="mt-1 text-xs text-slate-500">Uploading image...</p> : null}
+              </Field>
+
+              <Field label="Video URL (optional)">
+                <input
+                  value={courseForm.videoUrl}
+                  onChange={(e) => setCourseForm((p) => ({ ...p, videoUrl: e.target.value }))}
+                  className="mt-1 w-full rounded border px-3 py-2"
+                  placeholder="Upload a video or paste a URL"
+                />
+                <input
+                  type="file"
+                  accept="video/*"
+                  disabled={uploadBusy !== null}
+                  onChange={(e) => uploadCourseFile('video', e.target.files?.[0])}
+                  className="mt-2 block w-full text-xs text-slate-600 file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                />
+                {uploadBusy === 'video' ? <p className="mt-1 text-xs text-slate-500">Uploading video...</p> : null}
               </Field>
 
               <Field label={t('admin.syllabusOptional')}>
