@@ -1,6 +1,6 @@
 # Online Course Platform — Requirements checklist
 
-> Implementation status against the requirements document. Last updated: complete for Phase 1–2 MVP.
+> Implementation status against the requirements document. Last updated: complete for Phase 1–2 MVP plus security hardening.
 
 ## 0. Project foundations
 - [x] Next.js + Tailwind + TypeScript
@@ -28,6 +28,7 @@
 - [x] In-browser viewer
 - [x] Protected delivery via `/api/courses/[id]/pdf`
 - [x] Progress tracking
+- [x] Short-lived S3 signed URLs when PDFs are stored in configured S3/R2-compatible storage
 
 ## 5. Quiz & certificates
 - [x] 10 MC questions, pass 7/10, max 3 attempts
@@ -49,6 +50,9 @@
 ## 8. Admin panel
 - [x] Analytics (users, revenue, subscriptions, completion, affiliates)
 - [x] CRUD categories & courses
+- [x] User search + pagination for larger user tables
+- [x] Quiz management (create/reset/delete per course)
+- [x] Dedicated reports tab
 - [x] Marketing campaigns / lead export
 - [x] Affiliate commissions tab
 
@@ -65,6 +69,8 @@
 - [x] Mobile-first UI, responsive dashboards & PDF viewer
 - [x] Rate limiting (registration), Prisma (SQL injection safe)
 - [x] RBAC middleware
+- [x] Security response headers via Next.js config
+- [x] Hardened password reset token matching
 
 ## 15. Future (Phase 3 — scaffolding only)
 - [x] `videoUrl` on courses/lessons
@@ -73,6 +79,9 @@
 ## Optional / production hardening
 - [ ] PayPal integration
 - [ ] Redis + BullMQ
-- [ ] S3 presigned URLs (currently redirect-after-auth)
+- [x] S3 presigned URLs (for configured S3/R2 PDF objects)
 - [ ] PDF watermarking
-- [ ] Block sign-in until email verified
+- [x] Block sign-in until email verified
+- [ ] Full recurring subscription lifecycle (upgrade/downgrade/cancel with provider webhooks)
+- [ ] Background jobs for large marketing campaigns
+- [ ] Native mobile apps, AI chatbot, community, gamification

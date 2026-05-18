@@ -126,7 +126,7 @@ export default function PDFViewer({
   const percent = useMemo(() => {
     if (progress.completed) return 100
     return Math.round((progress.lastPage / maxLogicalProgress) * 90)
-  }, [progress.completed, progress.lastPage])
+  }, [maxLogicalProgress, progress.completed, progress.lastPage])
 
   const markComplete = async () => {
     const next: ProgressState = { completed: true, lastPage: maxLogicalProgress }
@@ -177,14 +177,9 @@ export default function PDFViewer({
         </div>
 
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <a
-            href={url}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="text-blue-600 hover:underline text-sm"
-          >
-            {t('course.openPdf')}
-          </a>
+          <p className="text-sm text-slate-500">
+            Secure viewing is provided through your authenticated course session.
+          </p>
 
           <button
             type="button"

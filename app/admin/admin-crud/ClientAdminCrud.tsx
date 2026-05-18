@@ -86,6 +86,9 @@ export default function ClientAdminCrud() {
   >([])
   const [userBusy, setUserBusy] = useState<string | null>(null)
   const [assignableRoles, setAssignableRoles] = useState<string[]>([])
+  const [userSearch, setUserSearch] = useState('')
+  const [userPage, setUserPage] = useState(1)
+  const [usersTotal, setUsersTotal] = useState(0)
 
   // Payments
   const [payments, setPayments] = useState<
@@ -240,11 +243,18 @@ export default function ClientAdminCrud() {
     setCommissions(data.commissions || [])
   }
 
-  async function fetchUsers() {
-    const res = await fetch('/api/admin/users')
+  async function fetchUsers(page = userPage, search = userSearch) {
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: '25',
+      ...(search.trim() ? { search: search.trim() } : {}),
+    })
+    const res = await fetch(`/api/admin/users?${params}`)
     if (!res.ok) throw new Error('Failed to load users')
     const data = await res.json()
     setUsers(data.users || [])
+    setUserPage(data.page || page)
+    setUsersTotal(data.total || 0)
     setAssignableRoles(data.assignableRoles || [])
   }
 
@@ -950,64 +960,114 @@ export default function ClientAdminCrud() {
 
       {tab === 'users' && (
         <div className={`${siteCardClass} p-6`}>
-          <h2 className="text-xl font-semibold mb-4">{t('admin.allUsers')}</h2>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">{t('admin.allUsers')}</h2>
+              <p className={`${siteMutedClass} mt-1 text-sm`}>
+                {usersTotal} total
+              </p>
+            </div>
+            <form
+              className="flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault()
+                void fetchUsers(1, userSearch)
+              }}
+            >
+              <input
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                placeholder="Search name, email, WhatsApp..."
+                className="w-full rounded border px-3 py-2 text-sm sm:w-72"
+              />
+              <button
+                type="submit"
+                className="rounded border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+              >
+                Search
+              </button>
+            </form>
+          </div>
           {users.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noUsers')}</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
-                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userEmail')}</th>
-                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userRole')}</th>
-                    <th className="px-4 py-2 text-left font-medium text-gray-700">Enrollments</th>
-                    <th className="px-4 py-2 text-left font-medium text-gray-700">Subscriptions</th>
-                    <th className="px-4 py-2 text-left font-medium text-gray-700">Payments</th>
-                    <th className="px-4 py-2 text-left font-medium text-gray-700">Certificates</th>
-                    <th className="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {users.map((u) => (
-                    <tr key={u.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-2">{u.name}</td>
-                      <td className="px-4 py-2">{u.email}</td>
-                      <td className="px-4 py-2">
-                        <select
-                          value={u.role}
-                          onChange={(e) => updateUserRole(u.id, e.target.value)}
-                          disabled={
-                            userBusy === u.id ||
-                            !assignableRoles.some((r) => canAssignRole(actorRole, u.role, r))
-                          }
-                          className="rounded border px-2 py-1 text-xs disabled:opacity-50"
-                        >
-                          {Array.from(new Set([u.role, ...assignableRoles])).map((role) => (
-                            <option key={role} value={role}>
-                              {role}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="px-4 py-2">{u._count.enrollments}</td>
-                      <td className="px-4 py-2">{u._count.subscriptions}</td>
-                      <td className="px-4 py-2">{u._count.payments}</td>
-                      <td className="px-4 py-2">{u._count.certificates}</td>
-                      <td className="px-4 py-2">
-                        <button
-                          disabled={userBusy === u.id || !canDeleteUser(actorRole, u.role)}
-                          onClick={() => deleteUser(u.id)}
-                          className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
-                        >
-                          {t('admin.delete')}
-                        </button>
-                      </td>
+            <>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userEmail')}</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userRole')}</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Enrollments</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Subscriptions</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Payments</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Certificates</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {users.map((u) => (
+                      <tr key={u.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2">{u.name}</td>
+                        <td className="px-4 py-2">{u.email}</td>
+                        <td className="px-4 py-2">
+                          <select
+                            value={u.role}
+                            onChange={(e) => updateUserRole(u.id, e.target.value)}
+                            disabled={
+                              userBusy === u.id ||
+                              !assignableRoles.some((r) => canAssignRole(actorRole, u.role, r))
+                            }
+                            className="rounded border px-2 py-1 text-xs disabled:opacity-50"
+                          >
+                            {Array.from(new Set([u.role, ...assignableRoles])).map((role) => (
+                              <option key={role} value={role}>
+                                {role}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-4 py-2">{u._count.enrollments}</td>
+                        <td className="px-4 py-2">{u._count.subscriptions}</td>
+                        <td className="px-4 py-2">{u._count.payments}</td>
+                        <td className="px-4 py-2">{u._count.certificates}</td>
+                        <td className="px-4 py-2">
+                          <button
+                            disabled={userBusy === u.id || !canDeleteUser(actorRole, u.role)}
+                            onClick={() => deleteUser(u.id)}
+                            className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
+                          >
+                            {t('admin.delete')}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-4 flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  disabled={userPage <= 1}
+                  onClick={() => fetchUsers(userPage - 1, userSearch)}
+                  className="rounded border px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <span className="text-slate-600">
+                  Page {userPage} of {Math.max(1, Math.ceil(usersTotal / 25))}
+                </span>
+                <button
+                  type="button"
+                  disabled={userPage >= Math.ceil(usersTotal / 25)}
+                  onClick={() => fetchUsers(userPage + 1, userSearch)}
+                  className="rounded border px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </>
           )}
         </div>
       )}

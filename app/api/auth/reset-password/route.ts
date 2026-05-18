@@ -15,23 +15,24 @@ export async function POST(request: NextRequest) {
 
     const prisma = getPrisma()
 
-    const resetCandidate = await prisma.passwordResetToken.findFirst({
+    const resetCandidates = await prisma.passwordResetToken.findMany({
       where: {
         used: false,
         expiresAt: { gt: new Date() },
       },
-      orderBy: { expiresAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
     })
 
-    // We must match the provided token against the stored hash.
-    // Because schema stores only hash, we iterate by verifying against a candidate.
-    // For SQLite this is acceptable; for scale, we'd store tokenHash and search differently.
-    if (!resetCandidate) {
-      return NextResponse.json({ error: 'Reset token is invalid or expired' }, { status: 400 })
+    let resetCandidate: (typeof resetCandidates)[number] | null = null
+    for (const candidate of resetCandidates) {
+      if (await bcrypt.compare(token, candidate.tokenHash)) {
+        resetCandidate = candidate
+        break
+      }
     }
 
-    const matches = await bcrypt.compare(token, resetCandidate.tokenHash)
-    if (!matches) {
+    if (!resetCandidate) {
       return NextResponse.json({ error: 'Reset token is invalid or expired' }, { status: 400 })
     }
 
@@ -44,6 +45,13 @@ export async function POST(request: NextRequest) {
       })
       await tx.passwordResetToken.update({
         where: { id: resetCandidate.id },
+        data: { used: true },
+      })
+      await tx.passwordResetToken.updateMany({
+        where: {
+          userId: resetCandidate.userId,
+          used: false,
+        },
         data: { used: true },
       })
     })
