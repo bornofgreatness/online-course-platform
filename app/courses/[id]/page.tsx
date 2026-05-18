@@ -8,7 +8,8 @@ import { authOptions } from '../../api/auth/[...nextauth]/options'
 import CourseActions from '../../../components/CourseActions'
 import CourseQuizPanel from '../../../components/CourseQuizPanel'
 import { LocalizedText } from '../../../components/LanguageProvider'
-import { getActiveSubscription, isPrivilegedRole } from '../../../lib/subscription'
+import { getActiveSubscription } from '../../../lib/subscription'
+import { canAccessPremiumContent } from '../../../lib/auth/rbac'
 import type { Metadata } from 'next'
 import { courseJsonLd } from '../../../lib/structuredData'
 import { parseCourseProgress } from '../../../lib/progress'
@@ -83,7 +84,7 @@ export default async function CourseDetails({ params }: Props) {
     if (user) {
       const role = user.role ?? ''
       const sub = await getActiveSubscription(prisma, user.id)
-      hasAccess = isPrivilegedRole(role) || !!sub
+      hasAccess = canAccessPremiumContent(role, !!sub)
 
       enrollment = await prisma.enrollment.findUnique({
         where: {

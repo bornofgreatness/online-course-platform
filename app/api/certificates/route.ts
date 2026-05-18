@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../auth/[...nextauth]/options'
+import { authErrorResponse, requirePremiumAccess, requireSession } from '@/lib/auth/session'
+import { canDownloadCertificates } from '@/lib/auth/rbac'
 import { getPrisma } from '../../../lib/prisma'
+import { getActiveSubscription } from '../../../lib/subscription'
 
 async function userPassedCourseQuiz(prisma: ReturnType<typeof getPrisma>, userId: string, courseId: string) {
   const quiz = await prisma.quiz.findUnique({ where: { courseId } })
@@ -13,108 +14,111 @@ async function userPassedCourseQuiz(prisma: ReturnType<typeof getPrisma>, userId
 }
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-  }
+  try {
+    const { user } = await requireSession()
+    const prisma = getPrisma()
+    const sub = await getActiveSubscription(prisma, user.id)
 
-  const { courseId } = await request.json()
-  if (!courseId) {
-    return NextResponse.json({ error: 'Course ID is required' }, { status: 400 })
-  }
-
-  const prisma = getPrisma()
-  const user = await prisma.user.findUnique({ where: { email: session.user.email } })
-  if (!user) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 })
-  }
-
-  // Check if user is enrolled and has completed the course
-  const enrollment = await prisma.enrollment.findUnique({
-    where: {
-      userId_courseId: {
-        userId: user.id,
-        courseId
-      }
-    },
-    include: { course: true }
-  })
-
-  if (!enrollment) {
-    return NextResponse.json({ error: 'Not enrolled in this course' }, { status: 404 })
-  }
-
-  const progress = enrollment.progress ? JSON.parse(enrollment.progress) : { completed: false }
-  if (!progress.completed) {
-    return NextResponse.json({ error: 'Course not completed yet' }, { status: 400 })
-  }
-
-  const okQuiz = await userPassedCourseQuiz(prisma, user.id, courseId)
-  if (!okQuiz) {
-    return NextResponse.json({ error: 'Pass the course quiz before requesting a certificate.' }, { status: 400 })
-  }
-
-  // Check if certificate already exists
-  const existingCertificate = await prisma.certificate.findUnique({
-    where: {
-      userId_courseId: {
-        userId: user.id,
-        courseId
-      }
+    if (!canDownloadCertificates(user.role, !!sub)) {
+      return NextResponse.json(
+        { error: 'An active subscription is required to request certificates.' },
+        { status: 403 }
+      )
     }
-  })
 
-  if (existingCertificate) {
-    return NextResponse.json({ certificate: existingCertificate })
+    const { courseId } = await request.json()
+    if (!courseId) {
+      return NextResponse.json({ error: 'Course ID is required' }, { status: 400 })
+    }
+
+    const enrollment = await prisma.enrollment.findUnique({
+      where: {
+        userId_courseId: {
+          userId: user.id,
+          courseId,
+        },
+      },
+      include: { course: true },
+    })
+
+    if (!enrollment) {
+      return NextResponse.json({ error: 'Not enrolled in this course' }, { status: 404 })
+    }
+
+    const progress = enrollment.progress ? JSON.parse(enrollment.progress) : { completed: false }
+    if (!progress.completed) {
+      return NextResponse.json({ error: 'Course not completed yet' }, { status: 400 })
+    }
+
+    const okQuiz = await userPassedCourseQuiz(prisma, user.id, courseId)
+    if (!okQuiz) {
+      return NextResponse.json({ error: 'Pass the course quiz before requesting a certificate.' }, { status: 400 })
+    }
+
+    const existingCertificate = await prisma.certificate.findUnique({
+      where: {
+        userId_courseId: {
+          userId: user.id,
+          courseId,
+        },
+      },
+    })
+
+    if (existingCertificate) {
+      return NextResponse.json({ certificate: existingCertificate })
+    }
+
+    const certificateNumber = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    const pdfPath = `/api/certificates/pdf/${encodeURIComponent(certificateNumber)}`
+    const base =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||
+      'http://localhost:3000'
+    const verifyUrl = `${base}/verify/certificate/${encodeURIComponent(certificateNumber)}`
+
+    const certificate = await prisma.certificate.create({
+      data: {
+        userId: user.id,
+        courseId,
+        certificateNumber,
+        pdfUrl: pdfPath,
+        qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}`,
+      },
+    })
+
+    return NextResponse.json({ certificate })
+  } catch (e: unknown) {
+    const { error, status } = authErrorResponse(e)
+    return NextResponse.json({ error }, { status })
   }
-
-  // Generate certificate number
-  const certificateNumber = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-  const pdfPath = `/api/certificates/pdf/${encodeURIComponent(certificateNumber)}`
-  const base =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||
-    'http://localhost:3000'
-  const verifyUrl = `${base}/verify/certificate/${encodeURIComponent(certificateNumber)}`
-
-  // Create certificate
-  const certificate = await prisma.certificate.create({
-    data: {
-      userId: user.id,
-      courseId,
-      certificateNumber,
-      pdfUrl: pdfPath,
-      qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}`,
-    },
-  })
-
-  return NextResponse.json({ certificate })
 }
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  try {
+    const { user } = await requireSession()
+    const prisma = getPrisma()
+    const sub = await getActiveSubscription(prisma, user.id)
+
+    if (!canDownloadCertificates(user.role, !!sub)) {
+      return NextResponse.json({ certificates: [] })
+    }
+
+    const certificates = await prisma.certificate.findMany({
+      where: { userId: user.id },
+      include: {
+        course: {
+          select: {
+            title: true,
+            description: true,
+          },
+        },
+      },
+      orderBy: { issuedAt: 'desc' },
+    })
+
+    return NextResponse.json({ certificates })
+  } catch (e: unknown) {
+    const { error, status } = authErrorResponse(e)
+    return NextResponse.json({ error }, { status })
   }
-
-  const prisma = getPrisma()
-  const user = await prisma.user.findUnique({ where: { email: session.user.email } })
-  if (!user) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 })
-  }
-
-  const certificates = await prisma.certificate.findMany({
-    where: { userId: user.id },
-    include: {
-      course: {
-        select: {
-          title: true,
-          description: true
-        }
-      }
-    },
-    orderBy: { issuedAt: 'desc' }
-  })
-
-  return NextResponse.json({ certificates })
 }

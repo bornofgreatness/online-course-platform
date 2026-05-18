@@ -8,6 +8,7 @@ import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
 import { useI18n } from '../../components/LanguageProvider'
 import { parseCourseProgress } from '../../lib/progress'
+import { canAccessAdminPanel } from '../../lib/auth/rbac'
 
 interface Enrollment {
   id: string
@@ -175,7 +176,7 @@ function DashboardContent() {
             >
               {t('common.certificates')}
             </Link>
-            {user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' ? (
+            {canAccessAdminPanel(user.role) ? (
               <Link
                 href="/admin"
                 className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"

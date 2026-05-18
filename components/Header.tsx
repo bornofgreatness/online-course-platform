@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CourseCategorySidebarIcon } from './CourseCategorySidebarIcon'
 import LanguageSwitch from './LanguageSwitch'
 import { useI18n } from './LanguageProvider'
+import { canAccessAdminPanel } from '../lib/auth/rbac'
 
 type NavCategory = { id: string; name: string; courseCount: number; icon?: string | null; imageUrl?: string | null }
 
@@ -52,6 +53,9 @@ export default function Header() {
   }
 
   const pathname = usePathname()
+  const userRole = session?.user?.role
+  const isAdmin = canAccessAdminPanel(userRole)
+  const showStudentNav = !!session
 
   const navText = (active: boolean) =>
     [
@@ -137,7 +141,7 @@ export default function Header() {
               <Link href="/pricing" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
                 {t('common.prices')}
               </Link>
-              {session ? (
+              {showStudentNav ? (
                 <>
                   <Link href="/dashboard" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
                     {t('common.dashboard')}
@@ -145,7 +149,7 @@ export default function Header() {
                   <Link href="/affiliate" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
                     {t('common.affiliate')}
                   </Link>
-                  {['ADMIN', 'SUPER_ADMIN'].includes(((session.user as { role?: string })?.role ?? '').toUpperCase()) && (
+                  {isAdmin && (
                     <Link href="/admin" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
                       {t('common.admin')}
                     </Link>
@@ -298,7 +302,7 @@ export default function Header() {
               {t('common.prices')}
             </Link>
 
-            {status === 'loading' ? null : session ? (
+            {status === 'loading' ? null : showStudentNav ? (
               <>
                 <Link href="/affiliate" className={navText(pathname.startsWith('/affiliate'))}>
                   {t('common.affiliate')}
@@ -306,7 +310,7 @@ export default function Header() {
                 <Link href="/dashboard" className={navText(dashboardActive)}>
                   {t('common.dashboard')}
                 </Link>
-                {['ADMIN', 'SUPER_ADMIN'].includes(((session.user as { role?: string })?.role ?? '').toUpperCase()) && (
+                {isAdmin && (
                   <Link href="/admin" className={navText(pathname.startsWith('/admin'))}>
                     {t('common.admin')}
                   </Link>

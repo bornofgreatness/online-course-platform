@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
+import { canAccessAdminPanel } from './lib/auth/rbac'
 
 function withReferralCookie(request: NextRequest, response: NextResponse) {
   const ref = request.nextUrl.searchParams.get('ref')
@@ -17,10 +18,12 @@ function withReferralCookie(request: NextRequest, response: NextResponse) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  const protectedPrefixes = ['/dashboard', '/admin', '/affiliate']
-  const isProtected = protectedPrefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+  const authRequiredPrefixes = ['/dashboard', '/admin', '/affiliate', '/certificates']
+  const isAuthRequired = authRequiredPrefixes.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  )
 
-  if (!isProtected) {
+  if (!isAuthRequired) {
     return withReferralCookie(request, NextResponse.next())
   }
 
@@ -37,8 +40,8 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith('/admin')) {
-    const role = ((token as { role?: string }).role ?? '').toString().toUpperCase()
-    if (role !== 'ADMIN' && role !== 'SUPER_ADMIN') {
+    const role = (token as { role?: string }).role
+    if (!canAccessAdminPanel(role)) {
       return withReferralCookie(request, NextResponse.redirect(new URL('/', request.url)))
     }
   }

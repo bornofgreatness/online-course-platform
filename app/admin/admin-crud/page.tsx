@@ -4,15 +4,15 @@ import Header from '../../../components/Header'
 import PageShell from '../../../components/PageShell'
 import { redirect } from 'next/navigation'
 import dynamic from 'next/dynamic'
-
+import { canAccessAdminPanel } from '../../../lib/auth/rbac'
 
 const ClientAdminCrud = dynamic(() => import('./ClientAdminCrud'), { ssr: false })
 
 export default async function AdminCrudPage() {
   const session = await getServerSession(authOptions)
+  const role = session?.user?.role
 
-  const role = (session?.user as any)?.role
-  if (!session || (role !== 'ADMIN' && role !== 'SUPER_ADMIN')) {
+  if (!session || !canAccessAdminPanel(role)) {
     redirect('/')
   }
 
@@ -24,7 +24,5 @@ export default async function AdminCrudPage() {
       </PageShell>
     </>
   )
-
-
 }
 

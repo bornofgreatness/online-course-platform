@@ -1,9 +1,6 @@
 import type { PrismaClient, Subscription } from './generated/prisma'
 
-export function isPrivilegedRole(role: string | null | undefined) {
-  const r = (role ?? '').toString().trim().toUpperCase()
-  return r === 'ADMIN' || r === 'SUPER_ADMIN'
-}
+export { isPrivilegedRole } from './auth/rbac'
 
 export async function getActiveSubscription(prisma: PrismaClient, userId: string): Promise<Subscription | null> {
   const now = new Date()

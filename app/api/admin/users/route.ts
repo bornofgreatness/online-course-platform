@@ -1,10 +1,20 @@
 import { NextResponse } from 'next/server'
-import { requireAdmin } from '@/lib/auth/admin'
+import { requireAdmin, requireSuperAdmin } from '@/lib/auth/admin'
+import { authErrorResponse } from '@/lib/auth/session'
+import {
+  assignableRoles,
+  canAssignRole,
+  canDeleteUser,
+  canManageRoles,
+  isSuperAdminRole,
+  normalizeRole,
+  ROLES,
+} from '@/lib/auth/rbac'
 import { getPrisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    await requireAdmin()
+    const { user: actor } = await requireAdmin()
 
     const prisma = getPrisma()
     const users = await prisma.user.findMany({
@@ -20,6 +30,7 @@ export async function GET() {
         role: true,
         emailVerifiedAt: true,
         createdAt: true,
+        affiliate: { select: { id: true } },
         _count: {
           select: {
             enrollments: true,
@@ -31,15 +42,20 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json({ users })
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'Forbidden' }, { status: e?.statusCode || 403 })
+    return NextResponse.json({
+      users,
+      assignableRoles: assignableRoles(actor.role),
+      canManageRoles: canManageRoles(actor.role),
+    })
+  } catch (e: unknown) {
+    const { error, status } = authErrorResponse(e)
+    return NextResponse.json({ error }, { status })
   }
 }
 
 export async function PATCH(request: Request) {
   try {
-    await requireAdmin()
+    const { user: actor } = await requireAdmin()
 
     const body = await request.json()
     const { id, role } = body as { id?: string; role?: string }
@@ -48,21 +64,52 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'User ID and role are required' }, { status: 400 })
     }
 
+    const normalizedRole = normalizeRole(role)
+    if (!normalizedRole) {
+      return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
+    }
+
+    if (normalizedRole === ROLES.SUPER_ADMIN) {
+      await requireSuperAdmin()
+    }
+
     const prisma = getPrisma()
+    const target = await prisma.user.findUnique({ where: { id } })
+    if (!target) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    if (isSuperAdminRole(target.role)) {
+      await requireSuperAdmin()
+    }
+
+    if (!canAssignRole(actor.role, target.role, normalizedRole)) {
+      return NextResponse.json({ error: 'You cannot assign this role' }, { status: 403 })
+    }
+
+    if (target.id === actor.id && normalizedRole !== ROLES.SUPER_ADMIN && isSuperAdmin(actor)) {
+      return NextResponse.json({ error: 'Super admins cannot demote themselves' }, { status: 403 })
+    }
+
     const user = await prisma.user.update({
       where: { id },
-      data: { role },
+      data: { role: normalizedRole },
     })
 
     return NextResponse.json({ user })
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'Failed to update user' }, { status: e?.statusCode || 500 })
+  } catch (e: unknown) {
+    const { error, status } = authErrorResponse(e)
+    return NextResponse.json({ error }, { status })
   }
+}
+
+function isSuperAdmin(user: { role: string }) {
+  return normalizeRole(user.role) === ROLES.SUPER_ADMIN
 }
 
 export async function DELETE(request: Request) {
   try {
-    await requireAdmin()
+    const { user: actor } = await requireAdmin()
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
@@ -71,13 +118,25 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
+    if (id === actor.id) {
+      return NextResponse.json({ error: 'You cannot delete your own account' }, { status: 403 })
+    }
+
     const prisma = getPrisma()
-    await prisma.user.delete({
-      where: { id },
-    })
+    const target = await prisma.user.findUnique({ where: { id } })
+    if (!target) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    if (!canDeleteUser(actor.role, target.role)) {
+      return NextResponse.json({ error: 'You cannot delete this user' }, { status: 403 })
+    }
+
+    await prisma.user.delete({ where: { id } })
 
     return NextResponse.json({ success: true })
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'Failed to delete user' }, { status: e?.statusCode || 500 })
+  } catch (e: unknown) {
+    const { error, status } = authErrorResponse(e)
+    return NextResponse.json({ error }, { status })
   }
 }

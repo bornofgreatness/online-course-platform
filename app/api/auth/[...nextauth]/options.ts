@@ -65,12 +65,25 @@ export const authOptions: AuthOptions = {
       return token
     },
     async session({ session, token }: { session: any; token: any }) {
-      if (token) {
+      if (token?.sub) {
         session.user.id = token.sub
-        session.user.role = token.role
+        const prisma = getPrisma()
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: {
+            role: true,
+            affiliate: { select: { id: true } },
+          },
+        })
+        if (dbUser) {
+          session.user.role = dbUser.role
+          session.user.isAffiliate = !!dbUser.affiliate
+        } else {
+          session.user.role = token.role
+        }
       }
       return session
-    }
+    },
   },
   pages: {
     signIn: '/auth/signin'

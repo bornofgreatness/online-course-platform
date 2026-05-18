@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
 import AdminMarketing from '../../../components/AdminMarketing'
 import { useI18n } from '../../../components/LanguageProvider'
 import { formatMoney } from '../../../lib/i18n/format'
+import { canDeleteUser, canAssignRole } from '../../../lib/auth/rbac'
 
 type Subcategory = {
   id: string
@@ -51,7 +53,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export default function ClientAdminCrud() {
   const { t, language } = useI18n()
-  const [tab, setTab] = useState<'categories' | 'courses' | 'marketing' | 'affiliates' | 'users' | 'payments' | 'subscriptions' | 'certificates'>('categories')
+  const { data: session } = useSession()
+  const actorRole = session?.user?.role
+  const [tab, setTab] = useState<'categories' | 'courses' | 'marketing' | 'affiliates' | 'users' | 'payments' | 'subscriptions' | 'certificates' | 'quizzes' | 'reports'>('categories')
   const [commissions, setCommissions] = useState<
     Array<{
       id: string
@@ -81,6 +85,7 @@ export default function ClientAdminCrud() {
     }>
   >([])
   const [userBusy, setUserBusy] = useState<string | null>(null)
+  const [assignableRoles, setAssignableRoles] = useState<string[]>([])
 
   // Payments
   const [payments, setPayments] = useState<
@@ -125,6 +130,26 @@ export default function ClientAdminCrud() {
     }>
   >([])
   const [certificateBusy, setCertificateBusy] = useState<string | null>(null)
+
+  // Quizzes
+  const [quizzes, setQuizzes] = useState<
+    Array<{
+      id: string
+      courseId: string
+      courseTitle: string
+      categoryName: string
+      questionCount: number
+      attemptCount: number
+      createdAt: string
+      valid: boolean
+    }>
+  >([])
+  const [coursesWithoutQuiz, setCoursesWithoutQuiz] = useState<
+    Array<{ id: string; title: string; category: { name: string } }>
+  >([])
+  const [quizCourseId, setQuizCourseId] = useState('')
+  const [quizBusy, setQuizBusy] = useState<string | null>(null)
+
   const [toast, setToast] = useState<Toast>(null)
   const [stats, setStats] = useState<{
     totalUsers: number
@@ -220,6 +245,7 @@ export default function ClientAdminCrud() {
     if (!res.ok) throw new Error('Failed to load users')
     const data = await res.json()
     setUsers(data.users || [])
+    setAssignableRoles(data.assignableRoles || [])
   }
 
   async function fetchPayments() {
@@ -241,6 +267,79 @@ export default function ClientAdminCrud() {
     if (!res.ok) throw new Error('Failed to load certificates')
     const data = await res.json()
     setCertificates(data.certificates || [])
+  }
+
+  async function fetchQuizzes() {
+    const res = await fetch('/api/admin/quizzes')
+    if (!res.ok) throw new Error('Failed to load quizzes')
+    const data = await res.json()
+    setQuizzes(data.quizzes || [])
+    setCoursesWithoutQuiz(data.coursesWithoutQuiz || [])
+  }
+
+  async function createQuiz() {
+    if (!quizCourseId) {
+      displayToast({ type: 'error', message: t('admin.selectCourse') })
+      return
+    }
+    setQuizBusy('create')
+    try {
+      const res = await fetch('/api/admin/quizzes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseId: quizCourseId }),
+      })
+      if (!res.ok) throw new Error('Failed to create quiz')
+      setQuizCourseId('')
+      await fetchQuizzes()
+      displayToast({ type: 'success', message: t('admin.quizCreated') })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('admin.failedCreateQuiz'),
+      })
+    } finally {
+      setQuizBusy(null)
+    }
+  }
+
+  async function resetQuizDefault(id: string) {
+    setQuizBusy(id)
+    try {
+      const res = await fetch(`/api/admin/quizzes/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ useDefault: true }),
+      })
+      if (!res.ok) throw new Error('Failed to update quiz')
+      await fetchQuizzes()
+      displayToast({ type: 'success', message: t('admin.quizUpdated') })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('admin.failedUpdateQuiz'),
+      })
+    } finally {
+      setQuizBusy(null)
+    }
+  }
+
+  async function deleteQuiz(id: string) {
+    if (!window.confirm(t('admin.confirmDeleteQuiz'))) return
+    setQuizBusy(id)
+    try {
+      const res = await fetch(`/api/admin/quizzes/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete quiz')
+      await fetchQuizzes()
+      displayToast({ type: 'success', message: t('admin.quizDeleted') })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('admin.failedDeleteQuiz'),
+      })
+    } finally {
+      setQuizBusy(null)
+    }
   }
 
   async function approveCommission(id: string) {
@@ -367,6 +466,15 @@ export default function ClientAdminCrud() {
       fetchSubscriptions().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadSubscriptions') }))
     } else if (tab === 'certificates') {
       fetchCertificates().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadCertificates') }))
+    } else if (tab === 'quizzes') {
+      fetchQuizzes().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadQuizzes') }))
+    } else if (tab === 'reports') {
+      fetch('/api/admin/stats')
+        .then((r) => r.json())
+        .then((d) => {
+          if (d && typeof d.totalUsers === 'number') setStats(d)
+        })
+        .catch(() => displayToast({ type: 'error', message: t('admin.failedLoadUsers') }))
     }
   }, [tab])
 
@@ -784,6 +892,22 @@ export default function ClientAdminCrud() {
           >
             {t('admin.tabCertificates')}
           </button>
+          <button
+            onClick={() => setTab('quizzes')}
+            className={`rounded px-3 py-2 text-sm border ${
+              tab === 'quizzes' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
+            }`}
+          >
+            {t('admin.tabQuizzes')}
+          </button>
+          <button
+            onClick={() => setTab('reports')}
+            className={`rounded px-3 py-2 text-sm border ${
+              tab === 'reports' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
+            }`}
+          >
+            {t('admin.tabReports')}
+          </button>
         </div>
       </div>
 
@@ -853,13 +977,17 @@ export default function ClientAdminCrud() {
                         <select
                           value={u.role}
                           onChange={(e) => updateUserRole(u.id, e.target.value)}
-                          disabled={userBusy === u.id}
+                          disabled={
+                            userBusy === u.id ||
+                            !assignableRoles.some((r) => canAssignRole(actorRole, u.role, r))
+                          }
                           className="rounded border px-2 py-1 text-xs disabled:opacity-50"
                         >
-                          <option value="STUDENT">STUDENT</option>
-                          <option value="ADMIN">ADMIN</option>
-                          <option value="SUPER_ADMIN">SUPER_ADMIN</option>
-                          <option value="AFFILIATE">AFFILIATE</option>
+                          {Array.from(new Set([u.role, ...assignableRoles])).map((role) => (
+                            <option key={role} value={role}>
+                              {role}
+                            </option>
+                          ))}
                         </select>
                       </td>
                       <td className="px-4 py-2">{u._count.enrollments}</td>
@@ -868,7 +996,7 @@ export default function ClientAdminCrud() {
                       <td className="px-4 py-2">{u._count.certificates}</td>
                       <td className="px-4 py-2">
                         <button
-                          disabled={userBusy === u.id}
+                          disabled={userBusy === u.id || !canDeleteUser(actorRole, u.role)}
                           onClick={() => deleteUser(u.id)}
                           className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
                         >
@@ -1037,6 +1165,146 @@ export default function ClientAdminCrud() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {tab === 'quizzes' && (
+        <div className="space-y-6">
+          <div className={`${siteCardClass} p-6`}>
+            <h2 className="text-xl font-semibold mb-4">{t('admin.createQuiz')}</h2>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <Field label={t('admin.selectCourse')}>
+                <select
+                  value={quizCourseId}
+                  onChange={(e) => setQuizCourseId(e.target.value)}
+                  className="mt-1 w-full min-w-[14rem] rounded border px-3 py-2 text-sm"
+                >
+                  <option value="">{t('admin.selectCourse')}</option>
+                  {coursesWithoutQuiz.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.title} ({c.category.name})
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <button
+                type="button"
+                disabled={quizBusy === 'create' || !quizCourseId}
+                onClick={createQuiz}
+                className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {quizBusy === 'create' ? t('common.working') : t('admin.createQuiz')}
+              </button>
+            </div>
+            {coursesWithoutQuiz.length === 0 ? (
+              <p className={`${siteMutedClass} mt-3 text-sm`}>{t('admin.coursesWithoutQuiz')}: 0</p>
+            ) : (
+              <p className={`${siteMutedClass} mt-3 text-sm`}>
+                {t('admin.coursesWithoutQuiz')}: {coursesWithoutQuiz.length}
+              </p>
+            )}
+          </div>
+
+          <div className={`${siteCardClass} p-6`}>
+            <h2 className="text-xl font-semibold mb-4">{t('admin.allQuizzes')}</h2>
+            {quizzes.length === 0 ? (
+              <p className={siteMutedClass}>{t('admin.noQuizzes')}</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Course</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Category</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.quizQuestions')}</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.quizAttempts')}</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Status</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {quizzes.map((q) => (
+                      <tr key={q.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2">{q.courseTitle}</td>
+                        <td className="px-4 py-2">{q.categoryName}</td>
+                        <td className="px-4 py-2">{q.questionCount}</td>
+                        <td className="px-4 py-2">{q.attemptCount}</td>
+                        <td className="px-4 py-2">
+                          <span
+                            className={`rounded px-2 py-1 text-xs ${
+                              q.valid ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+                            }`}
+                          >
+                            {q.valid ? 'OK' : t('admin.quizInvalid')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2">
+                          <button
+                            disabled={quizBusy === q.id}
+                            onClick={() => resetQuizDefault(q.id)}
+                            className="mr-2 rounded border px-2 py-1 text-xs hover:bg-gray-100 disabled:opacity-50"
+                          >
+                            {t('admin.quizResetDefault')}
+                          </button>
+                          <button
+                            disabled={quizBusy === q.id}
+                            onClick={() => deleteQuiz(q.id)}
+                            className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
+                          >
+                            {t('admin.delete')}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {tab === 'reports' && stats && (
+        <div className={`${siteCardClass} p-6`}>
+          <h2 className="text-xl font-semibold mb-4">{t('admin.tabReports')}</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
+              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.tabUsers')}</p>
+              <p className="mt-2 text-2xl font-bold tabular-nums">{stats.totalUsers}</p>
+            </div>
+            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
+              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.revenue')}</p>
+              <p className="mt-2 text-2xl font-bold tabular-nums">{formatMoney(stats.revenueUsd, language)}</p>
+            </div>
+            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
+              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.activeSubscriptions')}</p>
+              <p className="mt-2 text-2xl font-bold tabular-nums">{stats.activeSubscriptions}</p>
+            </div>
+            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
+              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.completionRate')}</p>
+              <p className="mt-2 text-2xl font-bold tabular-nums">{stats.completionRatePercent}%</p>
+            </div>
+            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
+              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.enrollments')}</p>
+              <p className="mt-2 text-sm text-slate-700">
+                {t('admin.enrollmentsSummary', {
+                  completed: stats.completedEnrollments,
+                  total: stats.totalEnrollments,
+                  completedLabel: t('admin.completed'),
+                })}
+              </p>
+            </div>
+            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
+              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.affiliateReferrals')}</p>
+              <p className="mt-2 text-2xl font-bold tabular-nums">{stats.affiliateReferrals}</p>
+            </div>
+            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4 sm:col-span-2 lg:col-span-3">
+              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.pendingCommissions')}</p>
+              <p className="mt-2 text-2xl font-bold tabular-nums">
+                {formatMoney(Math.round(stats.pendingCommissionUsd * 100), language)}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
