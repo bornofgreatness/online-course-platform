@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { authErrorResponse, requirePremiumAccess, requireSession } from '@/lib/auth/session'
+import { GENERATED_COURSE_PDF_URL, buildCourseMaterialPdf } from '@/lib/courseMaterialPdf'
 import { isS3Configured, s3ObjectKeyFromUrlOrKey, signedObjectUrl } from '@/lib/s3'
 import { getPrisma } from '../../../../../lib/prisma'
 import { touchLastViewed, parseCourseProgress } from '../../../../../lib/progress'
@@ -13,7 +14,13 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     const { user } = await requireSession()
 
     const prisma = getPrisma()
-    const course = await prisma.course.findUnique({ where: { id: params.id } })
+    const course = await prisma.course.findUnique({
+      where: { id: params.id },
+      include: {
+        category: { select: { name: true } },
+        subcategory: { select: { name: true } },
+      },
+    })
     if (!course?.pdfUrl) {
       return NextResponse.json({ error: 'Course material not found' }, { status: 404 })
     }
@@ -32,6 +39,19 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     })
 
     const target = course.pdfUrl.trim()
+    if (target === GENERATED_COURSE_PDF_URL) {
+      const pdf = await buildCourseMaterialPdf(course)
+      const filename = `${course.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.pdf`
+      return new NextResponse(new Uint8Array(pdf), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `inline; filename="${filename}"`,
+          'Cache-Control': 'private, no-store',
+        },
+      })
+    }
+
     if (!target.startsWith('http://') && !target.startsWith('https://')) {
       if (!isS3Configured()) {
         return NextResponse.json({ error: 'Secure course storage is not configured' }, { status: 500 })

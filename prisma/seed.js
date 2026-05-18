@@ -5,10 +5,12 @@ const {
   DEFAULT_WORKLOAD_HOURS,
   DEFAULT_PDF_URL,
   DEFAULT_THUMBNAIL,
+  courseThumbnailUrl,
   countCatalogCourses,
 } = require('../lib/platformCatalog.cjs')
 
 const prisma = new PrismaClient()
+const OLD_DUMMY_PDF_URL = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
 
 async function seedCatalog() {
   let courseCount = 0
@@ -51,7 +53,7 @@ async function seedCatalog() {
               categoryId: category.id,
               subcategoryId: subcategory.id,
               pdfUrl: DEFAULT_PDF_URL,
-              thumbnailUrl: DEFAULT_THUMBNAIL,
+              thumbnailUrl: courseThumbnailUrl(cat.name, course.title),
               workloadHours: DEFAULT_WORKLOAD_HOURS,
               syllabus: `Módulo 1: Fundamentos\nMódulo 2: Prática\nMódulo 3: Avaliação\nMódulo 4: Certificação (${DEFAULT_WORKLOAD_HOURS}h)`,
               seoTitle: `${course.title} | Plataforma de Cursos`,
@@ -82,6 +84,31 @@ async function seedCatalog() {
             },
           })
           courseCount++
+        } else {
+          const data = {}
+          if (!existing.pdfUrl || existing.pdfUrl === OLD_DUMMY_PDF_URL) {
+            data.pdfUrl = DEFAULT_PDF_URL
+          }
+          if (!existing.thumbnailUrl || existing.thumbnailUrl === DEFAULT_THUMBNAIL) {
+            data.thumbnailUrl = courseThumbnailUrl(cat.name, course.title)
+          }
+
+          if (Object.keys(data).length) {
+            await prisma.course.update({
+              where: { id: existing.id },
+              data,
+            })
+          }
+
+          if (!existing.pdfUrl || existing.pdfUrl === OLD_DUMMY_PDF_URL) {
+            await prisma.lesson.updateMany({
+              where: {
+                courseId: existing.id,
+                OR: [{ materialUrl: null }, { materialUrl: OLD_DUMMY_PDF_URL }],
+              },
+              data: { materialUrl: DEFAULT_PDF_URL },
+            })
+          }
         }
       }
     }

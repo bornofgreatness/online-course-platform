@@ -7,6 +7,7 @@ const catalog = require('./platformCatalog.cjs') as {
   DEFAULT_WORKLOAD_HOURS: number
   DEFAULT_PDF_URL: string
   DEFAULT_THUMBNAIL: string
+  courseThumbnailUrl: (categoryName: string, courseTitle: string) => string
   countCatalogCourses: () => number
 }
 
@@ -24,4 +25,5 @@ export const PLATFORM_CATALOG = catalog.PLATFORM_CATALOG
 export const DEFAULT_WORKLOAD_HOURS = catalog.DEFAULT_WORKLOAD_HOURS
 export const DEFAULT_PDF_URL = catalog.DEFAULT_PDF_URL
 export const DEFAULT_THUMBNAIL = catalog.DEFAULT_THUMBNAIL
+export const courseThumbnailUrl = catalog.courseThumbnailUrl
 export const countCatalogCourses = catalog.countCatalogCourses

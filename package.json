@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
+    "catalog:assets": "node scripts/update-catalog-assets.js",
     "seed": "node prisma/seed.js",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/billing/webhook"
   },
