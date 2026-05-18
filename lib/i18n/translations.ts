@@ -4,7 +4,7 @@ export const LANG_COOKIE = 'ocp_lang'
 
 export const translations = {
   en: {
-    'common.access': 'Access',
+    'common.access': 'Access course',
     'common.acrossEnrolledCourses': 'Across enrolled courses',
     'common.active': 'active',
     'common.admin': 'Admin',
@@ -487,7 +487,7 @@ export const translations = {
     'whatsapp.title': 'WhatsApp',
   },
   pt: {
-    'common.access': 'Acessar',
+    'common.access': 'Acessar curso',
     'common.acrossEnrolledCourses': 'Entre cursos inscritos',
     'common.active': 'ativo',
     'common.admin': 'Admin',
