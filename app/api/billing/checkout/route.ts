@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import { authOptions } from '../../auth/[...nextauth]/options'
 import { PLAN_LABEL_PT, PLAN_MONTHS } from '../../../../lib/billingPlans'
 import { resolveCheckoutPricing } from '../../../../lib/billingCheckout'
+import { stripeCheckoutPaymentMethods } from '../../../../lib/stripeCheckout'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: 'payment',
-      payment_method_types: ['card', 'pix'],
+      payment_method_types: stripeCheckoutPaymentMethods(),
       customer_email: session.user.email,
       locale: 'pt-BR',
       line_items: [

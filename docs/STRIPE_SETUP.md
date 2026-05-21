@@ -85,11 +85,20 @@ STRIPE_WEBHOOK_SECRET="whsec_xxxxxxxx"
 
 The redirect confirm endpoint already activates subscriptions; webhooks prevent missed activations if the user closes the browser early.
 
+## PIX (optional)
+
+Checkout defaults to **card only** (`STRIPE_CHECKOUT_PAYMENT_METHODS=card`). If Stripe returns *“payment method type pix is invalid”*, PIX is not enabled on your account yet.
+
+1. [Dashboard → Payment methods](https://dashboard.stripe.com/settings/payment_methods) — enable **Pix**
+2. In `.env`: `STRIPE_CHECKOUT_PAYMENT_METHODS=card,pix`
+3. Restart `npm run dev`
+
 ## Troubleshooting
 
 | Issue | Fix |
 |-------|-----|
 | `Stripe não configurado` | Set `STRIPE_SECRET_KEY` in `.env` and restart `npm run dev` |
+| `payment method type provided: pix is invalid` | Use `STRIPE_CHECKOUT_PAYMENT_METHODS=card` or enable Pix in Stripe Dashboard |
 | `ID do usuário ausente na sessão` | Sign out and sign in again (session must include user id) |
 | Subscription not active after pay | Check browser Network tab for `/api/billing/stripe/confirm` |
 | Email not sent | `RESEND_API_KEY` is optional; payment still activates |
