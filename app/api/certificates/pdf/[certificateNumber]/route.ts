@@ -50,6 +50,15 @@ export async function GET(
     const hours = certificate.course.workloadHours || 100
     const issuedDate = certificate.issuedAt.toLocaleDateString('pt-BR')
 
+    page.drawText('CONECT CURSOS', {
+      x: margin,
+      y,
+      size: 14,
+      font: fontBold,
+      color: rgb(0.05, 0.45, 0.42),
+    })
+    y -= 22
+
     page.drawText('Certificado de Conclusao', {
       x: margin,
       y,

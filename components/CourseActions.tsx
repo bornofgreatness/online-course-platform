@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import EnrollButton from './EnrollButton'
+import CertificateLegalNotice from './CertificateLegalNotice'
 import { useI18n } from './LanguageProvider'
+import { CERTIFICATE_ISSUANCE_FEE_BRL, formatCertificateFeeBrl } from '../lib/certificatePolicy'
 
 interface CourseActionsProps {
   courseId: string
@@ -28,8 +30,10 @@ export default function CourseActions({
 }: CourseActionsProps) {
   const [loading, setLoading] = useState(false)
   const [quizPassed, setQuizPassed] = useState(initialQuizPassed)
-  const { t } = useI18n()
+  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null)
+  const { t, language } = useI18n()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     const handleQuizPassed = (event: CustomEvent<{ courseId: string }>) => {
@@ -43,6 +47,41 @@ export default function CourseActions({
       window.removeEventListener('quiz-passed', handleQuizPassed as EventListener)
     }
   }, [courseId])
+
+  useEffect(() => {
+    const checkout = searchParams.get('certificate')
+    const sessionId = searchParams.get('session_id')
+    if (checkout !== 'success' || !sessionId) return
+
+    let cancelled = false
+    ;(async () => {
+      setLoading(true)
+      setCheckoutMessage(t('certificate.confirmingPayment'))
+      try {
+        const res = await fetch(
+          `/api/billing/certificate/confirm?session_id=${encodeURIComponent(sessionId)}&courseId=${encodeURIComponent(courseId)}`
+        )
+        const data = await res.json().catch(() => ({}))
+        if (!cancelled) {
+          if (res.ok) {
+            setCheckoutMessage(t('certificate.paymentConfirmed'))
+            router.replace(`/courses/${courseId}`, { scroll: false })
+            router.refresh()
+          } else {
+            setCheckoutMessage((data as { error?: string }).error || t('certificate.paymentConfirmFailed'))
+          }
+        }
+      } catch {
+        if (!cancelled) setCheckoutMessage(t('certificate.paymentConfirmFailed'))
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [searchParams, courseId, router, t])
 
   const handleMarkComplete = async () => {
     setLoading(true)
@@ -68,26 +107,62 @@ export default function CourseActions({
     setLoading(false)
   }
 
-  const handleGenerateCertificate = async () => {
+  const issueCertificateAfterPayment = async (): Promise<boolean> => {
+    const res = await fetch('/api/certificates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ courseId }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (res.ok) {
+      router.refresh()
+      return true
+    }
+    if (res.status === 402) {
+      return false
+    }
+    alert((data as { error?: string }).error || t('actions.failedGenerateCertificate'))
+    return false
+  }
+
+  const handleRequestCertificate = async () => {
     setLoading(true)
+    setCheckoutMessage(null)
     try {
-      const res = await fetch('/api/certificates', {
+      const checkoutRes = await fetch('/api/billing/certificate-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ courseId }),
       })
+      const checkoutData = await checkoutRes.json().catch(() => ({}))
 
-      if (res.ok) {
-        router.refresh()
-      } else {
-        const data = await res.json()
-        alert(data.error || t('actions.failedGenerateCertificate'))
+      if (!checkoutRes.ok) {
+        alert((checkoutData as { error?: string }).error || t('actions.failedGenerateCertificate'))
+        return
       }
+
+      if (checkoutData.paymentRequired === true && checkoutData.url) {
+        window.location.href = checkoutData.url as string
+        return
+      }
+
+      if (checkoutData.paymentRequired === false || checkoutData.alreadyPaid === true) {
+        const issued = await issueCertificateAfterPayment()
+        if (!issued) {
+          alert(t('certificate.paymentConfirmFailed'))
+        }
+        return
+      }
+
+      alert(t('actions.failedGenerateCertificate'))
     } catch {
       alert(t('actions.errorGeneratingCertificate'))
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
+
+  const feeLabel = formatCertificateFeeBrl(language === 'pt' ? 'pt-BR' : 'en-US')
 
   if (!isEnrolled) {
     return <EnrollButton courseId={courseId} />
@@ -118,6 +193,12 @@ export default function CourseActions({
         {progress.completed ? t('course.completed') : t('course.inProgress')}
       </div>
 
+      {checkoutMessage && (
+        <p className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-900">
+          {checkoutMessage}
+        </p>
+      )}
+
       {quizGateActive && (
         <p className="text-sm text-slate-700">{t('actions.passQuizBeforeComplete')}</p>
       )}
@@ -133,14 +214,22 @@ export default function CourseActions({
           </a>
         </div>
       ) : progress.completed ? (
-        <button
-          type="button"
-          onClick={handleGenerateCertificate}
-          disabled={loading}
-          className="w-full rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading ? t('actions.generating') : t('actions.generateCertificate')}
-        </button>
+        <div className="space-y-3">
+          <CertificateLegalNotice compact />
+          <button
+            type="button"
+            onClick={handleRequestCertificate}
+            disabled={loading}
+            className="w-full rounded bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading
+              ? t('actions.generating')
+              : t('actions.requestCertificate', { fee: feeLabel })}
+          </button>
+          <p className="text-center text-xs text-slate-500">
+            {t('certificate.feeAmount', { fee: feeLabel, amount: String(CERTIFICATE_ISSUANCE_FEE_BRL) })}
+          </p>
+        </div>
       ) : (
         <button
           type="button"

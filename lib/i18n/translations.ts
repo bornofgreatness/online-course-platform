@@ -120,6 +120,7 @@ export const translations = {
     'actions.failedGenerateCertificate': 'Failed to generate certificate',
     'actions.failedMarkComplete': 'Failed to mark course as complete',
     'actions.generateCertificate': 'Generate certificate',
+    'actions.requestCertificate': 'Request digital certificate — {fee}',
     'actions.generating': 'Generating...',
     'actions.passQuizBeforeComplete': 'Pass the course quiz (7/10 or higher) before marking complete.',
     'actions.renewAccess': 'Renew to access course materials, the quiz, and progress tracking.',
@@ -127,6 +128,28 @@ export const translations = {
     'actions.updating': 'Updating...',
     'actions.viewCertificate': 'View certificate',
     'actions.viewPlans': 'View plans',
+
+    'certificate.brandName': 'CONECT CURSOS',
+    'certificate.sectionTitle': 'Digital certificates',
+    'certificate.legalIntro':
+      'CONECT CURSOS offers online courses with flexible access, allowing students to study whenever and wherever they want.',
+    'certificate.legalAfterAssessment':
+      'After completing the course and assessment, students can request a digital certificate valid for resumes, continuing education hours, training, and professional qualification.',
+    'certificate.legalClassificationTitle':
+      'Courses are classified as Free Courses for professional development and qualification, supported by Brazilian legislation:',
+    'certificate.legalLaw9394':
+      'Law No. 9.394/96 (Law of Guidelines and Bases of National Education – LDB), Articles 39 and 42.',
+    'certificate.legalDecree5154':
+      'Decree No. 5.154/04, regarding Professional and Technological Education.',
+    'certificate.legalValidity':
+      'Certificates issued by CONECT CURSOS are valid throughout the national territory for professional qualification, extracurricular activities, curriculum enrichment, and professional advancement.',
+    'certificate.legalFee': 'Digital certificate issuance fee: {fee} per certificate.',
+    'certificate.legalCompact':
+      'CONECT CURSOS digital certificate — valid nationwide for qualification and résumé. Issuance fee: {fee} (after course + assessment).',
+    'certificate.feeAmount': 'Issuance fee: {fee} (R$ {amount} per certificate)',
+    'certificate.confirmingPayment': 'Confirming payment…',
+    'certificate.paymentConfirmed': 'Payment confirmed. Your certificate is ready.',
+    'certificate.paymentConfirmFailed': 'Could not confirm certificate payment.',
 
     'quiz.attemptsUsed': 'Attempts used',
     'quiz.attemptsLeft': '{count} attempt(s) left.',
@@ -207,7 +230,7 @@ export const translations = {
       'Choose a plan (1, 3, 6, or 12 months), pay by Mercado Pago, Stripe Pix, or Credit Card, and access the full catalog during the period.',
     'landing.faq2q': 'Is the certificate recognized?',
     'landing.faq2a':
-      'Each course issues a 100-hour certificate with a unique online verification code, student name, course, and completion date.',
+      'After completing the course and quiz, request your CONECT CURSOS digital certificate (R$ 19.99 issuance fee) with nationwide validity for qualification and résumé — unique online verification code included.',
     'landing.faq3q': 'Can I study on mobile?',
     'landing.faq3a': 'Yes. The platform is mobile-responsive — watch lessons, read PDFs, and track progress anywhere.',
     'landing.faq4q': 'Do I need to pay to register?',
@@ -604,6 +627,7 @@ export const translations = {
     'actions.failedGenerateCertificate': 'Falha ao gerar certificado',
     'actions.failedMarkComplete': 'Falha ao marcar o curso como concluído',
     'actions.generateCertificate': 'Gerar certificado',
+    'actions.requestCertificate': 'Solicitar certificado digital — {fee}',
     'actions.generating': 'Gerando...',
     'actions.passQuizBeforeComplete': 'Passe no quiz do curso (7/10 ou mais) antes de marcar como concluído.',
     'actions.renewAccess': 'Renove para acessar materiais do curso, quiz e acompanhamento de progresso.',
@@ -611,6 +635,28 @@ export const translations = {
     'actions.updating': 'Atualizando...',
     'actions.viewCertificate': 'Ver certificado',
     'actions.viewPlans': 'Ver planos',
+
+    'certificate.brandName': 'CONECT CURSOS',
+    'certificate.sectionTitle': 'Certificados digitais',
+    'certificate.legalIntro':
+      'A CONECT CURSOS oferece cursos online com acesso flexível, permitindo que os alunos estudem quando e onde quiserem.',
+    'certificate.legalAfterAssessment':
+      'Após concluir o curso e a avaliação, o aluno pode solicitar o certificado digital válido para currículo, horas de capacitação, treinamento e qualificação profissional.',
+    'certificate.legalClassificationTitle':
+      'Os cursos são classificados como Cursos Livres para desenvolvimento e qualificação profissional, amparados pela legislação brasileira:',
+    'certificate.legalLaw9394':
+      'Lei nº 9.394/96 (Lei de Diretrizes e Bases da Educação Nacional – LDB), em seus artigos 39 e 42.',
+    'certificate.legalDecree5154':
+      'Decreto nº 5.154/04, referente à Educação Profissional e Tecnológica.',
+    'certificate.legalValidity':
+      'Os certificados emitidos pela CONECT CURSOS são válidos em todo o território nacional para fins de qualificação profissional, atividades extracurriculares, enriquecimento curricular e progressão profissional.',
+    'certificate.legalFee': 'Taxa de emissão do certificado digital: {fee} por certificado.',
+    'certificate.legalCompact':
+      'Certificado digital CONECT CURSOS — válido em todo o país para qualificação e currículo. Taxa de emissão: {fee} (após curso + avaliação).',
+    'certificate.feeAmount': 'Taxa de emissão: {fee} (R$ {amount} por certificado)',
+    'certificate.confirmingPayment': 'Confirmando pagamento…',
+    'certificate.paymentConfirmed': 'Pagamento confirmado. Seu certificado está disponível.',
+    'certificate.paymentConfirmFailed': 'Não foi possível confirmar o pagamento do certificado.',
 
     'quiz.attemptsUsed': 'Tentativas usadas',
     'quiz.attemptsLeft': '{count} tentativa(s) restante(s).',
@@ -691,7 +737,7 @@ export const translations = {
       'Você escolhe um plano (1, 3, 6 ou 12 meses), paga com Mercado Pago, Stripe Pix ou Cartão de Crédito e tem acesso a todos os cursos do catálogo durante o período.',
     'landing.faq2q': 'O certificado é reconhecido?',
     'landing.faq2a':
-      'Cada curso emite certificado de 100 horas com código único de verificação online, nome do aluno, curso e data de conclusão.',
+      'Após concluir o curso e o quiz, solicite o certificado digital CONECT CURSOS (taxa de emissão R$ 19,99), válido em todo o território nacional, com código único de verificação online.',
     'landing.faq3q': 'Posso estudar pelo celular?',
     'landing.faq3a': 'Sim. A plataforma é responsiva — assista aulas, leia PDFs e acompanhe seu progresso de qualquer lugar.',
     'landing.faq4q': 'Preciso pagar para me cadastrar?',

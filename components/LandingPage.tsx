@@ -7,6 +7,7 @@ import WhatsAppFloat from './WhatsAppButton'
 import { countCatalogCourses, PLATFORM_CATALOG } from '../lib/platformCatalog'
 import { useI18n } from './LanguageProvider'
 import { CATEGORY_NAME_KEYS, type TranslationKey } from '../lib/i18n/translations'
+import CertificateLegalNotice from './CertificateLegalNotice'
 
 function catalogDisplayName(name: string, t: (k: TranslationKey) => string) {
   const key = CATEGORY_NAME_KEYS[name]
@@ -109,6 +110,18 @@ export default function LandingPage() {
               <p className="mt-1 text-sm font-medium text-slate-600">{t(s.labelKey)}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="border-y border-teal-100 bg-teal-50/60 py-16">
+        <div className="mx-auto max-w-3xl px-4 md:px-6">
+          <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">{t('certificate.sectionTitle')}</h2>
+          <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-teal-800">
+            {t('certificate.brandName')}
+          </p>
+          <div className="mt-6 rounded-2xl border border-teal-200 bg-white p-6 shadow-sm">
+            <CertificateLegalNotice />
+          </div>
         </div>
       </section>
 

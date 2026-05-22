@@ -142,6 +142,9 @@ model Payment {
   currency   String   @default("brl")
   status     String
   provider   String   @default("stripe")
+  /// subscription | certificate
+  purpose    String   @default("subscription")
+  courseId   String?
   externalId String?
   stripeId   String?
   couponId   String?
@@ -149,6 +152,7 @@ model Payment {
   createdAt  DateTime @default(now())
 
   @@index([userId])
+  @@index([userId, courseId, purpose])
   @@index([externalId])
 }
 

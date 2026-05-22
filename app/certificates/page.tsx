@@ -8,6 +8,7 @@ import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
 import { certificatePdfDownloadPath } from '../../lib/certificateDownload'
 import { useI18n } from '../../components/LanguageProvider'
+import CertificateLegalNotice from '../../components/CertificateLegalNotice'
 
 interface Certificate {
   id: string
@@ -68,6 +69,10 @@ export default function Certificates() {
           <Link href="/dashboard" className="mt-3 inline-block text-sm font-semibold text-blue-600 hover:underline">
             ← {t('common.backToDashboard')}
           </Link>
+        </div>
+
+        <div className={`${siteCardClass} mb-8 p-5 sm:p-6`}>
+          <CertificateLegalNotice />
         </div>
 
         {certificates.length === 0 ? (

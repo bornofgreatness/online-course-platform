@@ -5,7 +5,7 @@ import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../
 import PDFViewer from '../../../components/PDFViewer'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]/options'
-import CourseActions from '../../../components/CourseActions'
+import CourseActionsPanel from '../../../components/CourseActionsPanel'
 import CourseQuizPanel from '../../../components/CourseQuizPanel'
 import { LocalizedText } from '../../../components/LanguageProvider'
 import { getActiveSubscription } from '../../../lib/subscription'
@@ -190,7 +190,7 @@ export default async function CourseDetails({ params }: Props) {
                 <h3 className="mt-1 text-lg font-bold text-blue-950">PDF Learning Team</h3>
               </div>
               <div className="mt-6">
-                <CourseActions
+                <CourseActionsPanel
                   courseId={course.id}
                   isEnrolled={!!enrollment}
                   subscriptionBlocked={!!enrollment && !hasAccess}

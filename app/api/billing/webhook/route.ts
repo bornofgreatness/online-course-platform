@@ -35,6 +35,33 @@ export async function POST(request: Request) {
 
   const session = event.data.object as Stripe.Checkout.Session
   const userId = session.metadata?.userId
+  const prisma = getPrisma()
+  const amountBrl = (session.amount_total ?? 0) / 100
+
+  if (session.metadata?.type === 'certificate') {
+    const courseId = session.metadata?.courseId
+    if (!userId || !courseId) {
+      console.warn('certificate checkout missing metadata', session.id)
+      return NextResponse.json({ received: true })
+    }
+    try {
+      const { recordCertificatePayment } = await import('../../../../lib/certificatePayment')
+      const { issueCertificate } = await import('../../../../lib/issueCertificate')
+      await recordCertificatePayment(prisma, {
+        userId,
+        courseId,
+        amountBrl,
+        externalId: session.id,
+        currency: session.currency || 'brl',
+      })
+      const dbUser = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } })
+      await issueCertificate(prisma, userId, courseId, dbUser?.role)
+    } catch (e) {
+      console.error('certificate webhook failed', e)
+    }
+    return NextResponse.json({ received: true })
+  }
+
   const plan = session.metadata?.plan
   const couponId = session.metadata?.couponId || undefined
 
@@ -42,9 +69,6 @@ export async function POST(request: Request) {
     console.warn('checkout.session.completed missing metadata', session.id)
     return NextResponse.json({ received: true })
   }
-
-  const prisma = getPrisma()
-  const amountBrl = (session.amount_total ?? 0) / 100
 
   try {
     await activateSubscription(prisma, {
