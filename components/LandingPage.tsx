@@ -7,7 +7,7 @@ import WhatsAppFloat from './WhatsAppButton'
 import { countCatalogCourses, PLATFORM_CATALOG } from '../lib/platformCatalog'
 import { useI18n } from './LanguageProvider'
 import { CATEGORY_NAME_KEYS, type TranslationKey } from '../lib/i18n/translations'
-import CertificateLegalNotice from './CertificateLegalNotice'
+import CertificateShowcase from './CertificateShowcase'
 
 function catalogDisplayName(name: string, t: (k: TranslationKey) => string) {
   const key = CATEGORY_NAME_KEYS[name]
@@ -113,23 +113,47 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="border-y border-teal-100 bg-teal-50/60 py-16">
-        <div className="mx-auto max-w-3xl px-4 md:px-6">
-          <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">{t('certificate.sectionTitle')}</h2>
-          <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-teal-800">
-            {t('certificate.brandName')}
-          </p>
-          <div className="mt-6 rounded-2xl border border-teal-200 bg-white p-6 shadow-sm">
-            <CertificateLegalNotice />
-          </div>
+      <section
+        id="certificados"
+        className="relative overflow-hidden border-y border-teal-200/60 bg-gradient-to-b from-teal-50/90 via-emerald-50/40 to-white py-16 lg:py-20"
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.35]"
+          aria-hidden
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 20% 30%, rgba(20, 184, 166, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(30, 58, 138, 0.08) 0%, transparent 45%)',
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-4 md:px-6">
+          <CertificateShowcase linkToCertificatesPage />
         </div>
       </section>
 
-      <section id="planos" className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">{t('landing.pricingTitle')}</h2>
-        <p className="mt-2 text-slate-600">{t('landing.pricingSubtitle')}</p>
-        <div className="mt-8">
-          <PricingPlans />
+      <section
+        id="planos"
+        className="relative overflow-hidden border-t border-blue-200/50 bg-gradient-to-br from-slate-50 via-blue-50/70 to-indigo-50/30 py-16 lg:py-20"
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-40"
+          aria-hidden
+          style={{
+            backgroundImage:
+              'linear-gradient(135deg, rgba(59, 130, 246, 0.06) 25%, transparent 25%), linear-gradient(225deg, rgba(59, 130, 246, 0.06) 25%, transparent 25%)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-4 md:px-6">
+          <div className="mb-8 max-w-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-700">
+              {t('landing.pricingEyebrow')}
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{t('landing.pricingTitle')}</h2>
+            <p className="mt-2 text-slate-600">{t('landing.pricingSubtitle')}</p>
+          </div>
+          <div className="rounded-2xl bg-white/80 p-4 shadow-sm ring-1 ring-blue-100/80 backdrop-blur-sm sm:p-6">
+            <PricingPlans />
+          </div>
         </div>
       </section>
 

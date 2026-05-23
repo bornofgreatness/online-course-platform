@@ -18,7 +18,7 @@ function withReferralCookie(request: NextRequest, response: NextResponse) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  const authRequiredPrefixes = ['/dashboard', '/admin', '/affiliate', '/certificates']
+  const authRequiredPrefixes = ['/dashboard', '/admin', '/affiliate']
   const isAuthRequired = authRequiredPrefixes.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
   )

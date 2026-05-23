@@ -1,6 +1,7 @@
 'use client'
 
 import { useSession, signOut } from 'next-auth/react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -79,8 +80,15 @@ export default function Header() {
       {/* Mobile: matches courses page top bar */}
       <div className="sticky top-0 z-50 border-b border-white/10 bg-black lg:hidden">
         <div className="flex items-center justify-between px-4 py-3.5">
-          <Link href="/" className="text-sm font-bold uppercase tracking-wide text-white">
-            {t('common.home')}
+          <Link href="/" className="block shrink-0">
+            <Image
+              src="/logo.jpg"
+              alt={t('certificate.brandName')}
+              width={140}
+              height={56}
+              className="h-8 w-auto rounded bg-white px-1.5 object-contain"
+              priority
+            />
           </Link>
           <div className="flex items-center gap-2">
             <LanguageSwitch compact />
@@ -182,11 +190,15 @@ export default function Header() {
 
       <header className="hidden bg-white lg:block">
         <div className="flex items-center justify-between gap-4 border-b border-gray-200 px-4 py-3 md:px-6 md:py-4">
-          <Link
-            href="/"
-            className="text-xl font-bold uppercase tracking-tight text-slate-950 hover:opacity-80 md:text-2xl"
-          >
-            {t('common.home')}
+          <Link href="/" className="block shrink-0 hover:opacity-90">
+            <Image
+              src="/logo.jpg"
+              alt={t('certificate.brandName')}
+              width={180}
+              height={72}
+              className="h-10 w-auto object-contain md:h-12"
+              priority
+            />
           </Link>
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <LanguageSwitch />
