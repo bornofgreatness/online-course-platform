@@ -5,6 +5,7 @@ import Header from './Header'
 import PricingPlans from './PricingPlans'
 import WhatsAppFloat from './WhatsAppButton'
 import { countCatalogCourses, PLATFORM_CATALOG } from '../lib/platformCatalog'
+import { PLATFORM_WHATSAPP, PROMO_WHATSAPP_MESSAGE, whatsappLink } from '../lib/whatsapp'
 import { useI18n } from './LanguageProvider'
 import { CATEGORY_NAME_KEYS, type TranslationKey } from '../lib/i18n/translations'
 import CertificateShowcase from './CertificateShowcase'
@@ -198,24 +199,82 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="contato" className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-        <h2 className="text-2xl font-bold text-slate-900">{t('landing.contactTitle')}</h2>
-        <p className="mt-2 text-slate-600">{t('landing.contactSubtitle')}</p>
-        <div className="mt-6 flex flex-wrap gap-4">
-          <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5511999999999'}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg bg-green-600 px-6 py-3 text-sm font-semibold text-white hover:bg-green-700"
-          >
-            {t('common.whatsapp')}
-          </a>
-          <Link
-            href="/auth/signup"
-            className="rounded-lg border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
-          >
-            {t('common.signupFreeCta')}
-          </Link>
+      <section
+        id="contato"
+        className="relative overflow-hidden border-t border-teal-800/30 bg-gradient-to-br from-slate-900 via-blue-950 to-teal-900 py-16 text-white lg:py-20"
+      >
+        <div
+          className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-teal-500/20 blur-3xl"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -right-16 bottom-0 h-64 w-64 rounded-full bg-blue-500/15 blur-3xl"
+          aria-hidden
+        />
+        <div className="relative mx-auto grid max-w-6xl gap-10 px-4 md:px-6 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-12">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">
+              {t('landing.contactEyebrow')}
+            </p>
+            <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">{t('landing.contactTitle')}</h2>
+            <p className="mt-4 max-w-md text-base leading-relaxed text-blue-100/90">
+              {t('landing.contactSubtitle')}
+            </p>
+            <Link
+              href="/auth/signup"
+              className="mt-8 inline-flex items-center rounded-full border border-white/30 bg-white/10 px-6 py-2.5 text-sm font-semibold backdrop-blur transition hover:bg-white/20"
+            >
+              {t('common.signupFreeCta')} →
+            </Link>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <a
+              href={whatsappLink(PLATFORM_WHATSAPP, PROMO_WHATSAPP_MESSAGE)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex gap-4 rounded-2xl border border-green-400/30 bg-gradient-to-r from-green-600 to-emerald-600 p-5 shadow-lg shadow-green-900/30 transition hover:-translate-y-0.5 hover:shadow-xl sm:p-6"
+            >
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white/20 text-2xl">
+                💬
+              </span>
+              <div className="min-w-0 text-left">
+                <p className="text-lg font-bold">{t('landing.contactWhatsappTitle')}</p>
+                <p className="mt-1 text-sm leading-relaxed text-green-50/90">
+                  {t('landing.contactWhatsappDesc')}
+                </p>
+                <span className="mt-3 inline-block text-sm font-bold uppercase tracking-wide text-white/90 group-hover:underline">
+                  {t('common.whatsapp')} →
+                </span>
+              </div>
+            </a>
+
+            <Link
+              href="/courses"
+              className="group flex gap-4 rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur-sm transition hover:border-white/25 hover:bg-white/10 sm:p-6"
+            >
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-500/30 text-xl">
+                📚
+              </span>
+              <div>
+                <p className="font-bold">{t('landing.contactCoursesTitle')}</p>
+                <p className="mt-1 text-sm text-blue-100/80">{t('landing.contactCoursesDesc')}</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/pricing"
+              className="group flex gap-4 rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur-sm transition hover:border-white/25 hover:bg-white/10 sm:p-6"
+            >
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-500/30 text-xl">
+                💳
+              </span>
+              <div>
+                <p className="font-bold">{t('landing.contactPlansTitle')}</p>
+                <p className="mt-1 text-sm text-blue-100/80">{t('landing.contactPlansDesc')}</p>
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 
