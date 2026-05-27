@@ -294,6 +294,14 @@ export default function LandingPage() {
           <Link href="/about" className="text-blue-600 hover:underline">
             {t('common.about')}
           </Link>
+          {' · '}
+          <Link href="/cursos-online-com-certificado" className="text-blue-600 hover:underline" hrefLang="pt-BR">
+            {t('common.seoLandingLink')}
+          </Link>
+          {' · '}
+          <Link href="/online-courses-with-certificate" className="text-blue-600 hover:underline" hrefLang="en">
+            {t('common.seoLandingLinkEn')}
+          </Link>
         </p>
       </footer>
     </>

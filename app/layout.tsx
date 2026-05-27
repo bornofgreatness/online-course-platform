@@ -1,32 +1,50 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import SessionProvider from '../components/SessionProvider'
-import { organizationJsonLd, websiteJsonLd } from '../lib/structuredData'
+import {
+  educationalServiceJsonLd,
+  organizationJsonLd,
+  websiteJsonLd,
+} from '../lib/structuredData'
+import {
+  DEFAULT_DESCRIPTION_EN,
+  DEFAULT_DESCRIPTION_PT,
+  SITE_NAME,
+  SITE_TAGLINE_PT,
+} from '../lib/seo/metadata'
+import { SEO_KEYWORDS_COMBINED_STRING } from '../lib/seo/keywords'
+import { SEO_HREFLANG } from '../lib/seo/paths'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+    process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
   ),
   title: {
-    default: 'Plataforma de Cursos Online',
-    template: '%s | Plataforma de Cursos Online',
+    default: `${SITE_NAME} — ${SITE_TAGLINE_PT}`,
+    template: `%s`,
   },
-  description:
-    'Mais de 140 cursos com certificado de 100 horas. Educação, informática, IA, saúde, marketing e mais. Assinatura em reais (R$).',
+  description: `${DEFAULT_DESCRIPTION_PT} ${DEFAULT_DESCRIPTION_EN}`,
+  keywords: SEO_KEYWORDS_COMBINED_STRING,
+  robots: { index: true, follow: true },
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
-    siteName: 'Plataforma de Cursos Online',
-    title: 'Plataforma de Cursos Online',
-    description: 'Cursos online, certificados, quizzes e assinatura com acesso a todo o catálogo.',
+    alternateLocale: ['en_US'],
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: DEFAULT_DESCRIPTION_PT,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Plataforma de Cursos Online',
-    description: 'Cursos online, certificados e assinatura em BRL.',
+    title: SITE_NAME,
+    description: DEFAULT_DESCRIPTION_PT,
+  },
+  alternates: {
+    languages: { ...SEO_HREFLANG },
   },
 }
 
@@ -35,7 +53,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const jsonLd = [organizationJsonLd(), websiteJsonLd()]
+  const jsonLd = [organizationJsonLd(), websiteJsonLd(), educationalServiceJsonLd()]
 
   return (
     <html lang="pt-BR" suppressHydrationWarning>

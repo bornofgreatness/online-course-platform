@@ -8,20 +8,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'http://localhost:3000'
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    '',
-    '/courses',
-    '/categories',
-    '/pricing',
-    '/about',
-    '/certificates',
-    '/auth/signin',
-    '/auth/signup',
-    '/auth/forgot-password',
-  ].map((path) => ({
+    { path: '', priority: 1, changeFrequency: 'weekly' as const },
+    { path: '/cursos-online-com-certificado', priority: 0.95, changeFrequency: 'weekly' as const },
+    { path: '/online-courses-with-certificate', priority: 0.95, changeFrequency: 'weekly' as const },
+    { path: '/courses', priority: 0.9, changeFrequency: 'weekly' as const },
+    { path: '/certificates', priority: 0.85, changeFrequency: 'weekly' as const },
+    { path: '/pricing', priority: 0.85, changeFrequency: 'weekly' as const },
+    { path: '/categories', priority: 0.8, changeFrequency: 'weekly' as const },
+    { path: '/about', priority: 0.75, changeFrequency: 'monthly' as const },
+    { path: '/blog', priority: 0.7, changeFrequency: 'weekly' as const },
+    { path: '/auth/signin', priority: 0.3, changeFrequency: 'yearly' as const },
+    { path: '/auth/signup', priority: 0.5, changeFrequency: 'yearly' as const },
+    { path: '/auth/forgot-password', priority: 0.2, changeFrequency: 'yearly' as const },
+  ].map(({ path, priority, changeFrequency }) => ({
     url: `${base}${path}`,
     lastModified: new Date(),
-    changeFrequency: path === '' ? 'weekly' : 'weekly',
-    priority: path === '' ? 1 : 0.7,
+    changeFrequency,
+    priority,
   }))
 
   if (!process.env.DATABASE_URL) {

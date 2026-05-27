@@ -1,12 +1,14 @@
 import Header from '../../components/Header'
 import WhatsAppFloat from '../../components/WhatsAppButton'
 import PricingView from '../../components/views/PricingView'
+import { buildPageMetadata } from '../../lib/seo/metadata'
 
-export const metadata = {
-  title: 'Preços',
+export const metadata = buildPageMetadata({
+  title: 'Planos e preços | Affordable online courses',
   description:
-    'Planos de assinatura CONECT CURSOS — acesso ao catálogo completo, quizzes e certificados. Pagamento em reais (R$).',
-}
+    'Planos de assinatura em R$ / Affordable BRL subscription plans. Full catalog access and low-cost digital certificate after completion. CONECT CURSOS.',
+  path: '/pricing',
+})
 
 export default function PricingPage() {
   return (

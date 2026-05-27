@@ -12,6 +12,8 @@ import { getActiveSubscription } from '../../../lib/subscription'
 import { canAccessPremiumContent } from '../../../lib/auth/rbac'
 import type { Metadata } from 'next'
 import { courseJsonLd } from '../../../lib/structuredData'
+import { SITE_NAME } from '../../../lib/seo/metadata'
+import { SEO_KEYWORDS_COMBINED_STRING } from '../../../lib/seo/keywords'
 import { parseCourseProgress } from '../../../lib/progress'
 
 interface Props {
@@ -29,11 +31,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       include: { category: true },
     })
     if (!course) return { title: 'Course not found' }
-    const title = course.seoTitle || `${course.title} | Online Course Platform`
-    const description = course.seoDescription || course.description.slice(0, 160)
+    const title =
+      course.seoTitle || `${course.title} — curso online com certificado | ${SITE_NAME}`
+    const description =
+      course.seoDescription ||
+      `${course.description.slice(0, 140)}… Curso EaD com certificado digital. ${course.workloadHours}h.`
     return {
       title,
       description,
+      keywords: SEO_KEYWORDS_COMBINED_STRING,
       openGraph: {
         title,
         description,
