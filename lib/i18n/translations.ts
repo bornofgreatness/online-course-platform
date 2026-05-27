@@ -81,6 +81,7 @@ export const translations = {
     'common.welcomeBack': 'Welcome back',
     'common.youHaveNotEnrolled': 'You have not enrolled in any courses yet.',
     'common.blog': 'Blog',
+    'common.about': 'About',
     'common.contact': 'Contact',
     'common.faq': 'FAQ',
     'common.whatsapp': 'WhatsApp',
@@ -321,6 +322,38 @@ export const translations = {
     'blog.post2excerpt': '1, 3, 6, and 12-month plans with BRL pricing and monthly display.',
     'blog.post3title': 'Get promotions on WhatsApp',
     'blog.post3excerpt': 'Sign up for free and stay updated on offers and new courses.',
+
+    'about.title': 'About CONECT',
+    'about.subtitle': 'Education, training, and empowerment for Jacobina, Serrolândia, and the Chapada Diamantina region.',
+    'about.heroBadge': 'Jacobina · Chapada Diamantina · Bahia',
+    'about.statDistance': 'from Salvador',
+    'about.statFounded': 'Founded',
+    'about.statHq': 'Headquarters',
+    'about.statPartners': 'Quality network',
+    'about.section1Title': 'Our story',
+    'about.section2Title': 'Teaching',
+    'about.section3Title': 'Partnerships',
+    'about.section4Title': 'Course offerings',
+    'about.section5Title': 'Commitment',
+    'about.partnershipNote': 'National quality standards through accredited partnerships.',
+    'about.coursesIntro': 'Programs for the community',
+    'about.tagInformatica': 'Computer Science',
+    'about.tagVocational': 'Vocational',
+    'about.tagEnglish': 'English',
+    'about.tagLibras': 'Libras',
+    'about.tagMore': 'And more',
+    'about.ctaTitle': 'Ready to learn with CONECT?',
+    'about.ctaSubtitle': 'Explore courses and start your personal or professional development today.',
+    'about.section1':
+      'CONECT is a micro-enterprise located in the microregion of Jacobina, Bahia, in the Chapada Diamantina, about 318 km from the capital Salvador. It was founded at the end of 2023 by Jacobina-born entrepreneur Samuel Santos, who is also the founder of the GESSA Group of Enterprises. The company has its own headquarters in the municipality of Serrolândia, Bahia.',
+    'about.section2':
+      'Currently, CONECT is recognized as a school for in-person and distance learning courses, offering a variety of educational programs. It stands out as a diversified teaching institution, contributing to the development, training, and qualification of the local and regional community.',
+    'about.section3':
+      'CONECT is linked to CIBT (Cursos Interativos Brasil Treinamentos), which in turn is associated with ADEB (Brazilian Association of Distance Education), thus strengthening its partnership network and guaranteeing quality standards in the courses offered.',
+    'about.section4':
+      'The courses offered by CONECT include Computer Science, vocational programs, English, Libras (Brazilian Sign Language), and others. With a wide range of educational options, the company aims to meet the community\'s learning needs, providing opportunities for personal and professional development.',
+    'about.section5':
+      'With its own headquarters and the support of the GESSA Group, CONECT is positioned as a teaching institution committed to academic excellence and the educational growth of the region.',
 
     'verify.title': 'Certificate verification',
     'verify.subtitle': 'Public verification for certificates issued on this platform.',
@@ -614,6 +647,7 @@ export const translations = {
     'common.welcomeBack': 'Bem-vindo de volta',
     'common.youHaveNotEnrolled': 'Você ainda não se inscreveu em nenhum curso.',
     'common.blog': 'Blog',
+    'common.about': 'Sobre',
     'common.contact': 'Contato',
     'common.faq': 'FAQ',
     'common.whatsapp': 'WhatsApp',
@@ -858,6 +892,39 @@ export const translations = {
     'blog.post2excerpt': 'Planos de 1, 3, 6 e 12 meses com pagamento em reais e parcelamento mensal exibido.',
     'blog.post3title': 'Receba promoções pelo WhatsApp',
     'blog.post3excerpt': 'Cadastre-se gratuitamente e fique por dentro de ofertas e novos cursos.',
+
+    'about.title': 'Sobre a CONECT',
+    'about.subtitle':
+      'Ensino presencial e a distância para o desenvolvimento da sociedade local e regional.',
+    'about.heroBadge': 'Jacobina · Chapada Diamantina · Bahia',
+    'about.statDistance': 'de Salvador',
+    'about.statFounded': 'Fundação',
+    'about.statHq': 'Sede',
+    'about.statPartners': 'Rede de qualidade',
+    'about.section1Title': 'Nossa história',
+    'about.section2Title': 'Ensino',
+    'about.section3Title': 'Parcerias',
+    'about.section4Title': 'Cursos oferecidos',
+    'about.section5Title': 'Compromisso',
+    'about.partnershipNote': 'Padrões de qualidade nacional por meio de parcerias credenciadas.',
+    'about.coursesIntro': 'Programas para a comunidade',
+    'about.tagInformatica': 'Informática',
+    'about.tagVocational': 'Profissionalizantes',
+    'about.tagEnglish': 'Inglês',
+    'about.tagLibras': 'Libras',
+    'about.tagMore': 'E mais',
+    'about.ctaTitle': 'Pronto para estudar com a CONECT?',
+    'about.ctaSubtitle': 'Conheça os cursos e comece seu desenvolvimento pessoal e profissional.',
+    'about.section1':
+      'A CONECT é uma microempresa localizada na microrregião de Jacobina, Bahia, na Chapada Diamantina, a cerca de 318 km da capital Salvador. Ela foi fundada no final do ano de 2023 pelo microempresário Jacobinense Samuel Santos, que também é fundador do Grupo de Empreendimentos GESSA. A empresa tem sede própria no município de Serrolândia, Bahia.',
+    'about.section2':
+      'Atualmente, a CONECT é reconhecida como uma escola de cursos presenciais e a distância, oferecendo uma variedade de programas educacionais. Ela se destaca como uma instituição diversificada de ensino, contribuindo para o desenvolvimento, formação e capacitação da sociedade local e regional.',
+    'about.section3':
+      'A CONECT está vinculada à CIBT (Cursos Interativos Brasil Treinamentos), que por sua vez é associada à ADEB (Associação Brasileira de Educação a Distância), fortalecendo assim sua rede de parcerias e garantindo padrões de qualidade nos cursos oferecidos.',
+    'about.section4':
+      'Os cursos oferecidos pela CONECT incluem Informática, profissionalizantes, Inglês, Libras e outros. Com uma ampla gama de opções educacionais, a empresa visa atender às necessidades de aprendizado da comunidade, proporcionando oportunidades de desenvolvimento pessoal e profissional.',
+    'about.section5':
+      'Com sua sede própria e o apoio do Grupo GESSA, a CONECT está posicionada como uma instituição de ensino comprometida com a excelência acadêmica e o crescimento educacional da região.',
 
     'verify.title': 'Verificação de certificado',
     'verify.subtitle': 'Verificação pública de certificados emitidos nesta plataforma.',

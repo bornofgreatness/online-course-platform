@@ -71,6 +71,7 @@ export default function Header() {
   const signupActive = pathname.startsWith('/auth/signup')
   const certificatesActive = pathname.startsWith('/certificates')
   const pricingActive = pathname.startsWith('/pricing')
+  const aboutActive = pathname.startsWith('/about')
   const dashboardActive = pathname.startsWith('/dashboard')
 
   const drawerLinkClass = 'rounded-lg px-3 py-2.5 text-slate-800 hover:bg-gray-50'
@@ -148,6 +149,9 @@ export default function Header() {
               </Link>
               <Link href="/pricing" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
                 {t('common.prices')}
+              </Link>
+              <Link href="/about" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
+                {t('common.about')}
               </Link>
               {showStudentNav ? (
                 <>
@@ -312,6 +316,10 @@ export default function Header() {
 
             <Link href="/pricing" className={navText(pricingActive)}>
               {t('common.prices')}
+            </Link>
+
+            <Link href="/about" className={navText(aboutActive)}>
+              {t('common.about')}
             </Link>
 
             {status === 'loading' ? null : showStudentNav ? (

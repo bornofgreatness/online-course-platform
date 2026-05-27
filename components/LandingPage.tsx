@@ -292,6 +292,10 @@ export default function LandingPage() {
           <Link href="/blog" className="text-blue-600 hover:underline">
             {t('common.blog')}
           </Link>
+          {' · '}
+          <Link href="/about" className="text-blue-600 hover:underline">
+            {t('common.about')}
+          </Link>
         </p>
       </footer>
     </>
