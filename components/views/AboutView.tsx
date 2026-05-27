@@ -34,6 +34,14 @@ const STATS = [
   { value: 'CIBT · ADEB', labelKey: 'about.statPartners' as const },
 ]
 
+const SECTION_NUMBER_STYLES = [
+  'bg-blue-600 text-white shadow-md shadow-blue-600/30',
+  'bg-teal-600 text-white shadow-md shadow-teal-600/30',
+  'bg-violet-600 text-white shadow-md shadow-violet-600/30',
+  'bg-amber-500 text-white shadow-md shadow-amber-500/30',
+  'bg-rose-600 text-white shadow-md shadow-rose-600/30',
+] as const
+
 export default function AboutView() {
   const { t } = useI18n()
 
@@ -130,9 +138,7 @@ export default function AboutView() {
                   <div
                     className={[
                       'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold sm:h-12 sm:w-12 sm:text-base',
-                      isPartnership
-                        ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
-                        : 'bg-blue-950 text-teal-200',
+                      SECTION_NUMBER_STYLES[index],
                     ].join(' ')}
                     aria-hidden
                   >
