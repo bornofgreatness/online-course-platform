@@ -291,6 +291,13 @@ export const translations = {
 
     'pricing.intro':
       'Choose a plan for unlimited access to the full catalog, quizzes, and certificates while your subscription is active.',
+    'pricing.heroBadge': 'Plans & access',
+    'pricing.featuresTitle': 'Every plan includes',
+    'pricing.featureCatalog': 'Full course catalog',
+    'pricing.featureQuizzes': 'Quizzes and progress tracking',
+    'pricing.featureCertificates': 'Digital certificates',
+    'pricing.featureFlexible': 'Flexible study — online anytime',
+    'pricing.signInHint': 'Sign in to subscribe and unlock checkout.',
     'pricing.couponLabel': 'Discount coupon',
     'pricing.couponPlaceholder': 'E.g. PROMO20',
     'pricing.validateCoupon': 'Validate coupon',
@@ -861,6 +868,13 @@ export const translations = {
 
     'pricing.intro':
       'Escolha um plano para acesso ilimitado ao catálogo, quizzes e certificados enquanto sua assinatura estiver ativa.',
+    'pricing.heroBadge': 'Planos e acesso',
+    'pricing.featuresTitle': 'Todos os planos incluem',
+    'pricing.featureCatalog': 'Catálogo completo de cursos',
+    'pricing.featureQuizzes': 'Quizzes e acompanhamento de progresso',
+    'pricing.featureCertificates': 'Certificados digitais',
+    'pricing.featureFlexible': 'Estudo flexível — online quando quiser',
+    'pricing.signInHint': 'Entre na sua conta para assinar e finalizar o pagamento.',
     'pricing.couponLabel': 'Cupom de desconto',
     'pricing.couponPlaceholder': 'EX: PROMO20',
     'pricing.validateCoupon': 'Validar cupom',

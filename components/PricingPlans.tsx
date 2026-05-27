@@ -17,11 +17,50 @@ const planKeys: Record<BillingPlan, TranslationKey> = {
   '1y': 'pricing.plan.1y',
 }
 
+const PLAN_ACCENT: Record<
+  BillingPlan,
+  { gradient: string; badge: string; button: string; ring: string; price: string }
+> = {
+  '1m': {
+    gradient: 'from-slate-50 via-white to-slate-50',
+    badge: 'bg-slate-600',
+    button: 'bg-slate-800 hover:bg-slate-900 shadow-slate-900/20',
+    ring: 'border-slate-200',
+    price: 'text-slate-900',
+  },
+  '3m': {
+    gradient: 'from-blue-50 via-white to-teal-50/50',
+    badge: 'bg-blue-600',
+    button: 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/25',
+    ring: 'border-blue-400',
+    price: 'text-blue-950',
+  },
+  '6m': {
+    gradient: 'from-teal-50 via-white to-emerald-50/40',
+    badge: 'bg-teal-600',
+    button: 'bg-teal-600 hover:bg-teal-700 shadow-teal-600/25',
+    ring: 'border-teal-300',
+    price: 'text-teal-950',
+  },
+  '1y': {
+    gradient: 'from-violet-50 via-white to-indigo-50/40',
+    badge: 'bg-violet-600',
+    button: 'bg-violet-600 hover:bg-violet-700 shadow-violet-600/25',
+    ring: 'border-violet-300',
+    price: 'text-violet-950',
+  },
+}
+
 type PaymentProvider = 'stripe' | 'mercadopago'
 const mpEnabled = process.env.NEXT_PUBLIC_MERCADOPAGO_ENABLED === 'true'
 const stripeEnabled = process.env.NEXT_PUBLIC_STRIPE_ENABLED !== 'false'
 
-export default function PricingPlans() {
+type PricingPlansProps = {
+  /** When true, shows the feature checklist above plans (e.g. landing embed). */
+  showFeatures?: boolean
+}
+
+export default function PricingPlans({ showFeatures = false }: PricingPlansProps) {
   const { t, language } = useI18n()
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -99,99 +138,152 @@ export default function PricingPlans() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-end">
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-slate-700">{t('pricing.couponLabel')}</label>
-          <input
-            type="text"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-            placeholder={t('pricing.couponPlaceholder')}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm uppercase"
-          />
+    <div className="space-y-8">
+      {/* Coupon */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm ring-1 ring-black/5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+          <div className="flex-1">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              {t('pricing.couponLabel')}
+            </label>
+            <input
+              type="text"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              placeholder={t('pricing.couponPlaceholder')}
+              className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm font-medium uppercase tracking-wide text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => validateCoupon('3m')}
+            className="shrink-0 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-900"
+          >
+            {t('pricing.validateCoupon')}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => validateCoupon('3m')}
-          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50"
-        >
-          {t('pricing.validateCoupon')}
-        </button>
+        {couponPreview && (
+          <p
+            className={`mt-3 text-sm font-medium ${couponPreview.valid ? 'text-emerald-700' : 'text-red-600'}`}
+          >
+            {couponPreview.valid
+              ? t('pricing.couponApplied', {
+                  amount: formatMoney(couponPreview.discountCents || 0, language),
+                })
+              : couponPreview.error || t('pricing.couponInvalid')}
+          </p>
+        )}
       </div>
 
-      {couponPreview && (
-        <p className={`text-sm ${couponPreview.valid ? 'text-green-700' : 'text-red-600'}`}>
-          {couponPreview.valid
-            ? t('pricing.couponApplied', {
-                amount: formatMoney(couponPreview.discountCents || 0, language),
-              })
-            : couponPreview.error || t('pricing.couponInvalid')}
-        </p>
+      {/* Payment method */}
+      {(mpEnabled || stripeEnabled) && (
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            {t('pricing.paymentMethod')}
+          </span>
+          <div className="inline-flex rounded-full border border-slate-200 bg-white p-1 shadow-sm ring-1 ring-black/5">
+            {mpEnabled && (
+              <button
+                type="button"
+                onClick={() => setProvider('mercadopago')}
+                className={`rounded-full px-4 py-2 text-xs font-bold transition sm:px-5 sm:text-sm ${
+                  provider === 'mercadopago'
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {t('pricing.mercadoPago')}
+              </button>
+            )}
+            {stripeEnabled && (
+              <button
+                type="button"
+                onClick={() => setProvider('stripe')}
+                className={`rounded-full px-4 py-2 text-xs font-bold transition sm:px-5 sm:text-sm ${
+                  provider === 'stripe'
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {t('pricing.stripe')}
+              </button>
+            )}
+          </div>
+        </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        <span className="text-sm font-medium text-slate-600">{t('pricing.paymentMethod')}</span>
-        {mpEnabled && (
-          <button
-            type="button"
-            onClick={() => setProvider('mercadopago')}
-            className={`rounded-full px-4 py-1.5 text-xs font-bold ${
-              provider === 'mercadopago' ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-700'
-            }`}
-          >
-            {t('pricing.mercadoPago')}
-          </button>
-        )}
-        {stripeEnabled && (
-          <button
-            type="button"
-            onClick={() => setProvider('stripe')}
-            className={`rounded-full px-4 py-1.5 text-xs font-bold ${
-              provider === 'stripe' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
-            }`}
-          >
-            {t('pricing.stripe')}
-          </button>
-        )}
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Plans */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:items-stretch lg:gap-4 xl:gap-5">
         {plans.map((plan) => {
           const months = PLAN_MONTHS[plan]
           const monthly = displayMonthly(plan)
           const total = displayTotal(plan)
           const highlight = plan === '3m'
+          const accent = PLAN_ACCENT[plan]
 
           return (
             <div
               key={plan}
-              className={`flex flex-col rounded-2xl border bg-white p-5 shadow-sm ring-1 ring-black/5 ${
-                highlight ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200'
-              }`}
+              className={[
+                'relative flex flex-col overflow-hidden rounded-2xl border bg-gradient-to-b p-6 shadow-sm ring-1 ring-black/5 transition hover:shadow-lg',
+                accent.gradient,
+                accent.ring,
+                highlight ? 'z-10 lg:-mt-2 lg:mb-2 lg:scale-[1.03] lg:shadow-xl lg:ring-2 lg:ring-blue-500/30' : '',
+              ].join(' ')}
             >
-              {highlight ? (
-                <span className="mb-2 w-fit rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-800">
+              {highlight && (
+                <span
+                  className={`absolute right-4 top-4 rounded-full ${accent.badge} px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm`}
+                >
                   {t('pricing.mostPopular')}
                 </span>
-              ) : null}
-              <h2 className="text-lg font-bold text-blue-950">{t(planKeys[plan])}</h2>
-              <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900">
-                {formatMoney(monthly, language)}
-                <span className="text-base font-semibold text-slate-600">{t('pricing.perMonth')}</span>
-              </p>
-              <p className="mt-1 text-xs text-slate-500">
+              )}
+
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 text-lg font-bold text-slate-400 shadow-sm ring-1 ring-black/5">
+                {months}
+              </div>
+
+              <h2 className="pr-16 text-lg font-bold text-slate-900">{t(planKeys[plan])}</h2>
+
+              <div className="mt-4">
+                <p className={`text-3xl font-bold tabular-nums tracking-tight ${accent.price}`}>
+                  {formatMoney(monthly, language)}
+                </p>
+                <p className="text-sm font-semibold text-slate-500">{t('pricing.perMonth')}</p>
+              </div>
+
+              <p className="mt-3 text-xs font-medium text-slate-500">
                 {t('pricing.total')} {formatMoney(total, language)}
               </p>
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-slate-400">
                 {months} {months === 1 ? t('common.month') : t('common.months')} {t('pricing.fullAccess')}
               </p>
+
+              {showFeatures && (
+                <ul className="mt-4 space-y-1.5 border-t border-slate-200/60 pt-4 text-xs text-slate-600">
+                  <li className="flex items-center gap-2">
+                    <span className="text-teal-600" aria-hidden>
+                      ✓
+                    </span>
+                    {t('pricing.featureCatalog')}
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-teal-600" aria-hidden>
+                      ✓
+                    </span>
+                    {t('pricing.featureQuizzes')}
+                  </li>
+                </ul>
+              )}
 
               <button
                 type="button"
                 disabled={busy !== null}
                 onClick={() => checkout(plan)}
-                className="mt-auto w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+                className={[
+                  'mt-6 w-full rounded-xl py-3 text-sm font-bold text-white shadow-md transition disabled:opacity-50',
+                  accent.button,
+                ].join(' ')}
               >
                 {busy === plan ? t('pricing.wait') : t('pricing.subscribeNow')}
               </button>
@@ -201,7 +293,9 @@ export default function PricingPlans() {
       </div>
 
       {error ? (
-        <p className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</p>
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-800">
+          {error}
+        </p>
       ) : null}
     </div>
   )

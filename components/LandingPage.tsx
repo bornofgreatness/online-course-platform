@@ -152,9 +152,7 @@ export default function LandingPage() {
             <h2 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{t('landing.pricingTitle')}</h2>
             <p className="mt-2 text-slate-600">{t('landing.pricingSubtitle')}</p>
           </div>
-          <div className="rounded-2xl bg-white/80 p-4 shadow-sm ring-1 ring-blue-100/80 backdrop-blur-sm sm:p-6">
-            <PricingPlans />
-          </div>
+          <PricingPlans />
         </div>
       </section>
 
