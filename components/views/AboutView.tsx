@@ -42,6 +42,14 @@ const SECTION_NUMBER_STYLES = [
   'bg-rose-600 text-white shadow-md shadow-rose-600/30',
 ] as const
 
+const SECTION_CARD_STYLES = [
+  'border-blue-200/90 bg-gradient-to-br from-blue-50/70 via-white to-sky-50/40 shadow-blue-100/70',
+  'border-teal-200/90 bg-gradient-to-br from-teal-50/70 via-white to-emerald-50/35 shadow-teal-100/70',
+  'border-violet-200/90 bg-gradient-to-br from-violet-50/70 via-white to-indigo-50/35 shadow-violet-100/70',
+  'border-amber-200/90 bg-gradient-to-br from-amber-50/70 via-white to-yellow-50/40 shadow-amber-100/70',
+  'border-rose-200/90 bg-gradient-to-br from-rose-50/70 via-white to-pink-50/35 shadow-rose-100/70',
+] as const
+
 export default function AboutView() {
   const { t } = useI18n()
 
@@ -128,10 +136,8 @@ export default function AboutView() {
               <article
                 key={section.bodyKey}
                 className={[
-                  'group relative overflow-hidden rounded-2xl border bg-white p-6 shadow-sm ring-1 ring-black/5 transition hover:shadow-md sm:p-8',
-                  isPartnership
-                    ? 'border-teal-200/80 bg-gradient-to-br from-teal-50/80 via-white to-emerald-50/40'
-                    : 'border-slate-200/80',
+                  'group relative overflow-hidden rounded-2xl border p-6 shadow-lg ring-1 ring-black/5 transition hover:shadow-xl sm:p-8',
+                  SECTION_CARD_STYLES[index],
                 ].join(' ')}
               >
                 <div className="flex gap-5 sm:gap-6">
