@@ -42,6 +42,10 @@ export async function POST(request: Request) {
     if (!description || typeof description !== 'string') return NextResponse.json({ error: 'description is required' }, { status: 400 })
     if (!categoryId || typeof categoryId !== 'string') return NextResponse.json({ error: 'categoryId is required' }, { status: 400 })
     if (!pdfUrl || typeof pdfUrl !== 'string') return NextResponse.json({ error: 'pdfUrl is required' }, { status: 400 })
+    const parsedWorkloadHours = Number(workloadHours)
+    if (!Number.isInteger(parsedWorkloadHours) || parsedWorkloadHours <= 0) {
+      return NextResponse.json({ error: 'workloadHours must be a positive integer' }, { status: 400 })
+    }
 
     const prisma = getPrisma()
 
@@ -64,7 +68,7 @@ export async function POST(request: Request) {
         videoUrl: videoUrl || null,
         thumbnailUrl: thumbnailUrl || null,
         syllabus: syllabus || null,
-        workloadHours: typeof workloadHours === 'number' ? workloadHours : Number(workloadHours || 0),
+        workloadHours: parsedWorkloadHours,
         seoTitle: seoTitle || null,
         seoDescription: seoDescription || null,
       },

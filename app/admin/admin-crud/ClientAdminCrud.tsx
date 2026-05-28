@@ -196,7 +196,7 @@ export default function ClientAdminCrud() {
     videoUrl: '',
     thumbnailUrl: '',
     syllabus: '',
-    workloadHours: 1,
+    workloadHours: 100,
     seoTitle: '',
     seoDescription: '',
   })
@@ -721,7 +721,7 @@ export default function ClientAdminCrud() {
       videoUrl: course.videoUrl || '',
       thumbnailUrl: course.thumbnailUrl || '',
       syllabus: course.syllabus || '',
-      workloadHours: course.workloadHours ?? 1,
+      workloadHours: course.workloadHours ?? 100,
       seoTitle: course.seoTitle || '',
       seoDescription: course.seoDescription || '',
     })
@@ -738,7 +738,7 @@ export default function ClientAdminCrud() {
       videoUrl: '',
       thumbnailUrl: '',
       syllabus: '',
-      workloadHours: 1,
+      workloadHours: 100,
       seoTitle: '',
       seoDescription: '',
     })
@@ -749,6 +749,9 @@ export default function ClientAdminCrud() {
     if (!courseForm.description.trim()) return displayToast({ type: 'error', message: t('admin.descriptionRequired') })
     if (!courseForm.categoryId) return displayToast({ type: 'error', message: t('admin.categoryRequired') })
     if (!courseForm.pdfUrl.trim()) return displayToast({ type: 'error', message: t('admin.pdfUrlRequired') })
+    if (!Number.isInteger(Number(courseForm.workloadHours)) || Number(courseForm.workloadHours) <= 0) {
+      return displayToast({ type: 'error', message: 'Workload hours must be a positive integer' })
+    }
 
     setCourseBusy(true)
     try {
@@ -761,7 +764,7 @@ export default function ClientAdminCrud() {
         videoUrl: courseForm.videoUrl.trim() ? courseForm.videoUrl.trim() : null,
         thumbnailUrl: courseForm.thumbnailUrl.trim() ? courseForm.thumbnailUrl.trim() : null,
         syllabus: courseForm.syllabus.trim() ? courseForm.syllabus.trim() : null,
-        workloadHours: Number(courseForm.workloadHours || 0),
+        workloadHours: Number(courseForm.workloadHours),
         seoTitle: courseForm.seoTitle.trim() ? courseForm.seoTitle.trim() : null,
         seoDescription: courseForm.seoDescription.trim() ? courseForm.seoDescription.trim() : null,
       }
@@ -1803,7 +1806,8 @@ export default function ClientAdminCrud() {
                 <Field label={t('admin.workloadHours')}>
                   <input
                     type="number"
-                    min={0}
+                    min={1}
+                    step={1}
                     value={courseForm.workloadHours}
                     onChange={(e) => setCourseForm((p) => ({ ...p, workloadHours: Number(e.target.value) }))}
                     className="mt-1 w-full rounded border px-3 py-2"
