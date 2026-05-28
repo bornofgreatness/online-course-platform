@@ -99,6 +99,12 @@ export default function Courses() {
     })
   }, [])
 
+  const scrollToCourses = useCallback(() => {
+    if (typeof window === 'undefined') return
+    if (!window.matchMedia('(max-width: 1023px)').matches) return
+    coursesListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [])
+
   const selectAll = useCallback(() => {
     setSelectedCategoryId('')
     setSelectedSubcategoryId('')
@@ -108,15 +114,23 @@ export default function Courses() {
     (categoryId: string) => {
       setSelectedCategoryId(categoryId)
       setSelectedSubcategoryId('')
+      const cat = catalogCategories.find((c) => c.id === categoryId)
+      if (cat && cat.subcategories.length === 0) {
+        queueMicrotask(() => scrollToCourses())
+      }
     },
-    []
+    [catalogCategories, scrollToCourses]
   )
 
-  const selectSubcategory = useCallback((categoryId: string, subcategoryId: string) => {
-    setSelectedCategoryId(categoryId)
-    setSelectedSubcategoryId(subcategoryId)
-    setExpandedCategoryIds((prev) => new Set(prev).add(categoryId))
-  }, [])
+  const selectSubcategory = useCallback(
+    (categoryId: string, subcategoryId: string) => {
+      setSelectedCategoryId(categoryId)
+      setSelectedSubcategoryId(subcategoryId)
+      setExpandedCategoryIds((prev) => new Set(prev).add(categoryId))
+      queueMicrotask(() => scrollToCourses())
+    },
+    [scrollToCourses]
+  )
 
   const panelTitle = useMemo(() => {
     if (selectedSubcategoryId) {
@@ -131,10 +145,6 @@ export default function Courses() {
     }
     return t('course.available')
   }, [catalogCategories, selectedCategoryId, selectedSubcategoryId, t])
-
-  const scrollToCourses = () => {
-    coursesListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   const renderCourseCard = (course: Course) => (
     <CourseListCard
