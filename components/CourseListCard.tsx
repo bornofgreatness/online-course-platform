@@ -9,14 +9,14 @@ export type CourseListCardCourse = {
   title: string
   description: string
   thumbnailUrl?: string | null
-  workloadHours?: number
+  workloadHours: number
 }
 
 /** Horizontal course card — course name first, then duration. */
 export default function CourseListCard({ course }: { course: CourseListCardCourse }) {
   const { t } = useI18n()
   const name = courseDisplayTitle(course.title)
-  const hours = course.workloadHours ?? 100
+  const hours = course.workloadHours
 
   return (
     <article className="flex h-32 flex-row overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-black/5 transition hover:shadow-lg sm:h-40">

@@ -11,7 +11,7 @@ const catalog = require('./platformCatalog.cjs') as {
   countCatalogCourses: () => number
 }
 
-export type CatalogCourse = { title: string; description?: string }
+export type CatalogCourse = { title: string; description?: string; workloadHours: number }
 export type CatalogSubcategory = { name: string; courses: CatalogCourse[] }
 export type CatalogCategory = {
   name: string

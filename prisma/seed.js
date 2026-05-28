@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs')
 const { PrismaClient } = require('../lib/generated/prisma')
 const {
   PLATFORM_CATALOG,
-  DEFAULT_WORKLOAD_HOURS,
   DEFAULT_PDF_URL,
   DEFAULT_THUMBNAIL,
   courseThumbnailUrl,
@@ -11,6 +10,13 @@ const {
 
 const prisma = new PrismaClient()
 const OLD_DUMMY_PDF_URL = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+
+function withWorkloadText(input, hours) {
+  if (!input) return input
+  return input
+    .replace(/100\s*h(?:oras?)?/gi, `${hours} horas`)
+    .replace(/Certificado\s+de\s+\d+\s*horas?/gi, `Certificado de ${hours} horas`)
+}
 
 async function seedCatalog() {
   let courseCount = 0
@@ -40,6 +46,16 @@ async function seedCatalog() {
       })
 
       for (const course of sub.courses) {
+        const workloadHours = Number(course.workloadHours || 100)
+        const baseDescription =
+          course.description ||
+          `Formação profissional em ${sub.name}. Certificado de ${workloadHours} horas.`
+        const normalizedDescription = withWorkloadText(baseDescription, workloadHours)
+        const normalizedSyllabus = withWorkloadText(
+          `Módulo 1: Fundamentos\nMódulo 2: Prática\nMódulo 3: Avaliação\nMódulo 4: Certificação (${workloadHours}h)`,
+          workloadHours
+        )
+
         const existing = await prisma.course.findFirst({
           where: { title: course.title, categoryId: category.id },
         })
@@ -47,17 +63,15 @@ async function seedCatalog() {
           await prisma.course.create({
             data: {
               title: course.title,
-              description:
-                course.description ||
-                `Formação profissional em ${sub.name}. Certificado de ${DEFAULT_WORKLOAD_HOURS} horas.`,
+              description: normalizedDescription,
               categoryId: category.id,
               subcategoryId: subcategory.id,
               pdfUrl: DEFAULT_PDF_URL,
               thumbnailUrl: courseThumbnailUrl(cat.name, course.title),
-              workloadHours: DEFAULT_WORKLOAD_HOURS,
-              syllabus: `Módulo 1: Fundamentos\nMódulo 2: Prática\nMódulo 3: Avaliação\nMódulo 4: Certificação (${DEFAULT_WORKLOAD_HOURS}h)`,
+              workloadHours,
+              syllabus: normalizedSyllabus,
               seoTitle: `${course.title} | Plataforma de Cursos`,
-              seoDescription: `Curso online com certificado de ${DEFAULT_WORKLOAD_HOURS} horas em ${sub.name}.`,
+              seoDescription: `Curso online com certificado de ${workloadHours} horas em ${sub.name}.`,
               lessons: {
                 create: [
                   {
@@ -86,6 +100,18 @@ async function seedCatalog() {
           courseCount++
         } else {
           const data = {}
+          if (existing.workloadHours !== workloadHours) {
+            data.workloadHours = workloadHours
+          }
+          if (existing.description && /100\s*h(?:oras?)?|Certificado de \d+\s*horas?/i.test(existing.description)) {
+            data.description = withWorkloadText(existing.description, workloadHours)
+          }
+          if (existing.syllabus && /100\s*h(?:oras?)?|Certificação\s*\(\d+\s*h\)/i.test(existing.syllabus)) {
+            data.syllabus = withWorkloadText(existing.syllabus, workloadHours)
+          }
+          if (existing.seoDescription && /certificado de \d+\s*horas?/i.test(existing.seoDescription)) {
+            data.seoDescription = `Curso online com certificado de ${workloadHours} horas em ${sub.name}.`
+          }
           if (!existing.pdfUrl || existing.pdfUrl === OLD_DUMMY_PDF_URL) {
             data.pdfUrl = DEFAULT_PDF_URL
           }

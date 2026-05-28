@@ -13,6 +13,7 @@ type CourseRow = {
   title: string
   description: string
   thumbnailUrl: string | null
+  workloadHours: number
 }
 
 type CategoryData = {
