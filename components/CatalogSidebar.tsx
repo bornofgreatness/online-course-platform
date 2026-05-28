@@ -69,6 +69,10 @@ export default function CatalogSidebar({
         const expanded = expandedCategoryIds.has(cat.id)
         const hasSubs = cat.subcategories.length > 0
         const categoryOnlyActive = selectedCategoryId === cat.id && !selectedSubcategoryId
+        const handleCategoryClick = () => {
+          onSelectCategory(cat.id)
+          if (hasSubs) onToggleCategory(cat.id)
+        }
 
         return (
           <div key={cat.id} className="flex flex-col">
@@ -94,7 +98,7 @@ export default function CatalogSidebar({
               )}
               <button
                 type="button"
-                onClick={() => onSelectCategory(cat.id)}
+                onClick={handleCategoryClick}
                 className={`${catalogNavRowClass(categoryOnlyActive)} min-w-0 flex-1`}
               >
                 <CourseCategorySidebarIcon categoryName={cat.name} icon={cat.icon} />

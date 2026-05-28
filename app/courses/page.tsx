@@ -108,7 +108,6 @@ export default function Courses() {
     (categoryId: string) => {
       setSelectedCategoryId(categoryId)
       setSelectedSubcategoryId('')
-      setExpandedCategoryIds((prev) => new Set(prev).add(categoryId))
     },
     []
   )
