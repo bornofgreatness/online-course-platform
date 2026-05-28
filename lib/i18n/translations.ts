@@ -258,7 +258,7 @@ export const translations = {
       'Choose a plan (1, 3, 6, or 12 months), pay by Mercado Pago, Stripe Pix, or Credit Card, and access the full catalog during the period.',
     'landing.faq2q': 'Is the certificate recognized?',
     'landing.faq2a':
-      'After completing the course and quiz, request your CONECT CURSOS digital certificate (R$ 19.99 issuance fee) with nationwide validity for qualification and résumé — unique online verification code included.',
+      'After completing the course and quiz, request your CONECT CURSOS digital certificate (R$ 9.00 issuance fee) with nationwide validity for qualification and résumé — unique online verification code included.',
     'landing.faq3q': 'Can I study on mobile?',
     'landing.faq3a': 'Yes. The platform is mobile-responsive — watch lessons, read PDFs, and track progress anywhere.',
     'landing.faq4q': 'Do I need to pay to register?',
@@ -905,7 +905,7 @@ export const translations = {
       'Você escolhe um plano (1, 3, 6 ou 12 meses), paga com Mercado Pago, Stripe Pix ou Cartão de Crédito e tem acesso a todos os cursos do catálogo durante o período.',
     'landing.faq2q': 'O certificado é reconhecido?',
     'landing.faq2a':
-      'Após concluir o curso e o quiz, solicite o certificado digital CONECT CURSOS (taxa de emissão R$ 19,99), válido em todo o território nacional, com código único de verificação online.',
+      'Após concluir o curso e o quiz, solicite o certificado digital CONECT CURSOS (taxa de emissão R$ 9,00), válido em todo o território nacional, com código único de verificação online.',
     'landing.faq3q': 'Posso estudar pelo celular?',
     'landing.faq3a': 'Sim. A plataforma é responsiva — assista aulas, leia PDFs e acompanhe seu progresso de qualquer lugar.',
     'landing.faq4q': 'Preciso pagar para me cadastrar?',

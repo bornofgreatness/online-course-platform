@@ -2,8 +2,8 @@
 
 export const BRAND_NAME = 'CONECT CURSOS'
 
-/** R$ 19.99 per certificate (BRL cents for Stripe). */
-export const CERTIFICATE_ISSUANCE_FEE_CENTS = 1999
+/** R$ 9.00 per certificate (BRL cents for Stripe). */
+export const CERTIFICATE_ISSUANCE_FEE_CENTS = 900
 
 export const CERTIFICATE_ISSUANCE_FEE_BRL = CERTIFICATE_ISSUANCE_FEE_CENTS / 100
 

@@ -10,7 +10,7 @@ Professional subscription-based LMS for PDF courses, certifications, quizzes, af
 - Stripe + Mercado Pago checkout
 - In-browser **PDF viewer** with protected delivery (`/api/courses/[id]/pdf`)
 - **Quizzes**: 10 questions, pass 7/10, max 3 attempts
-- **Certificates** (CONECT CURSOS) with legal notice, QR verification, PDF download, and **R$ 19.99** issuance fee via Stripe
+- **Certificates** (CONECT CURSOS) with legal notice, QR verification, PDF download, and **R$ 9.00** issuance fee via Stripe
 - **Affiliate** referrals and commission tracking (admin approval)
 - **Admin panel**: categories, courses, marketing campaigns, analytics, commissions
 - SEO: SSR, dynamic metadata, sitemap, robots.txt, JSON-LD
