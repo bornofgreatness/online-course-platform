@@ -183,7 +183,7 @@ export default function Courses() {
 
           <div className="px-0 pb-2">
             <h2 className="mb-2 text-base font-bold text-slate-900">{t('common.categories')}</h2>
-            <div className="h-[calc(100vh-12rem)] overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-sm">
+            <div className="overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-sm">
               <CatalogSidebar
                 categories={catalogCategories}
                 selectedCategoryId={selectedCategoryId}
