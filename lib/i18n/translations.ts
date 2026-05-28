@@ -556,8 +556,8 @@ export const translations = {
     'admin.failedDeleteCourse': 'Failed to delete course',
     'admin.enrollmentsSummary': '{completed} / {total} {completedLabel}',
 
-    'marketing.uploadTitle': 'S3 upload (videos / PDFs)',
-    'marketing.uploadSubtitle': 'Upload files and use the URL in courses or lessons.',
+    'marketing.uploadTitle': 'File upload (Supabase Storage)',
+    'marketing.uploadSubtitle': 'Upload images, PDFs, or videos and use the URL in courses or lessons.',
     'marketing.urlCopied': 'URL copied:',
     'marketing.coupons': 'Coupons',
     'marketing.couponCode': 'Code (e.g. PROMO20)',
@@ -1209,8 +1209,8 @@ export const translations = {
     'admin.failedDeleteCourse': 'Falha ao excluir curso',
     'admin.enrollmentsSummary': '{completed} / {total} {completedLabel}',
 
-    'marketing.uploadTitle': 'Upload S3 (vídeos / PDFs)',
-    'marketing.uploadSubtitle': 'Envie arquivos e use a URL no curso ou aula.',
+    'marketing.uploadTitle': 'Upload de arquivos (Supabase Storage)',
+    'marketing.uploadSubtitle': 'Envie imagens, PDFs ou vídeos e use a URL no curso ou aula.',
     'marketing.urlCopied': 'URL copiada:',
     'marketing.coupons': 'Cupons',
     'marketing.couponCode': 'Código (ex: PROMO20)',

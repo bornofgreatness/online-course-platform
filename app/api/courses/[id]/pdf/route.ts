@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { authErrorResponse, requirePremiumAccess, requireSession } from '@/lib/auth/session'
 import { GENERATED_COURSE_PDF_URL, buildCourseMaterialPdf } from '@/lib/courseMaterialPdf'
-import { isS3Configured, s3ObjectKeyFromUrlOrKey, signedObjectUrl } from '@/lib/s3'
+import { isObjectStorageConfigured, objectKeyFromUrlOrKey, signedObjectUrl } from '@/lib/storage'
 import { getPrisma } from '../../../../../lib/prisma'
 import { touchLastViewed, parseCourseProgress } from '../../../../../lib/progress'
 
@@ -52,12 +52,9 @@ export async function GET(_request: Request, { params }: { params: { id: string 
       })
     }
 
-    if (!target.startsWith('http://') && !target.startsWith('https://')) {
-      if (!isS3Configured()) {
-        return NextResponse.json({ error: 'Secure course storage is not configured' }, { status: 500 })
-      }
-
-      const signedUrl = await signedObjectUrl(target, {
+    const storageKey = objectKeyFromUrlOrKey(target)
+    if (storageKey && isObjectStorageConfigured()) {
+      const signedUrl = await signedObjectUrl(storageKey, {
         expiresInSeconds: 60 * 5,
         filename: `${course.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.pdf`,
       })
@@ -66,15 +63,8 @@ export async function GET(_request: Request, { params }: { params: { id: string 
       return res
     }
 
-    const s3Key = s3ObjectKeyFromUrlOrKey(target)
-    if (s3Key && isS3Configured()) {
-      const signedUrl = await signedObjectUrl(s3Key, {
-        expiresInSeconds: 60 * 5,
-        filename: `${course.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.pdf`,
-      })
-      const res = NextResponse.redirect(signedUrl, 302)
-      res.headers.set('Cache-Control', 'private, no-store')
-      return res
+    if (!target.startsWith('http://') && !target.startsWith('https://')) {
+      return NextResponse.json({ error: 'Secure course storage is not configured' }, { status: 500 })
     }
 
     const res = NextResponse.redirect(target, 302)

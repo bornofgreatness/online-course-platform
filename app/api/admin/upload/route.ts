@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '../../../../lib/auth/admin'
-import { isS3Configured, uploadToS3, type S3Folder } from '../../../../lib/s3'
+import {
+  isObjectStorageConfigured,
+  uploadObject,
+  type StorageFolder,
+} from '../../../../lib/storage'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,9 +18,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: err?.message || 'Forbidden' }, { status: err?.statusCode || 403 })
   }
 
-  if (!isS3Configured()) {
+  if (!isObjectStorageConfigured()) {
     return NextResponse.json(
-      { error: 'S3 não configurado. Defina AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY e S3_BUCKET_NAME.' },
+      {
+        error:
+          'Armazenamento não configurado. Defina NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY e SUPABASE_STORAGE_BUCKET (Supabase), ou credenciais S3.',
+      },
       { status: 503 }
     )
   }
@@ -33,8 +40,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Arquivo muito grande (máx. 500 MB)' }, { status: 400 })
   }
 
-  const allowed: S3Folder[] = ['videos', 'pdfs', 'thumbnails', 'materials']
-  if (!allowed.includes(folder as S3Folder)) {
+  const allowed: StorageFolder[] = ['videos', 'pdfs', 'thumbnails', 'materials']
+  if (!allowed.includes(folder as StorageFolder)) {
     return NextResponse.json({ error: 'Pasta inválida' }, { status: 400 })
   }
 
@@ -54,16 +61,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Tipo de arquivo inválido para a pasta selecionada' }, { status: 400 })
   }
 
-  const result = await uploadToS3(buffer, {
-    folder: folder as S3Folder,
-    filename: file.name,
-    contentType,
-  })
+  try {
+    const result = await uploadObject(buffer, {
+      folder: folder as StorageFolder,
+      filename: file.name,
+      contentType,
+    })
 
-  return NextResponse.json({
-    url: result.url,
-    key: result.key,
-    contentType,
-    size: file.size,
-  })
+    return NextResponse.json({
+      url: result.url,
+      key: result.key,
+      provider: result.provider,
+      contentType,
+      size: file.size,
+    })
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Falha no upload'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }
