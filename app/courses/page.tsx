@@ -145,6 +145,7 @@ export default function Courses() {
         title: course.title,
         description: course.description,
         thumbnailUrl: course.thumbnailUrl,
+        workloadHours: course.workloadHours,
       }}
     />
   )

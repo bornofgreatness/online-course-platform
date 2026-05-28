@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { courseDisplayTitle } from '../lib/courseDisplay'
 import { useI18n } from './LanguageProvider'
 
 export type CourseListCardCourse = {
@@ -8,22 +9,24 @@ export type CourseListCardCourse = {
   title: string
   description: string
   thumbnailUrl?: string | null
+  workloadHours?: number
 }
 
-/** Horizontal course card matching the /courses catalog layout. */
+/** Horizontal course card — course name first, then duration. */
 export default function CourseListCard({ course }: { course: CourseListCardCourse }) {
   const { t } = useI18n()
+  const name = courseDisplayTitle(course.title)
+  const hours = course.workloadHours ?? 100
 
   return (
-    <article className="flex flex-row overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-black/5 transition hover:shadow-lg h-32 sm:h-40">
-      <div className="flex flex-shrink-0 items-center justify-center" style={{ width: '60%', minWidth: '120px', maxWidth: '180px' }}>
+    <article className="flex h-32 flex-row overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-black/5 transition hover:shadow-lg sm:h-40">
+      <div
+        className="flex flex-shrink-0 items-center justify-center"
+        style={{ width: '60%', minWidth: '120px', maxWidth: '180px' }}
+      >
         <div className="ml-1.5 mr-3 h-[calc(100%-16px)] w-[calc(100%-18px)] overflow-hidden rounded-lg sm:rounded-xl">
           {course.thumbnailUrl ? (
-            <img
-              src={course.thumbnailUrl}
-              alt={course.title}
-              className="h-full w-full object-cover"
-            />
+            <img src={course.thumbnailUrl} alt={name} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-2xl text-slate-500">
               📚
@@ -33,10 +36,11 @@ export default function CourseListCard({ course }: { course: CourseListCardCours
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center py-1 pr-2 sm:pr-2.5">
         <div>
-          <div className="flex items-start justify-between gap-1">
-            <h3 className="line-clamp-1 text-sm font-bold leading-tight text-blue-950 sm:text-base">{course.title}</h3>
-          </div>
-          <p className="mt-1 line-clamp-3 text-[10px] leading-tight text-slate-600 sm:text-xs">{course.description}</p>
+          <h3 className="line-clamp-2 text-sm font-bold leading-snug text-blue-950 sm:text-base">{name}</h3>
+          <p className="mt-0.5 text-[11px] font-semibold text-teal-700 sm:text-xs">
+            {t('course.workload', { hours })}
+          </p>
+          <p className="mt-1 line-clamp-2 text-[10px] leading-tight text-slate-600 sm:text-xs">{course.description}</p>
         </div>
         <div className="mt-2 flex items-center justify-end gap-1.5">
           <Link
