@@ -79,7 +79,7 @@ export default function Header() {
   return (
     <>
       {/* Mobile: matches courses page top bar */}
-      <div className="sticky top-0 z-50 border-b border-white/10 bg-black lg:hidden">
+      <div className="sticky top-0 z-50 border-b border-black/10 bg-white lg:hidden">
         <div className="flex items-center justify-between px-4 py-3.5">
           <Link href="/" className="block shrink-0">
             <Image
@@ -96,14 +96,14 @@ export default function Header() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="rounded-lg border border-white p-2 text-white hover:bg-white/10"
+              className="rounded-lg border border-black p-2 text-black hover:bg-black/10"
               aria-expanded={mobileMenuOpen}
               aria-label="Open menu"
             >
               <span className="flex h-4 w-5 flex-col justify-center gap-1">
-                <span className="h-0.5 w-full rounded-full bg-white" />
-                <span className="h-0.5 w-full rounded-full bg-white" />
-                <span className="h-0.5 w-full rounded-full bg-white" />
+                <span className="h-0.5 w-full rounded-full bg-black" />
+                <span className="h-0.5 w-full rounded-full bg-black" />
+                <span className="h-0.5 w-full rounded-full bg-black" />
               </span>
             </button>
           </div>
