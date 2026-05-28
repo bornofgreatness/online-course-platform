@@ -49,6 +49,9 @@ export default function CatalogSidebar({
   className = '',
 }: Props) {
   const { t } = useI18n()
+  const categoriesWithSubcategories = categories.filter((cat) => cat.subcategories.length > 0)
+  const categoriesWithoutSubcategories = categories.filter((cat) => cat.subcategories.length === 0)
+  const orderedCategories = [...categoriesWithSubcategories, ...categoriesWithoutSubcategories]
 
   return (
     <nav className={`flex flex-col gap-0.5 ${className}`}>
@@ -61,7 +64,7 @@ export default function CatalogSidebar({
         <span className="text-sm font-bold leading-tight text-black">{t('common.allCategories')}</span>
       </button>
 
-      {categories.map((cat) => {
+      {orderedCategories.map((cat) => {
         const displayName = translateCategoryName(cat.name, t)
         const expanded = expandedCategoryIds.has(cat.id)
         const hasSubs = cat.subcategories.length > 0

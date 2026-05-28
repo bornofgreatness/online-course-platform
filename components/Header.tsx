@@ -4,13 +4,20 @@ import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CourseCategorySidebarIcon } from './CourseCategorySidebarIcon'
 import LanguageSwitch from './LanguageSwitch'
 import { useI18n } from './LanguageProvider'
 import { canAccessAdminPanel } from '../lib/auth/rbac'
 
-type NavCategory = { id: string; name: string; courseCount: number; icon?: string | null; imageUrl?: string | null }
+type NavCategory = {
+  id: string
+  name: string
+  courseCount: number
+  icon?: string | null
+  imageUrl?: string | null
+  subcategories?: Array<{ id: string; name: string; courseCount: number }>
+}
 
 export default function Header() {
   const { data: session, status } = useSession()
@@ -57,6 +64,11 @@ export default function Header() {
   const userRole = session?.user?.role
   const isAdmin = canAccessAdminPanel(userRole)
   const showStudentNav = !!session
+  const orderedCategories = useMemo(() => {
+    const withSubs = categories.filter((c) => (c.subcategories?.length || 0) > 0)
+    const withoutSubs = categories.filter((c) => (c.subcategories?.length || 0) === 0)
+    return [...withSubs, ...withoutSubs]
+  }, [categories])
 
   const navText = (active: boolean) =>
     [
@@ -262,10 +274,10 @@ export default function Header() {
                   >
                     {t('common.allCategories')}
                   </Link>
-                  {categories.length > 0 && (
+                  {orderedCategories.length > 0 && (
                     <>
                       <div className="my-1 border-t border-gray-100" />
-                      {categories.map((c) => (
+                      {orderedCategories.map((c) => (
                         <Link
                           key={c.id}
                           href={`/categories/${c.id}`}
