@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import type { BillingPlan } from '../lib/billingPlans'
 import { PLAN_MONTHS, PLAN_TOTAL_CENTS_BRL } from '../lib/billingPlans'
+import type { CheckoutProvider } from '../lib/billingProvider'
 import { formatMoney } from '../lib/i18n/format'
 import { useI18n } from './LanguageProvider'
 import type { TranslationKey } from '../lib/i18n/translations'
@@ -51,9 +52,8 @@ const PLAN_ACCENT: Record<
   },
 }
 
-type PaymentProvider = 'stripe' | 'mercadopago'
-const mpEnabled = process.env.NEXT_PUBLIC_MERCADOPAGO_ENABLED === 'true'
-const stripeEnabled = process.env.NEXT_PUBLIC_STRIPE_ENABLED !== 'false'
+const mpEnabled = process.env.NEXT_PUBLIC_MERCADOPAGO_ENABLED !== 'false'
+const stripeEnabled = process.env.NEXT_PUBLIC_STRIPE_ENABLED === 'true'
 
 type PricingPlansProps = {
   /** When true, shows the feature checklist above plans (e.g. landing embed). */
@@ -73,8 +73,8 @@ export default function PricingPlans({ showFeatures = false }: PricingPlansProps
     discountCents?: number
     error?: string
   } | null>(null)
-  const [provider, setProvider] = useState<PaymentProvider>(
-    stripeEnabled ? 'stripe' : mpEnabled ? 'mercadopago' : 'stripe'
+  const [provider, setProvider] = useState<CheckoutProvider>(
+    mpEnabled ? 'mercadopago' : stripeEnabled ? 'stripe' : 'mercadopago'
   )
 
   async function validateCoupon(plan: BillingPlan) {

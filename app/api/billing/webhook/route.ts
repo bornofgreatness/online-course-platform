@@ -52,6 +52,7 @@ export async function POST(request: Request) {
         courseId,
         amountBrl,
         externalId: session.id,
+        provider: 'stripe',
         currency: session.currency || 'brl',
       })
       const dbUser = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } })

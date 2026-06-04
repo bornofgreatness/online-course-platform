@@ -255,7 +255,7 @@ export const translations = {
     'landing.footer': '© {year} Online Course Platform · BRL currency',
     'landing.faq1q': 'How does the subscription work?',
     'landing.faq1a':
-      'Choose a plan (1, 3, 6, or 12 months), pay by Mercado Pago, Stripe Pix, or Credit Card, and access the full catalog during the period.',
+      'Choose a plan (1, 3, 6, or 12 months), pay with Mercado Pago (PIX or card), and access the full catalog during the period.',
     'landing.faq2q': 'Is the certificate recognized?',
     'landing.faq2a':
       'After completing the course and quiz, request your CONECT CURSOS digital certificate (R$ 9.00 issuance fee) with nationwide validity for qualification and résumé — unique online verification code included.',
@@ -316,6 +316,8 @@ export const translations = {
     'pricing.noCheckoutUrl': 'No checkout URL returned',
     'pricing.stripeNote':
       'Configure STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET. Webhook URL: /api/billing/webhook',
+    'pricing.mercadoPagoNote':
+      'Payments via Mercado Pago (PIX and card). Webhook URL: /api/billing/mercadopago/webhook',
     'pricing.plan.1m': '1 month access',
     'pricing.plan.3m': '3 months access',
     'pricing.plan.6m': '6 months access',
@@ -902,7 +904,7 @@ export const translations = {
     'landing.footer': '© {year} Plataforma de Cursos Online · Moeda: BRL',
     'landing.faq1q': 'Como funciona a assinatura?',
     'landing.faq1a':
-      'Você escolhe um plano (1, 3, 6 ou 12 meses), paga com Mercado Pago, Stripe Pix ou Cartão de Crédito e tem acesso a todos os cursos do catálogo durante o período.',
+      'Você escolhe um plano (1, 3, 6 ou 12 meses), paga com Mercado Pago (PIX ou cartão) e tem acesso a todos os cursos do catálogo durante o período.',
     'landing.faq2q': 'O certificado é reconhecido?',
     'landing.faq2a':
       'Após concluir o curso e o quiz, solicite o certificado digital CONECT CURSOS (taxa de emissão R$ 9,00), válido em todo o território nacional, com código único de verificação online.',
@@ -966,6 +968,8 @@ export const translations = {
     'pricing.noCheckoutUrl': 'URL de checkout não retornada',
     'pricing.stripeNote':
       'Configure STRIPE_SECRET_KEY e STRIPE_WEBHOOK_SECRET. URL do webhook: /api/billing/webhook',
+    'pricing.mercadoPagoNote':
+      'Pagamento via Mercado Pago (PIX e cartão). URL do webhook: /api/billing/mercadopago/webhook',
     'pricing.plan.1m': 'Acesso por 1 mês',
     'pricing.plan.3m': 'Acesso por 3 meses',
     'pricing.plan.6m': 'Acesso por 6 meses',

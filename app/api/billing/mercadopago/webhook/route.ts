@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server'
 import { getPrisma } from '../../../../../lib/prisma'
 import { activateSubscription } from '../../../../../lib/activateSubscription'
-import { getMercadoPagoPayment, parseExternalReference, isMercadoPagoConfigured } from '../../../../../lib/mercadoPago'
+import {
+  getMercadoPagoPayment,
+  parseExternalReference,
+  parseCertificateExternalReference,
+  isMercadoPagoConfigured,
+} from '../../../../../lib/mercadoPago'
 import { isBillingPlan } from '../../../../../lib/billingPlans'
+import { recordCertificatePayment } from '../../../../../lib/certificatePayment'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +38,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true, status: payment.status })
     }
 
+    const prisma = getPrisma()
+
+    const certParsed =
+      parseCertificateExternalReference(payment.external_reference) ||
+      (payment.metadata?.type === 'certificate' &&
+      payment.metadata?.user_id &&
+      payment.metadata?.course_id
+        ? { userId: payment.metadata.user_id, courseId: payment.metadata.course_id }
+        : null)
+
+    if (certParsed) {
+      await recordCertificatePayment(prisma, {
+        userId: certParsed.userId,
+        courseId: certParsed.courseId,
+        amountBrl: payment.transaction_amount,
+        externalId: String(payment.id),
+        provider: 'mercadopago',
+        currency: payment.currency_id?.toLowerCase() || 'brl',
+      })
+      return NextResponse.json({ received: true, certificatePaid: true })
+    }
+
     const parsed =
       parseExternalReference(payment.external_reference) ||
       (payment.metadata?.user_id && payment.metadata?.plan
@@ -47,7 +75,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true })
     }
 
-    const prisma = getPrisma()
     await activateSubscription(prisma, {
       userId: parsed.userId,
       plan: parsed.plan,

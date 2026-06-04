@@ -51,16 +51,18 @@ export default function CourseActions({
   useEffect(() => {
     const checkout = searchParams.get('certificate')
     const sessionId = searchParams.get('session_id')
-    if (checkout !== 'success' || !sessionId) return
+    const paymentId = searchParams.get('payment_id')
+    if (checkout !== 'success' || (!sessionId && !paymentId)) return
 
     let cancelled = false
     ;(async () => {
       setLoading(true)
       setCheckoutMessage(t('certificate.confirmingPayment'))
       try {
-        const res = await fetch(
-          `/api/billing/certificate/confirm?session_id=${encodeURIComponent(sessionId)}&courseId=${encodeURIComponent(courseId)}`
-        )
+        const params = new URLSearchParams({ courseId })
+        if (paymentId) params.set('payment_id', paymentId)
+        if (sessionId) params.set('session_id', sessionId)
+        const res = await fetch(`/api/billing/certificate/confirm?${params.toString()}`)
         const data = await res.json().catch(() => ({}))
         if (!cancelled) {
           if (res.ok) {

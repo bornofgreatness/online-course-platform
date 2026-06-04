@@ -9,21 +9,26 @@ import {
 import { getPrisma } from '../../../../lib/prisma'
 import { getActiveSubscription } from '../../../../lib/subscription'
 import {
+  CERTIFICATE_ISSUANCE_FEE_BRL,
   CERTIFICATE_ISSUANCE_FEE_CENTS,
   formatCertificateFeeBrl,
 } from '../../../../lib/certificatePolicy'
 import { assertEligibleForCertificate } from '../../../../lib/issueCertificate'
 import { hasPaidCertificateFee } from '../../../../lib/certificatePayment'
 import { stripeCheckoutPaymentMethods } from '../../../../lib/stripeCheckout'
+import {
+  isMercadoPagoConfigured,
+  createMercadoPagoCertificatePreference,
+} from '../../../../lib/mercadoPago'
+import {
+  isStripeConfigured,
+  isStripePaymentEnabled,
+  preferMercadoPagoCheckout,
+} from '../../../../lib/billingProvider'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  const secret = process.env.STRIPE_SECRET_KEY?.trim()
-  if (!secret || secret.includes('your_key') || secret.length < 30) {
-    return NextResponse.json({ error: 'Stripe não configurado (STRIPE_SECRET_KEY).' }, { status: 503 })
-  }
-
   try {
     const { user } = await requireSession()
     const prisma = getPrisma()
@@ -78,49 +83,82 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Course not found' }, { status: 404 })
     }
 
-    const stripe = new Stripe(secret)
     const baseUrl =
       process.env.NEXT_PUBLIC_APP_URL ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
       'http://localhost:3000'
 
-    const checkoutSession = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: stripeCheckoutPaymentMethods(),
-      customer_email: user.email,
-      locale: 'pt-BR',
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: 'brl',
-            unit_amount: CERTIFICATE_ISSUANCE_FEE_CENTS,
-            product_data: {
-              name: `Certificado digital — ${course.title}`,
-              description: `Taxa de emissão do certificado digital CONECT CURSOS (${formatCertificateFeeBrl()})`,
-            },
-          },
-        },
-      ],
-      success_url: `${baseUrl}/courses/${courseId}?certificate=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/courses/${courseId}`,
-      metadata: {
-        userId: user.id,
+    if (preferMercadoPagoCheckout() && isMercadoPagoConfigured()) {
+      const preference = await createMercadoPagoCertificatePreference({
         courseId,
-        type: 'certificate',
-      },
-    })
+        courseTitle: course.title,
+        unitPriceBrl: CERTIFICATE_ISSUANCE_FEE_BRL,
+        userId: user.id,
+        payerEmail: user.email,
+        baseUrl,
+      })
 
-    if (!checkoutSession.url) {
-      return NextResponse.json({ error: 'Stripe did not return a checkout URL' }, { status: 500 })
+      const useSandbox = process.env.MERCADOPAGO_SANDBOX === 'true'
+      const url =
+        useSandbox && preference.sandbox_init_point
+          ? preference.sandbox_init_point
+          : preference.init_point
+
+      return NextResponse.json({
+        paymentRequired: true,
+        url,
+        provider: 'mercadopago',
+        feeCents: CERTIFICATE_ISSUANCE_FEE_CENTS,
+        feeLabel: formatCertificateFeeBrl(),
+      })
     }
 
-    return NextResponse.json({
-      paymentRequired: true,
-      url: checkoutSession.url,
-      feeCents: CERTIFICATE_ISSUANCE_FEE_CENTS,
-      feeLabel: formatCertificateFeeBrl(),
-    })
+    if (isStripePaymentEnabled() && isStripeConfigured()) {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim())
+      const checkoutSession = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        payment_method_types: stripeCheckoutPaymentMethods(),
+        customer_email: user.email,
+        locale: 'pt-BR',
+        line_items: [
+          {
+            quantity: 1,
+            price_data: {
+              currency: 'brl',
+              unit_amount: CERTIFICATE_ISSUANCE_FEE_CENTS,
+              product_data: {
+                name: `Certificado digital — ${course.title}`,
+                description: `Taxa de emissão do certificado digital CONECT CURSOS (${formatCertificateFeeBrl()})`,
+              },
+            },
+          },
+        ],
+        success_url: `${baseUrl}/courses/${courseId}?certificate=success&provider=stripe&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/courses/${courseId}`,
+        metadata: {
+          userId: user.id,
+          courseId,
+          type: 'certificate',
+        },
+      })
+
+      if (!checkoutSession.url) {
+        return NextResponse.json({ error: 'Stripe did not return a checkout URL' }, { status: 500 })
+      }
+
+      return NextResponse.json({
+        paymentRequired: true,
+        url: checkoutSession.url,
+        provider: 'stripe',
+        feeCents: CERTIFICATE_ISSUANCE_FEE_CENTS,
+        feeLabel: formatCertificateFeeBrl(),
+      })
+    }
+
+    return NextResponse.json(
+      { error: 'Mercado Pago não configurado (MERCADOPAGO_ACCESS_TOKEN).' },
+      { status: 503 }
+    )
   } catch (e: unknown) {
     const auth = authErrorResponse(e)
     if (auth.status !== 500) {

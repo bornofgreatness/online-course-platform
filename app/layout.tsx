@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import SessionProvider from '../components/SessionProvider'
 import {
   educationalServiceJsonLd,
@@ -15,8 +14,6 @@ import {
 import { SEO_KEYWORDS_COMBINED_STRING } from '../lib/seo/keywords'
 import { SEO_HREFLANG } from '../lib/seo/paths'
 import './globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -63,7 +60,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.className} bg-slate-100 antialiased`}>
+      <body className="font-sans bg-slate-100 antialiased">
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

@@ -7,10 +7,10 @@ Professional subscription-based LMS for PDF courses, certifications, quizzes, af
 - **147 courses** across **7 categories** and **30+ subcategories** (seed catalog)
 - Student registration with lead capture (WhatsApp, address, referral `?ref=`)
 - **4 subscription plans** (1 / 3 / 6 / 12 months) with monthly BRL pricing display
-- Stripe + Mercado Pago checkout
+- Mercado Pago checkout (PIX + card); Stripe optional
 - In-browser **PDF viewer** with protected delivery (`/api/courses/[id]/pdf`)
 - **Quizzes**: 10 questions, pass 7/10, max 3 attempts
-- **Certificates** (CONECT CURSOS) with legal notice, QR verification, PDF download, and **R$ 9.00** issuance fee via Stripe
+- **Certificates** (CONECT CURSOS) with legal notice, QR verification, PDF download, and **R$ 9.00** issuance fee via Mercado Pago
 - **Affiliate** referrals and commission tracking (admin approval)
 - **Admin panel**: categories, courses, marketing campaigns, analytics, commissions
 - SEO: SSR, dynamic metadata, sitemap, robots.txt, JSON-LD
@@ -84,17 +84,13 @@ Student account includes a **12-month active subscription** for testing enrollme
 | `/admin` | Admin CRUD & analytics |
 | `/verify/certificate/[id]` | Public certificate verification |
 
-## Payments (Stripe — recommended)
+## Payments (Mercado Pago — default)
 
-See **[docs/STRIPE_SETUP.md](docs/STRIPE_SETUP.md)** for API keys and test card `4242 4242 4242 4242`.
+Set `MERCADOPAGO_ACCESS_TOKEN` and `NEXT_PUBLIC_MERCADOPAGO_ENABLED="true"` in `.env`. Checkout uses Mercado Pago (PIX + card) for plans and certificate fees.
 
-After checkout, the dashboard calls `/api/billing/stripe/confirm` so subscriptions activate on localhost without webhooks.
+Configure the webhook in [Mercado Pago Developers](https://www.mercadopago.com.br/developers): `POST /api/billing/mercadopago/webhook` on your public URL (e.g. production domain).
 
-Optional webhook forwarding:
-
-```bash
-npm run stripe:listen
-```
+Optional Stripe: set `NEXT_PUBLIC_STRIPE_ENABLED="true"` and see **[docs/STRIPE_SETUP.md](docs/STRIPE_SETUP.md)**.
 
 ## End-to-end testing
 

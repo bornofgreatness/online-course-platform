@@ -92,7 +92,11 @@ export default function PricingView() {
           <PricingPlans showFeatures={false} />
         </div>
 
-        <p className="mt-8 text-center text-xs text-slate-500">{t('pricing.stripeNote')}</p>
+        <p className="mt-8 text-center text-xs text-slate-500">
+          {process.env.NEXT_PUBLIC_STRIPE_ENABLED === 'true'
+            ? t('pricing.stripeNote')
+            : t('pricing.mercadoPagoNote')}
+        </p>
       </section>
     </div>
   )

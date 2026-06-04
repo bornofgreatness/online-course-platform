@@ -3,7 +3,7 @@ import { CERTIFICATE_ISSUANCE_FEE_CENTS, certificateFeeEnabled } from './certifi
 
 export const PAYMENT_PURPOSE_CERTIFICATE = 'certificate'
 
-/** Record certificate fee payment (idempotent by Stripe session id). */
+/** Record certificate fee payment (idempotent by provider + external id). */
 export async function recordCertificatePayment(
   prisma: PrismaClient,
   input: {
@@ -11,12 +11,13 @@ export async function recordCertificatePayment(
     courseId: string
     amountBrl: number
     externalId: string
+    provider: 'stripe' | 'mercadopago'
     currency?: string
   }
 ) {
   const existing = await prisma.payment.findFirst({
     where: {
-      provider: 'stripe',
+      provider: input.provider,
       externalId: input.externalId,
       status: 'succeeded',
     },
@@ -29,9 +30,9 @@ export async function recordCertificatePayment(
       amount: input.amountBrl,
       currency: (input.currency || 'brl').toLowerCase(),
       status: 'succeeded',
-      provider: 'stripe',
+      provider: input.provider,
       externalId: input.externalId,
-      stripeId: input.externalId,
+      stripeId: input.provider === 'stripe' ? input.externalId : null,
       purpose: PAYMENT_PURPOSE_CERTIFICATE,
       courseId: input.courseId,
     },
