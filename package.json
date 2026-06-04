@@ -11,8 +11,7 @@
     "db:push": "prisma db push",
     "db:local": "node scripts/ensure-local-db.js && prisma db push",
     "catalog:assets": "node scripts/update-catalog-assets.js",
-    "seed": "node prisma/seed.js",
-    "stripe:listen": "stripe listen --forward-to localhost:3000/api/billing/webhook"
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",
@@ -28,8 +27,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.75.0",
-    "react-pdf": "^10.4.1",
-    "stripe": "^22.1.1"
+    "react-pdf": "^10.4.1"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

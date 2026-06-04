@@ -17,7 +17,7 @@ export const PLAN_TOTAL_CENTS_BRL: Record<BillingPlan, number> = {
   '1y': 11880,
 }
 
-/** @deprecated Use PLAN_TOTAL_CENTS_BRL — kept for Stripe webhook compatibility */
+/** @deprecated Use PLAN_TOTAL_CENTS_BRL */
 export const PLAN_AMOUNT_CENTS: Record<BillingPlan, number> = PLAN_TOTAL_CENTS_BRL
 
 export const PLAN_LABEL_PT: Record<BillingPlan, string> = {

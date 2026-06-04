@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import type { BillingPlan } from '../lib/billingPlans'
 import { PLAN_MONTHS, PLAN_TOTAL_CENTS_BRL } from '../lib/billingPlans'
-import type { CheckoutProvider } from '../lib/billingProvider'
 import { formatMoney } from '../lib/i18n/format'
 import { useI18n } from './LanguageProvider'
 import type { TranslationKey } from '../lib/i18n/translations'
@@ -52,9 +51,6 @@ const PLAN_ACCENT: Record<
   },
 }
 
-const mpEnabled = process.env.NEXT_PUBLIC_MERCADOPAGO_ENABLED !== 'false'
-const stripeEnabled = process.env.NEXT_PUBLIC_STRIPE_ENABLED === 'true'
-
 type PricingPlansProps = {
   /** When true, shows the feature checklist above plans (e.g. landing embed). */
   showFeatures?: boolean
@@ -73,9 +69,6 @@ export default function PricingPlans({ showFeatures = false }: PricingPlansProps
     discountCents?: number
     error?: string
   } | null>(null)
-  const [provider, setProvider] = useState<CheckoutProvider>(
-    mpEnabled ? 'mercadopago' : stripeEnabled ? 'stripe' : 'mercadopago'
-  )
 
   async function validateCoupon(plan: BillingPlan) {
     if (!couponCode.trim()) {
@@ -98,10 +91,7 @@ export default function PricingPlans({ showFeatures = false }: PricingPlansProps
 
     setBusy(plan)
     try {
-      const endpoint =
-        provider === 'mercadopago' ? '/api/billing/mercadopago/checkout' : '/api/billing/checkout'
-
-      const res = await fetch(endpoint, {
+      const res = await fetch('/api/billing/mercadopago/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan, couponCode: couponCode.trim() || undefined }),
@@ -175,42 +165,9 @@ export default function PricingPlans({ showFeatures = false }: PricingPlansProps
         )}
       </div>
 
-      {/* Payment method */}
-      {(mpEnabled || stripeEnabled) && (
-        <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            {t('pricing.paymentMethod')}
-          </span>
-          <div className="inline-flex rounded-full border border-slate-200 bg-white p-1 shadow-sm ring-1 ring-black/5">
-            {mpEnabled && (
-              <button
-                type="button"
-                onClick={() => setProvider('mercadopago')}
-                className={`rounded-full px-4 py-2 text-xs font-bold transition sm:px-5 sm:text-sm ${
-                  provider === 'mercadopago'
-                    ? 'bg-green-600 text-white shadow-md'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {t('pricing.mercadoPago')}
-              </button>
-            )}
-            {stripeEnabled && (
-              <button
-                type="button"
-                onClick={() => setProvider('stripe')}
-                className={`rounded-full px-4 py-2 text-xs font-bold transition sm:px-5 sm:text-sm ${
-                  provider === 'stripe'
-                    ? 'bg-indigo-600 text-white shadow-md'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {t('pricing.stripe')}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+      <p className="text-center text-xs font-medium text-slate-500">
+        {t('pricing.paymentMethod')}: {t('pricing.mercadoPago')}
+      </p>
 
       {/* Plans */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:items-stretch lg:gap-4 xl:gap-5">

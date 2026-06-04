@@ -7,7 +7,7 @@ Professional subscription-based LMS for PDF courses, certifications, quizzes, af
 - **147 courses** across **7 categories** and **30+ subcategories** (seed catalog)
 - Student registration with lead capture (WhatsApp, address, referral `?ref=`)
 - **4 subscription plans** (1 / 3 / 6 / 12 months) with monthly BRL pricing display
-- Mercado Pago checkout (PIX + card); Stripe optional
+- Mercado Pago checkout (PIX + card)
 - In-browser **PDF viewer** with protected delivery (`/api/courses/[id]/pdf`)
 - **Quizzes**: 10 questions, pass 7/10, max 3 attempts
 - **Certificates** (CONECT CURSOS) with legal notice, QR verification, PDF download, and **R$ 9.00** issuance fee via Mercado Pago
@@ -40,8 +40,7 @@ Required for local dev:
 Optional but recommended:
 
 - `RESEND_API_KEY` — email verification & password reset
-- `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` — payments
-- `MERCADOPAGO_ACCESS_TOKEN` — PIX/card (set `NEXT_PUBLIC_MERCADOPAGO_ENABLED=true`)
+- `MERCADOPAGO_ACCESS_TOKEN` — payments (PIX + card; `NEXT_PUBLIC_MERCADOPAGO_ENABLED=true`)
 - AWS S3 — PDF/thumbnail uploads in admin
 
 ### 3. Database & seed
@@ -90,18 +89,15 @@ Set `MERCADOPAGO_ACCESS_TOKEN` and `NEXT_PUBLIC_MERCADOPAGO_ENABLED="true"` in `
 
 Configure the webhook in [Mercado Pago Developers](https://www.mercadopago.com.br/developers): `POST /api/billing/mercadopago/webhook` on your public URL (e.g. production domain).
 
-Optional Stripe: set `NEXT_PUBLIC_STRIPE_ENABLED="true"` and see **[docs/STRIPE_SETUP.md](docs/STRIPE_SETUP.md)**.
-
 ## End-to-end testing
 
 Full walkthrough (enroll → quiz → certificate): **[docs/E2E_TESTING.md](docs/E2E_TESTING.md)**
 
 ## Webhooks
 
-- Stripe: `POST /api/billing/webhook`
 - Mercado Pago: `POST /api/billing/mercadopago/webhook`
 
-Point provider webhooks to your deployed URL and use the secrets in `.env`.
+Point the webhook to your deployed URL in the Mercado Pago developer panel.
 
 ## Scripts
 

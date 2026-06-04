@@ -2,7 +2,7 @@
 
 export const BRAND_NAME = 'CONECT CURSOS'
 
-/** R$ 9.00 per certificate (BRL; charged via Mercado Pago or optional Stripe). */
+/** R$ 9.00 per certificate (BRL; charged via Mercado Pago). */
 export const CERTIFICATE_ISSUANCE_FEE_CENTS = 900
 
 export const CERTIFICATE_ISSUANCE_FEE_BRL = CERTIFICATE_ISSUANCE_FEE_CENTS / 100

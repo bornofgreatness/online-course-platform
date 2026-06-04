@@ -1,6 +1,6 @@
 # End-to-end test: Pay → Enroll → Quiz → Certificate
 
-Two paths: **A** uses the seeded student (skip payment). **B** uses Stripe (full flow).
+Two paths: **A** uses the seeded student (skip payment). **B** uses Mercado Pago (full flow).
 
 ---
 
@@ -9,7 +9,7 @@ Two paths: **A** uses the seeded student (skip payment). **B** uses Stripe (full
 ```bash
 cp .env.example .env
 # Set DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL=http://localhost:3000
-# For Path B also set STRIPE_SECRET_KEY (see docs/STRIPE_SETUP.md)
+# For Path B also set MERCADOPAGO_ACCESS_TOKEN
 
 npm install
 npx prisma db push
@@ -23,7 +23,7 @@ Open **http://localhost:3000**
 
 ## Path A — Quick flow (seeded student, no payment)
 
-Use this to validate enroll → quiz → certificate without Stripe.
+Use this to validate enroll → quiz → certificate without payment.
 
 | Step | Action | Expected |
 |------|--------|----------|
@@ -43,13 +43,13 @@ Use this to validate enroll → quiz → certificate without Stripe.
 
 ---
 
-## Path B — Full flow with Stripe
+## Path B — Full flow with Mercado Pago
 
 | Step | Action | Expected |
 |------|--------|----------|
 | 1 | `/auth/signup` — create a new account | Success (verify email optional if `REQUIRE_EMAIL_VERIFICATION=false`) |
-| 2 | `/pricing` — select **Stripe**, plan **1 month** | Checkout redirect |
-| 3 | Pay with test card `4242 4242 4242 4242` | Redirect to dashboard |
+| 2 | `/pricing` — plan **1 month** → **Assinar agora** | Mercado Pago checkout redirect |
+| 3 | Pay with Mercado Pago test/sandbox account | Redirect to dashboard |
 | 4 | Green banner: payment confirmed | Active subscription on dashboard |
 | 5 | Continue from Path A step 4 | Same enroll → quiz → certificate flow |
 
@@ -78,15 +78,11 @@ GET  /api/certificates
 
 ---
 
-## Mercado Pago (alternative)
-
-For Brazil PIX/card via Mercado Pago:
+## Mercado Pago notes
 
 1. Set `MERCADOPAGO_ACCESS_TOKEN` and `NEXT_PUBLIC_MERCADOPAGO_ENABLED=true`
-2. Use [Mercado Pago test users](https://www.mercadopago.com.br/developers/pt/docs/your-integrations/test/accounts)
-3. Webhooks require a public URL (e.g. [ngrok](https://ngrok.com/) → `/api/billing/mercadopago/webhook`)
-
-Stripe is simpler for localhost because redirect confirm activates the subscription without ngrok.
+2. Use [Mercado Pago test users](https://www.mercadopago.com.br/developers/pt/docs/your-integrations/test/accounts) with `MERCADOPAGO_SANDBOX=true`
+3. Subscriptions activate via webhook — use [ngrok](https://ngrok.com/) → `/api/billing/mercadopago/webhook` on localhost
 
 ---
 
@@ -98,4 +94,4 @@ Stripe is simpler for localhost because redirect confirm activates the subscript
 | PDF not shown | Not enrolled or subscription expired | Enroll + active plan |
 | Cannot mark complete | Quiz not passed | Score ≥ 7 on quiz |
 | Cannot get certificate | Course not marked complete | Mark complete after quiz |
-| Checkout error | Missing Stripe key | `docs/STRIPE_SETUP.md` |
+| Checkout error | Missing MP token | Set `MERCADOPAGO_ACCESS_TOKEN` in `.env` |

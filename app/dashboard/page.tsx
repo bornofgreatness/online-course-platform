@@ -70,26 +70,9 @@ function DashboardContent() {
     }
 
     const checkout = searchParams.get('checkout')
-    const provider = searchParams.get('provider')
-    const sessionId = searchParams.get('session_id')
 
     async function run() {
-      if (checkout === 'success' && provider === 'stripe' && sessionId) {
-        try {
-          const res = await fetch(
-            `/api/billing/stripe/confirm?session_id=${encodeURIComponent(sessionId)}`
-          )
-          const data = await res.json().catch(() => ({}))
-          if (res.ok) {
-            setCheckoutMessage(t('dashboard.paymentConfirmed'))
-          } else {
-            setCheckoutMessage((data as { error?: string }).error || t('dashboard.paymentConfirmFailed'))
-          }
-        } catch {
-          setCheckoutMessage(t('dashboard.paymentConfirmFailed'))
-        }
-        router.replace('/dashboard', { scroll: false })
-      } else if (checkout === 'success') {
+      if (checkout === 'success') {
         setCheckoutMessage(t('dashboard.paymentConfirmed'))
         router.replace('/dashboard', { scroll: false })
       } else if (checkout === 'pending') {
