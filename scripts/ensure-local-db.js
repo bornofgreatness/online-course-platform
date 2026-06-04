@@ -2,7 +2,7 @@
  * Creates local database from DATABASE_URL name if missing (connects via postgres DB).
  * Usage: node scripts/ensure-local-db.js
  */
-const { PrismaClient } = require('../lib/generated/prisma')
+const { PrismaClient } = require('@prisma/client')
 
 const databaseUrl = process.env.DATABASE_URL || ''
 const match = databaseUrl.match(/\/([^/?]+)(\?|$)/)

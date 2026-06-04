@@ -94,7 +94,13 @@ export async function getMercadoPagoPayment(paymentId: string) {
     transaction_amount: number
     currency_id: string
     external_reference?: string
-    metadata?: { user_id?: string; plan?: string; coupon_id?: string }
+    metadata?: {
+      user_id?: string
+      plan?: string
+      coupon_id?: string
+      type?: string
+      course_id?: string
+    }
   }
 }
 

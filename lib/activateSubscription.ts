@@ -1,4 +1,4 @@
-import type { PrismaClient } from './generated/prisma'
+import type { PrismaClient } from '@prisma/client'
 import { addMonths, isBillingPlan, PLAN_LABEL_PT, PLAN_MONTHS, type BillingPlan } from './billingPlans'
 import { sendEmail } from './email'
 

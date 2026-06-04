@@ -2,7 +2,6 @@
 const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   poweredByHeader: false,
-  // Avoid following junctions outside the repo on Windows (EPERM on profile folders)
   webpack: (config) => {
     config.resolve.symlinks = false
     return config

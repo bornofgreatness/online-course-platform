@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import Stripe from 'stripe'
-import { authOptions } from '../../../../auth/[...nextauth]/options'
+import { authOptions } from '../../../auth/[...nextauth]/options'
 import { getPrisma } from '../../../../../lib/prisma'
 import { issueCertificate } from '../../../../../lib/issueCertificate'
 import { recordCertificatePayment } from '../../../../../lib/certificatePayment'
-import { getMercadoPagoPayment, parseCertificateExternalReference } from '../../../../../lib/mercadoPago'
-import { isMercadoPagoConfigured, isStripeConfigured } from '../../../../../lib/billingProvider'
+import {
+  getMercadoPagoPayment,
+  parseCertificateExternalReference,
+  isMercadoPagoConfigured,
+} from '../../../../../lib/mercadoPago'
+import { isStripeConfigured } from '../../../../../lib/billingProvider'
 
 export const dynamic = 'force-dynamic'
 

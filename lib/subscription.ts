@@ -1,4 +1,4 @@
-import type { PrismaClient, Subscription } from './generated/prisma'
+import type { PrismaClient, Subscription } from '@prisma/client'
 
 export { isPrivilegedRole } from './auth/rbac'
 

@@ -3,7 +3,8 @@
 
 generator client {
   provider = "prisma-client-js"
-  // Default output (node_modules/.prisma/client) — required for Next.js build on Windows
+  // Custom output avoids Windows EPERM when next dev locks the default query engine DLL
+  output   = "../lib/generated/prisma"
 }
 
 datasource db {

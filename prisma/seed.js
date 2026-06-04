@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { PrismaClient } = require('../lib/generated/prisma')
+const { PrismaClient } = require('@prisma/client')
 const {
   PLATFORM_CATALOG,
   DEFAULT_PDF_URL,

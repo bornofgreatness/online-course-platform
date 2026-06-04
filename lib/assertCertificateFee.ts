@@ -1,4 +1,4 @@
-import type { PrismaClient } from './generated/prisma'
+import type { PrismaClient } from '@prisma/client'
 import { CERTIFICATE_ISSUANCE_FEE_BRL, certificateFeeEnabled } from './certificatePolicy'
 import { hasPaidCertificateFee } from './certificatePayment'
 import { isPrivilegedRole } from './auth/rbac'

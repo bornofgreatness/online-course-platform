@@ -1,4 +1,4 @@
-import type { PrismaClient } from './generated/prisma'
+import type { PrismaClient } from '@prisma/client'
 import { CERTIFICATE_ISSUANCE_FEE_CENTS, certificateFeeEnabled } from './certificatePolicy'
 
 export const PAYMENT_PURPOSE_CERTIFICATE = 'certificate'

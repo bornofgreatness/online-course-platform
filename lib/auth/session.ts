@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import type { User } from '../generated/prisma'
+import type { User } from '@prisma/client'
 import { authOptions } from '../../app/api/auth/[...nextauth]/options'
 import { getPrisma } from '../prisma'
 import {

@@ -1,4 +1,4 @@
-import type { Coupon } from './generated/prisma'
+import type { Coupon } from '@prisma/client'
 import type { BillingPlan } from './billingPlans'
 import { PLAN_TOTAL_CENTS_BRL } from './billingPlans'
 
