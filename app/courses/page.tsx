@@ -224,10 +224,10 @@ export default function Courses() {
               </Link>
             ) : (
               <Link
-                href="/auth/signup"
+                href="/auth/signin"
                 className="block w-full rounded-xl bg-emerald-600 py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-emerald-700"
               >
-                {t('common.signup')}
+                {t('common.loginSignup')}
               </Link>
             )}
           </div>
