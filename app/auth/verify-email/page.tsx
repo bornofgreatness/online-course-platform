@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
+import PageLoading from '../../../components/PageLoading'
 import { useI18n } from '../../../components/LanguageProvider'
 
 function VerifyEmailInner() {
@@ -88,14 +89,7 @@ function VerifyEmailInner() {
 
 function VerifyEmailFallback() {
   const { t } = useI18n()
-  return (
-    <>
-      <Header />
-      <PageShell centered>
-        <p className="text-center text-slate-600">{t('common.loading')}</p>
-      </PageShell>
-    </>
-  )
+  return <PageLoading centered label={t('common.loading')} />
 }
 
 export default function VerifyEmailPage() {

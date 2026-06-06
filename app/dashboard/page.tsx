@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
+import PageLoading from '../../components/PageLoading'
 import { useI18n } from '../../components/LanguageProvider'
 import { parseCourseProgress } from '../../lib/progress'
 import { canAccessAdminPanel } from '../../lib/auth/rbac'
@@ -96,14 +97,7 @@ function DashboardContent() {
   }, [session, status, router, searchParams, t])
 
   if (status === 'loading' || loading) {
-    return (
-      <>
-        <Header />
-        <PageShell>
-          <p className={siteMutedClass}>Loading…</p>
-        </PageShell>
-      </>
-    )
+    return <PageLoading label={t('common.loading')} />
   }
 
   if (!session) {
@@ -346,18 +340,14 @@ function DashboardContent() {
   )
 }
 
+function DashboardSuspenseFallback() {
+  const { t } = useI18n()
+  return <PageLoading label={t('common.loading')} />
+}
+
 export default function DashboardPage() {
   return (
-    <Suspense
-      fallback={
-        <>
-          <Header />
-          <PageShell>
-            <p className={siteMutedClass}>Loading…</p>
-          </PageShell>
-        </>
-      }
-    >
+    <Suspense fallback={<DashboardSuspenseFallback />}>
       <DashboardContent />
     </Suspense>
   )

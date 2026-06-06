@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CourseCategorySidebarIcon } from './CourseCategorySidebarIcon'
 import LanguageSwitch from './LanguageSwitch'
+import LoadingImage from './LoadingImage'
 import { useI18n } from './LanguageProvider'
 import { canAccessAdminPanel } from '../lib/auth/rbac'
 
@@ -219,7 +220,7 @@ export default function Header() {
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <LanguageSwitch />
             {status === 'loading' ? (
-                <span className="text-sm font-semibold uppercase text-gray-400">…</span>
+              <LoadingImage size="sm" className="px-2" />
             ) : session ? (
               <button
                 type="button"

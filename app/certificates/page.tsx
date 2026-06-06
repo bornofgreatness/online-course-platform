@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass } from '../../components/PageShell'
+import LoadingImage from '../../components/LoadingImage'
 import CertificateShowcase from '../../components/CertificateShowcase'
 import { certificatePdfDownloadPath } from '../../lib/certificateDownload'
 import { useI18n } from '../../components/LanguageProvider'
@@ -72,11 +73,7 @@ export default function Certificates() {
             </div>
 
             {loading ? (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className={`${siteCardClass} h-72 animate-pulse bg-slate-100`} />
-                ))}
-              </div>
+              <LoadingImage size="lg" label={t('common.loading')} className="py-16" />
             ) : certificates.length === 0 ? (
               <div className={`${siteCardClass} flex flex-col items-center px-8 py-16 text-center`}>
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-amber-100 to-teal-100 text-4xl">

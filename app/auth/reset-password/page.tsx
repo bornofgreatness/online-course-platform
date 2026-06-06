@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
+import PageLoading from '../../../components/PageLoading'
 import { useI18n } from '../../../components/LanguageProvider'
 
 const inputClass =
@@ -109,14 +110,7 @@ export default function ResetPasswordPage() {
   const { t } = useI18n()
   return (
     <Suspense
-      fallback={
-        <>
-          <Header />
-          <PageShell centered>
-            <p className="text-center text-slate-600">{t('common.loading')}</p>
-          </PageShell>
-        </>
-      }
+      fallback={<PageLoading centered label={t('common.loading')} />}
     >
       <ResetPasswordInner />
     </Suspense>

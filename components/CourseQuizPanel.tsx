@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useI18n } from './LanguageProvider'
+import LoadingImage from './LoadingImage'
 
 type QuizQuestion = { id: string; prompt: string; options: string[] }
 
@@ -82,8 +83,8 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
 
   if (loading) {
     return (
-      <div id="course-quiz" className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600 shadow-sm">
-        {t('quiz.loading')}
+      <div id="course-quiz" className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <LoadingImage size="sm" label={t('quiz.loading')} className="py-6" />
       </div>
     )
   }

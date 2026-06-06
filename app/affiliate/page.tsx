@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
+import LoadingImage from '../../components/LoadingImage'
 import { useI18n } from '../../components/LanguageProvider'
 import { formatMoney } from '../../lib/i18n/format'
 
@@ -63,7 +64,7 @@ export default function AffiliatePage() {
         <p className={`${siteMutedClass} mt-2 max-w-2xl`}>{t('affiliate.intro')}</p>
 
         {loading ? (
-          <p className="mt-6 text-slate-600">{t('common.loading')}</p>
+          <LoadingImage size="lg" label={t('common.loading')} className="mt-10 py-8" />
         ) : !affiliate ? (
           <div className={`${siteCardClass} mt-8 max-w-lg p-6`}>
             <p className="text-slate-700">{t('affiliate.notRegistered')}</p>

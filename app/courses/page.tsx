@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import Header from '../../components/Header'
 import PageShell from '../../components/PageShell'
+import PageLoading from '../../components/PageLoading'
 import CourseListCard from '../../components/CourseListCard'
 import CatalogSidebar, { type CatalogCategoryItem } from '../../components/CatalogSidebar'
 import { useI18n } from '../../components/LanguageProvider'
@@ -83,6 +84,7 @@ export default function Courses() {
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('')
   const [expandedCategoryIds, setExpandedCategoryIds] = useState<Set<string>>(new Set())
+  const [loading, setLoading] = useState(true)
   const coursesListRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -110,6 +112,7 @@ export default function Courses() {
           )
         }
       })
+      .finally(() => setLoading(false))
   }, [])
 
   const filteredCourses = useMemo(() => {
@@ -200,6 +203,10 @@ export default function Courses() {
       }}
     />
   )
+
+  if (loading) {
+    return <PageLoading label={t('common.loading')} />
+  }
 
   return (
     <>
