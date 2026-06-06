@@ -207,3 +207,21 @@ export function gradeAnswers(payload: QuizPayload, answers: number[]): number {
   }
   return score
 }
+
+/** Normalize admin draft input before save. Returns null if invalid. */
+export function normalizeQuizDraft(questions: QuizQuestion[]): QuizPayload | null {
+  if (questions.length !== QUIZ_MAX_QUESTIONS) return null
+
+  const normalized: QuizQuestion[] = questions.map((q, index) => ({
+    id: (q.id?.trim() || `q${index + 1}`) as string,
+    prompt: q.prompt.trim(),
+    options: q.options.map((option) => String(option).trim()) as [string, string, string, string],
+    correctIndex: q.correctIndex,
+  }))
+
+  return parseQuizQuestions(JSON.stringify({ questions: normalized }))
+}
+
+export function isQuizDraftComplete(questions: QuizQuestion[]): boolean {
+  return normalizeQuizDraft(questions) !== null
+}

@@ -7,6 +7,7 @@ import LoadingImage from '../../../components/LoadingImage'
 import AdminMarketing from '../../../components/AdminMarketing'
 import AdminTabs from '../../../components/admin/AdminTabs'
 import AdminSearchBar from '../../../components/admin/AdminSearchBar'
+import AdminQuizEditor from '../../../components/admin/AdminQuizEditor'
 import {
   AdminDesktopTable,
   AdminMobileActions,
@@ -195,6 +196,8 @@ export default function ClientAdminCrud() {
   >([])
   const [quizCourseId, setQuizCourseId] = useState('')
   const [quizBusy, setQuizBusy] = useState<string | null>(null)
+  const [editingQuizId, setEditingQuizId] = useState<string | null>(null)
+  const [editingQuizCourseTitle, setEditingQuizCourseTitle] = useState('')
   const [paymentSearch, setPaymentSearch] = useState('')
   const [subscriptionSearch, setSubscriptionSearch] = useState('')
   const [certificateSearch, setCertificateSearch] = useState('')
@@ -437,6 +440,8 @@ export default function ClientAdminCrud() {
       displayToast({ type: 'error', message: t('admin.selectCourse') })
       return
     }
+    const createdCourseTitle =
+      filteredCoursesWithoutQuiz.find((c) => c.id === quizCourseId)?.title ?? ''
     setQuizBusy('create')
     try {
       const res = await fetch('/api/admin/quizzes', {
@@ -444,9 +449,14 @@ export default function ClientAdminCrud() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ courseId: quizCourseId }),
       })
-      if (!res.ok) throw new Error('Failed to create quiz')
+      const data = await res.json().catch(() => null)
+      if (!res.ok) throw new Error(data?.error || 'Failed to create quiz')
       setQuizCourseId('')
       await fetchQuizzes()
+      if (data?.quiz?.id) {
+        setEditingQuizId(data.quiz.id)
+        setEditingQuizCourseTitle(createdCourseTitle)
+      }
       displayToast({ type: 'success', message: t('admin.quizCreated') })
     } catch (e: unknown) {
       displayToast({
@@ -456,6 +466,16 @@ export default function ClientAdminCrud() {
     } finally {
       setQuizBusy(null)
     }
+  }
+
+  function openQuizEditor(quiz: { id: string; courseTitle: string }) {
+    setEditingQuizId(quiz.id)
+    setEditingQuizCourseTitle(quiz.courseTitle)
+  }
+
+  function closeQuizEditor() {
+    setEditingQuizId(null)
+    setEditingQuizCourseTitle('')
   }
 
   async function resetQuizDefault(id: string) {
@@ -485,6 +505,7 @@ export default function ClientAdminCrud() {
     try {
       const res = await fetch(`/api/admin/quizzes/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to delete quiz')
+      if (editingQuizId === id) closeQuizEditor()
       await fetchQuizzes()
       displayToast({ type: 'success', message: t('admin.quizDeleted') })
     } catch (e: unknown) {
@@ -1607,6 +1628,19 @@ export default function ClientAdminCrud() {
               className="max-w-xl"
             />
           )}
+
+          {editingQuizId ? (
+            <AdminQuizEditor
+              quizId={editingQuizId}
+              courseTitle={editingQuizCourseTitle}
+              onSaved={() => {
+                void fetchQuizzes()
+                displayToast({ type: 'success', message: t('admin.quizUpdated') })
+              }}
+              onCancel={closeQuizEditor}
+            />
+          ) : null}
+
           <div className={adminCardClass}>
             <h2 className="text-xl font-semibold mb-4">{t('admin.createQuiz')}</h2>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -1672,6 +1706,14 @@ export default function ClientAdminCrud() {
                       </div>
                       <AdminMobileActions>
                         <button
+                          type="button"
+                          disabled={quizBusy === q.id}
+                          onClick={() => openQuizEditor(q)}
+                          className={adminPrimaryBtnClass}
+                        >
+                          {t('admin.editQuiz')}
+                        </button>
+                        <button
                           disabled={quizBusy === q.id}
                           onClick={() => resetQuizDefault(q.id)}
                           className={adminActionBtnClass}
@@ -1718,6 +1760,14 @@ export default function ClientAdminCrud() {
                           </span>
                         </td>
                         <td className="px-4 py-2">
+                          <button
+                            type="button"
+                            disabled={quizBusy === q.id}
+                            onClick={() => openQuizEditor(q)}
+                            className="mr-2 rounded bg-blue-600 px-2 py-1 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            {t('admin.editQuiz')}
+                          </button>
                           <button
                             disabled={quizBusy === q.id}
                             onClick={() => resetQuizDefault(q.id)}
