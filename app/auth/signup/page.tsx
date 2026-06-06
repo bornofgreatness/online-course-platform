@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
 import PageShell, { siteCardClass, siteTitleClass } from '../../../components/PageShell'
+import LoadingImage from '../../../components/LoadingImage'
 import { useI18n } from '../../../components/LanguageProvider'
 
 const inputClass =
@@ -27,6 +28,7 @@ export default function SignUp() {
   const [state, setState] = useState('')
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const [referralCode, setReferralCode] = useState('')
   const router = useRouter()
 
@@ -44,32 +46,40 @@ export default function SignUp() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
     setMessage(null)
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email,
-        password,
-        name,
-        whatsapp,
-        address,
-        city,
-        state,
-        referralCode: referralCode || undefined,
-      }),
-    })
 
-    const data = await res.json().catch(() => null)
-    if (res.ok) {
-      if (data?.verifyUrl) {
-        setVerifyUrl(data.verifyUrl)
-        setMessage(t('auth.signupSuccess'))
+    let success = false
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          whatsapp,
+          address,
+          city,
+          state,
+          referralCode: referralCode || undefined,
+        }),
+      })
+
+      const data = await res.json().catch(() => null)
+      if (res.ok) {
+        if (data?.verifyUrl) {
+          setVerifyUrl(data.verifyUrl)
+          setMessage(t('auth.signupSuccess'))
+        } else {
+          success = true
+          router.push('/auth/signin')
+        }
       } else {
-        router.push('/auth/signin')
+        setMessage(data?.error || t('auth.signupFailed'))
       }
-    } else {
-      setMessage(data?.error || t('auth.signupFailed'))
+    } finally {
+      if (!success) setLoading(false)
     }
   }
 
@@ -140,9 +150,15 @@ export default function SignUp() {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+              disabled={loading}
+              aria-busy={loading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
             >
-              {t('common.signupFreeCta')}
+              {loading ? (
+                <LoadingImage inline size="xs" color="white" label={t('common.loading')} />
+              ) : (
+                t('common.signupFreeCta')
+              )}
             </button>
 
             {message && (

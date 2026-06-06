@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
 import PageShell, { siteCardClass, siteTitleClass } from '../../../components/PageShell'
+import LoadingImage from '../../../components/LoadingImage'
 import { useI18n } from '../../../components/LanguageProvider'
 
 const inputClass =
@@ -20,33 +21,41 @@ export default function SignIn() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [needsVerification, setNeedsVerification] = useState(false)
   const [resendMessage, setResendMessage] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
     setErrorMessage(null)
     setNeedsVerification(false)
     setResendMessage(null)
 
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    })
+    let success = false
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
 
-    if (result?.ok) {
-      router.push('/dashboard')
-      return
-    }
+      if (result?.ok) {
+        success = true
+        router.push('/dashboard')
+        return
+      }
 
-    const err = result?.error || ''
-    if (err === 'Email not verified' || err.includes('not verified')) {
-      setNeedsVerification(true)
-      setErrorMessage(t('auth.emailNotVerified'))
-    } else if (err === 'CredentialsSignin') {
-      setErrorMessage(t('auth.wrongCredentials'))
-    } else {
-      setErrorMessage(err || t('auth.signInFailed'))
+      const err = result?.error || ''
+      if (err === 'Email not verified' || err.includes('not verified')) {
+        setNeedsVerification(true)
+        setErrorMessage(t('auth.emailNotVerified'))
+      } else if (err === 'CredentialsSignin') {
+        setErrorMessage(t('auth.wrongCredentials'))
+      } else {
+        setErrorMessage(err || t('auth.signInFailed'))
+      }
+    } finally {
+      if (!success) setLoading(false)
     }
   }
 
@@ -109,9 +118,15 @@ export default function SignIn() {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+              disabled={loading}
+              aria-busy={loading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
             >
-              {t('common.login')}
+              {loading ? (
+                <LoadingImage inline size="xs" color="white" label={t('common.loading')} />
+              ) : (
+                t('common.login')
+              )}
             </button>
 
             {errorMessage && <div className="mt-4 text-center text-sm text-red-600">{errorMessage}</div>}
