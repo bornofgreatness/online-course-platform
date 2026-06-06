@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import AdminSearchBar from './admin/AdminSearchBar'
 import {
   adminCardClass,
   adminInputClass,
@@ -9,6 +10,7 @@ import {
 import LoadingButtonLabel from './LoadingButtonLabel'
 import LoadingImage from './LoadingImage'
 import { useI18n } from './LanguageProvider'
+import { matchesAdminSearch } from '../lib/admin/matchesSearch'
 
 type Coupon = {
   id: string
@@ -54,6 +56,22 @@ export default function AdminMarketing() {
 
   const [uploadFolder, setUploadFolder] = useState('videos')
   const [uploadResult, setUploadResult] = useState<string | null>(null)
+  const [couponSearch, setCouponSearch] = useState('')
+  const [campaignSearch, setCampaignSearch] = useState('')
+
+  const filteredCoupons = useMemo(() => {
+    if (!couponSearch.trim()) return coupons
+    return coupons.filter((c) =>
+      matchesAdminSearch(couponSearch, c.code, c.description, c.active ? 'active' : 'inactive')
+    )
+  }, [coupons, couponSearch])
+
+  const filteredCampaigns = useMemo(() => {
+    if (!campaignSearch.trim()) return campaigns
+    return campaigns.filter((c) =>
+      matchesAdminSearch(campaignSearch, c.subject, c.status, c.recipientFilter)
+    )
+  }, [campaigns, campaignSearch])
 
   async function load() {
     setLoading(true)
@@ -222,8 +240,19 @@ export default function AdminMarketing() {
             </LoadingButtonLabel>
           </button>
         </form>
+        {coupons.length > 0 ? (
+          <AdminSearchBar
+            value={couponSearch}
+            onChange={setCouponSearch}
+            placeholder={t('marketing.searchCoupons')}
+            className="mt-4"
+          />
+        ) : null}
         <ul className="mt-4 space-y-2 text-sm">
-          {coupons.map((c) => (
+          {coupons.length === 0 ? null : filteredCoupons.length === 0 ? (
+            <li className="text-slate-600">{t('admin.noSearchResults')}</li>
+          ) : (
+            filteredCoupons.map((c) => (
             <li key={c.id} className="flex flex-col gap-2 rounded-xl border border-slate-200/80 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
               <span>
                 <strong>{c.code}</strong> — {c.discountPercent}% · {c.usedCount}/{c.maxUses ?? '∞'}{' '}
@@ -233,7 +262,8 @@ export default function AdminMarketing() {
                 {c.active ? t('marketing.active') : t('marketing.inactive')}
               </span>
             </li>
-          ))}
+          ))
+          )}
         </ul>
       </section>
 
@@ -275,8 +305,19 @@ export default function AdminMarketing() {
             </LoadingButtonLabel>
           </button>
         </form>
+        {campaigns.length > 0 ? (
+          <AdminSearchBar
+            value={campaignSearch}
+            onChange={setCampaignSearch}
+            placeholder={t('marketing.searchCampaigns')}
+            className="mt-6"
+          />
+        ) : null}
         <ul className="mt-6 space-y-3">
-          {campaigns.map((camp) => (
+          {campaigns.length === 0 ? null : filteredCampaigns.length === 0 ? (
+            <li className="text-slate-600">{t('admin.noSearchResults')}</li>
+          ) : (
+            filteredCampaigns.map((camp) => (
             <li key={camp.id} className="rounded-xl border border-slate-200/80 p-4 text-sm">
               <p className="font-semibold">{camp.subject}</p>
               <p className="text-slate-500">
@@ -301,7 +342,8 @@ export default function AdminMarketing() {
                 </button>
               )}
             </li>
-          ))}
+          ))
+          )}
         </ul>
       </section>
     </div>

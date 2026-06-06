@@ -6,6 +6,7 @@ import { siteMutedClass, siteTitleClass } from '../../../components/PageShell'
 import LoadingImage from '../../../components/LoadingImage'
 import AdminMarketing from '../../../components/AdminMarketing'
 import AdminTabs from '../../../components/admin/AdminTabs'
+import AdminSearchBar from '../../../components/admin/AdminSearchBar'
 import {
   AdminDesktopTable,
   AdminMobileActions,
@@ -29,6 +30,7 @@ import {
 } from '../../../components/admin/adminStyles'
 import { useI18n } from '../../../components/LanguageProvider'
 import { formatMoney } from '../../../lib/i18n/format'
+import { matchesAdminSearch } from '../../../lib/admin/matchesSearch'
 import { canDeleteUser, canAssignRole } from '../../../lib/auth/rbac'
 
 type Subcategory = {
@@ -193,6 +195,14 @@ export default function ClientAdminCrud() {
   >([])
   const [quizCourseId, setQuizCourseId] = useState('')
   const [quizBusy, setQuizBusy] = useState<string | null>(null)
+  const [paymentSearch, setPaymentSearch] = useState('')
+  const [subscriptionSearch, setSubscriptionSearch] = useState('')
+  const [certificateSearch, setCertificateSearch] = useState('')
+  const [quizSearch, setQuizSearch] = useState('')
+  const [courseSearch, setCourseSearch] = useState('')
+  const [affiliateSearch, setAffiliateSearch] = useState('')
+  const [categorySearch, setCategorySearch] = useState('')
+  const [subcategorySearch, setSubcategorySearch] = useState('')
 
   const [toast, setToast] = useState<Toast>(null)
   const [initialLoading, setInitialLoading] = useState(true)
@@ -260,6 +270,95 @@ export default function ClientAdminCrud() {
       (c.subcategories ?? []).map((s) => ({ ...s, categoryName: c.name }))
     )
   }, [categories])
+
+  const filteredPayments = useMemo(() => {
+    if (!paymentSearch.trim()) return payments
+    return payments.filter((p) =>
+      matchesAdminSearch(
+        paymentSearch,
+        p.user.name,
+        p.user.email,
+        p.status,
+        p.provider,
+        p.currency,
+        p.coupon?.code
+      )
+    )
+  }, [payments, paymentSearch])
+
+  const filteredSubscriptions = useMemo(() => {
+    if (!subscriptionSearch.trim()) return subscriptions
+    return subscriptions.filter((s) =>
+      matchesAdminSearch(subscriptionSearch, s.user.name, s.user.email, s.plan, s.active ? 'active' : 'inactive')
+    )
+  }, [subscriptions, subscriptionSearch])
+
+  const filteredCertificates = useMemo(() => {
+    if (!certificateSearch.trim()) return certificates
+    return certificates.filter((c) =>
+      matchesAdminSearch(
+        certificateSearch,
+        c.user.name,
+        c.user.email,
+        c.course.title,
+        c.certificateNumber
+      )
+    )
+  }, [certificates, certificateSearch])
+
+  const filteredQuizzes = useMemo(() => {
+    if (!quizSearch.trim()) return quizzes
+    return quizzes.filter((q) =>
+      matchesAdminSearch(quizSearch, q.courseTitle, q.categoryName, q.valid ? 'ok' : 'invalid')
+    )
+  }, [quizzes, quizSearch])
+
+  const filteredCoursesWithoutQuiz = useMemo(() => {
+    if (!quizSearch.trim()) return coursesWithoutQuiz
+    return coursesWithoutQuiz.filter((c) =>
+      matchesAdminSearch(quizSearch, c.title, c.category.name)
+    )
+  }, [coursesWithoutQuiz, quizSearch])
+
+  const filteredCourses = useMemo(() => {
+    if (!courseSearch.trim()) return courses
+    return courses.filter((c) =>
+      matchesAdminSearch(
+        courseSearch,
+        c.title,
+        c.description,
+        c.category?.name,
+        c.subcategory?.name,
+        c.pdfUrl
+      )
+    )
+  }, [courses, courseSearch])
+
+  const filteredCommissions = useMemo(() => {
+    if (!affiliateSearch.trim()) return commissions
+    return commissions.filter((c) =>
+      matchesAdminSearch(
+        affiliateSearch,
+        c.affiliate.user.name,
+        c.affiliate.user.email,
+        c.referredUser.name,
+        c.referredUser.email,
+        c.status
+      )
+    )
+  }, [commissions, affiliateSearch])
+
+  const filteredCategories = useMemo(() => {
+    if (!categorySearch.trim()) return categories
+    return categories.filter((c) => matchesAdminSearch(categorySearch, c.name, c.icon))
+  }, [categories, categorySearch])
+
+  const filteredSubcategories = useMemo(() => {
+    if (!subcategorySearch.trim()) return allSubcategories
+    return allSubcategories.filter((s) =>
+      matchesAdminSearch(subcategorySearch, s.name, s.categoryName)
+    )
+  }, [allSubcategories, subcategorySearch])
 
   const displayToast = (toast: Toast) => {
     setToast(toast)
@@ -1021,12 +1120,24 @@ export default function ClientAdminCrud() {
 
       {tab === 'affiliates' && (
         <div className={adminCardClass}>
-          <h2 className="text-xl font-semibold mb-4">{t('admin.tabAffiliates')}</h2>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <h2 className="text-xl font-semibold">{t('admin.tabAffiliates')}</h2>
+            {commissions.length > 0 ? (
+              <AdminSearchBar
+                value={affiliateSearch}
+                onChange={setAffiliateSearch}
+                placeholder={t('admin.searchAffiliates')}
+                className="w-full sm:max-w-sm"
+              />
+            ) : null}
+          </div>
           {commissions.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noCommissions')}</p>
+          ) : filteredCommissions.length === 0 ? (
+            <p className={siteMutedClass}>{t('admin.noSearchResults')}</p>
           ) : (
             <ul className="divide-y divide-slate-100 text-sm">
-              {commissions.map((c) => (
+              {filteredCommissions.map((c) => (
                 <li key={c.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-medium text-slate-900">
@@ -1063,26 +1174,15 @@ export default function ClientAdminCrud() {
                 {usersTotal} total
               </p>
             </div>
-            <form
-              className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
-              onSubmit={(e) => {
-                e.preventDefault()
-                void fetchUsers(1, userSearch)
-              }}
-            >
-              <input
+            <div className="w-full sm:max-w-md">
+              <AdminSearchBar
                 value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
-                placeholder="Search name, email, WhatsApp..."
-                className={`${adminInputClass} sm:max-w-xs`}
+                onChange={setUserSearch}
+                placeholder={t('admin.searchUsers')}
+                submitLabel={t('admin.search')}
+                onSubmit={() => void fetchUsers(1, userSearch)}
               />
-              <button
-                type="submit"
-                className={`${adminSecondaryBtnClass} w-full sm:w-auto`}
-              >
-                Search
-              </button>
-            </form>
+            </div>
           </div>
           {users.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noUsers')}</p>
@@ -1208,13 +1308,25 @@ export default function ClientAdminCrud() {
 
       {tab === 'payments' && (
         <div className={adminCardClass}>
-          <h2 className="text-xl font-semibold mb-4">{t('admin.allPayments')}</h2>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <h2 className="text-xl font-semibold">{t('admin.allPayments')}</h2>
+            {payments.length > 0 ? (
+              <AdminSearchBar
+                value={paymentSearch}
+                onChange={setPaymentSearch}
+                placeholder={t('admin.searchPayments')}
+                className="w-full sm:max-w-sm"
+              />
+            ) : null}
+          </div>
           {payments.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noPayments')}</p>
+          ) : filteredPayments.length === 0 ? (
+            <p className={siteMutedClass}>{t('admin.noSearchResults')}</p>
           ) : (
             <>
               <AdminMobileList>
-                {payments.map((p) => (
+                {filteredPayments.map((p) => (
                   <AdminMobileCard key={p.id}>
                     <AdminMobileHeader title={p.user.name} subtitle={p.user.email} />
                     <div className="space-y-2">
@@ -1255,7 +1367,7 @@ export default function ClientAdminCrud() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {payments.map((p) => (
+                  {filteredPayments.map((p) => (
                     <tr key={p.id} className="hover:bg-gray-50">
                       <td className="px-4 py-2">{p.user.name}</td>
                       <td className="px-4 py-2">{p.user.email}</td>
@@ -1288,13 +1400,25 @@ export default function ClientAdminCrud() {
 
       {tab === 'subscriptions' && (
         <div className={adminCardClass}>
-          <h2 className="text-xl font-semibold mb-4">{t('admin.allSubscriptions')}</h2>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <h2 className="text-xl font-semibold">{t('admin.allSubscriptions')}</h2>
+            {subscriptions.length > 0 ? (
+              <AdminSearchBar
+                value={subscriptionSearch}
+                onChange={setSubscriptionSearch}
+                placeholder={t('admin.searchSubscriptions')}
+                className="w-full sm:max-w-sm"
+              />
+            ) : null}
+          </div>
           {subscriptions.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noSubscriptions')}</p>
+          ) : filteredSubscriptions.length === 0 ? (
+            <p className={siteMutedClass}>{t('admin.noSearchResults')}</p>
           ) : (
             <>
               <AdminMobileList>
-                {subscriptions.map((s) => (
+                {filteredSubscriptions.map((s) => (
                   <AdminMobileCard key={s.id}>
                     <AdminMobileHeader title={s.user.name} subtitle={s.user.email} />
                     <div className="space-y-2">
@@ -1341,7 +1465,7 @@ export default function ClientAdminCrud() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {subscriptions.map((s) => (
+                  {filteredSubscriptions.map((s) => (
                     <tr key={s.id} className="hover:bg-gray-50">
                       <td className="px-4 py-2">{s.user.name}</td>
                       <td className="px-4 py-2">{s.user.email}</td>
@@ -1377,13 +1501,25 @@ export default function ClientAdminCrud() {
 
       {tab === 'certificates' && (
         <div className={adminCardClass}>
-          <h2 className="text-xl font-semibold mb-4">{t('admin.allCertificates')}</h2>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <h2 className="text-xl font-semibold">{t('admin.allCertificates')}</h2>
+            {certificates.length > 0 ? (
+              <AdminSearchBar
+                value={certificateSearch}
+                onChange={setCertificateSearch}
+                placeholder={t('admin.searchCertificates')}
+                className="w-full sm:max-w-sm"
+              />
+            ) : null}
+          </div>
           {certificates.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noCertificates')}</p>
+          ) : filteredCertificates.length === 0 ? (
+            <p className={siteMutedClass}>{t('admin.noSearchResults')}</p>
           ) : (
             <>
               <AdminMobileList>
-                {certificates.map((c) => (
+                {filteredCertificates.map((c) => (
                   <AdminMobileCard key={c.id}>
                     <AdminMobileHeader title={c.user.name} subtitle={c.user.email} />
                     <div className="space-y-2">
@@ -1428,7 +1564,7 @@ export default function ClientAdminCrud() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {certificates.map((c) => (
+                  {filteredCertificates.map((c) => (
                     <tr key={c.id} className="hover:bg-gray-50">
                       <td className="px-4 py-2">{c.user.name}</td>
                       <td className="px-4 py-2">{c.user.email}</td>
@@ -1463,6 +1599,14 @@ export default function ClientAdminCrud() {
 
       {tab === 'quizzes' && (
         <div className="space-y-6">
+          {(quizzes.length > 0 || coursesWithoutQuiz.length > 0) && (
+            <AdminSearchBar
+              value={quizSearch}
+              onChange={setQuizSearch}
+              placeholder={t('admin.searchQuizzes')}
+              className="max-w-xl"
+            />
+          )}
           <div className={adminCardClass}>
             <h2 className="text-xl font-semibold mb-4">{t('admin.createQuiz')}</h2>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -1473,7 +1617,7 @@ export default function ClientAdminCrud() {
                   className={adminInputClass}
                 >
                   <option value="">{t('admin.selectCourse')}</option>
-                  {coursesWithoutQuiz.map((c) => (
+                  {filteredCoursesWithoutQuiz.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.title} ({c.category.name})
                     </option>
@@ -1491,21 +1635,26 @@ export default function ClientAdminCrud() {
             </div>
             {coursesWithoutQuiz.length === 0 ? (
               <p className={`${siteMutedClass} mt-3 text-sm`}>{t('admin.coursesWithoutQuiz')}: 0</p>
+            ) : filteredCoursesWithoutQuiz.length === 0 ? (
+              <p className={`${siteMutedClass} mt-3 text-sm`}>{t('admin.noSearchResults')}</p>
             ) : (
               <p className={`${siteMutedClass} mt-3 text-sm`}>
-                {t('admin.coursesWithoutQuiz')}: {coursesWithoutQuiz.length}
+                {t('admin.coursesWithoutQuiz')}: {filteredCoursesWithoutQuiz.length}
+                {quizSearch.trim() ? ` / ${coursesWithoutQuiz.length}` : ''}
               </p>
             )}
           </div>
 
           <div className={adminCardClass}>
-            <h2 className="text-xl font-semibold mb-4">{t('admin.allQuizzes')}</h2>
+            <h2 className="mb-4 text-xl font-semibold">{t('admin.allQuizzes')}</h2>
             {quizzes.length === 0 ? (
               <p className={siteMutedClass}>{t('admin.noQuizzes')}</p>
+            ) : filteredQuizzes.length === 0 ? (
+              <p className={siteMutedClass}>{t('admin.noSearchResults')}</p>
             ) : (
               <>
                 <AdminMobileList>
-                  {quizzes.map((q) => (
+                  {filteredQuizzes.map((q) => (
                     <AdminMobileCard key={q.id}>
                       <AdminMobileHeader title={q.courseTitle} subtitle={q.categoryName} />
                       <AdminMobileStatGrid>
@@ -1553,7 +1702,7 @@ export default function ClientAdminCrud() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {quizzes.map((q) => (
+                    {filteredQuizzes.map((q) => (
                       <tr key={q.id} className="hover:bg-gray-50">
                         <td className="px-4 py-2">{q.courseTitle}</td>
                         <td className="px-4 py-2">{q.categoryName}</td>
@@ -1695,13 +1844,25 @@ export default function ClientAdminCrud() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-black/5 sm:p-6">
-            <h2 className="text-xl font-semibold mb-4">{t('admin.allCategories')}</h2>
+          <div className={adminCardClass}>
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <h2 className="text-xl font-semibold">{t('admin.allCategories')}</h2>
+              {categories.length > 0 ? (
+                <AdminSearchBar
+                  value={categorySearch}
+                  onChange={setCategorySearch}
+                  placeholder={t('admin.searchCategories')}
+                  className="w-full sm:max-w-sm"
+                />
+              ) : null}
+            </div>
             <div className="space-y-3">
               {categories.length === 0 ? (
-                <p className="text-gray-600">{t('admin.noCategories')}</p>
+                <p className={siteMutedClass}>{t('admin.noCategories')}</p>
+              ) : filteredCategories.length === 0 ? (
+                <p className={siteMutedClass}>{t('admin.noSearchResults')}</p>
               ) : (
-                categories.map((c) => (
+                filteredCategories.map((c) => (
                   <div key={c.id} className="flex flex-col gap-2 rounded border p-3">
                     {editingCategoryId === c.id ? (
                       <>
@@ -1846,11 +2007,22 @@ export default function ClientAdminCrud() {
               </div>
             </div>
 
+            {allSubcategories.length > 0 ? (
+              <AdminSearchBar
+                value={subcategorySearch}
+                onChange={setSubcategorySearch}
+                placeholder={t('admin.searchSubcategories')}
+                className="mb-4 max-w-xl"
+              />
+            ) : null}
+
             <div className="max-h-96 space-y-2 overflow-y-auto">
               {allSubcategories.length === 0 ? (
-                <p className="text-gray-600">{t('admin.noSubcategories')}</p>
+                <p className={siteMutedClass}>{t('admin.noSubcategories')}</p>
+              ) : filteredSubcategories.length === 0 ? (
+                <p className={siteMutedClass}>{t('admin.noSearchResults')}</p>
               ) : (
-                allSubcategories.map((s) => (
+                filteredSubcategories.map((s) => (
                   <div key={s.id} className="flex flex-col gap-2 rounded border p-3 sm:flex-row sm:items-center sm:justify-between">
                     {editingSubcategoryId === s.id ? (
                       <>
@@ -2098,12 +2270,24 @@ export default function ClientAdminCrud() {
           </div>
 
           <div className={adminCardClass}>
-            <h2 className="mb-4 text-xl font-semibold">{t('admin.allCourses')}</h2>
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <h2 className="text-xl font-semibold">{t('admin.allCourses')}</h2>
+              {courses.length > 0 ? (
+                <AdminSearchBar
+                  value={courseSearch}
+                  onChange={setCourseSearch}
+                  placeholder={t('admin.searchCourses')}
+                  className="w-full sm:max-w-sm"
+                />
+              ) : null}
+            </div>
             <div className="space-y-3">
               {courses.length === 0 ? (
                 <p className={siteMutedClass}>{t('admin.noCourses')}</p>
+              ) : filteredCourses.length === 0 ? (
+                <p className={siteMutedClass}>{t('admin.noSearchResults')}</p>
               ) : (
-                courses.map((c) => (
+                filteredCourses.map((c) => (
                   <AdminMobileCard key={c.id}>
                     <AdminMobileHeader
                       title={c.title}
