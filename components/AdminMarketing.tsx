@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { siteCardClass } from './PageShell'
+import LoadingButtonLabel from './LoadingButtonLabel'
+import LoadingImage from './LoadingImage'
 import { useI18n } from './LanguageProvider'
 
 type Coupon = {
@@ -29,6 +31,7 @@ export default function AdminMarketing() {
   const { t } = useI18n()
   const [coupons, setCoupons] = useState<Coupon[]>([])
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
@@ -49,14 +52,19 @@ export default function AdminMarketing() {
   const [uploadResult, setUploadResult] = useState<string | null>(null)
 
   async function load() {
-    const [cRes, campRes] = await Promise.all([
-      fetch('/api/admin/coupons'),
-      fetch('/api/admin/campaigns'),
-    ])
-    const cData = await cRes.json()
-    const campData = await campRes.json()
-    if (cRes.ok) setCoupons(cData.coupons || [])
-    if (campRes.ok) setCampaigns(campData.campaigns || [])
+    setLoading(true)
+    try {
+      const [cRes, campRes] = await Promise.all([
+        fetch('/api/admin/coupons'),
+        fetch('/api/admin/campaigns'),
+      ])
+      const cData = await cRes.json()
+      const campData = await campRes.json()
+      if (cRes.ok) setCoupons(cData.coupons || [])
+      if (campRes.ok) setCampaigns(campData.campaigns || [])
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -135,6 +143,10 @@ export default function AdminMarketing() {
     e.target.value = ''
   }
 
+  if (loading) {
+    return <LoadingImage size="lg" label={t('common.loading')} className="py-16" />
+  }
+
   return (
     <div className="space-y-8">
       {message && <p className="rounded-lg bg-blue-50 p-3 text-sm text-blue-900">{message}</p>}
@@ -198,9 +210,12 @@ export default function AdminMarketing() {
           <button
             type="submit"
             disabled={busy}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 sm:col-span-2"
+            aria-busy={busy}
+            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80 sm:col-span-2"
           >
-            {t('marketing.createCoupon')}
+            <LoadingButtonLabel loading={busy} label={t('common.loading')}>
+              {t('marketing.createCoupon')}
+            </LoadingButtonLabel>
           </button>
         </form>
         <ul className="mt-4 space-y-2 text-sm">
@@ -248,9 +263,12 @@ export default function AdminMarketing() {
           <button
             type="submit"
             disabled={busy}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
+            aria-busy={busy}
+            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-80"
           >
-            {t('marketing.saveDraft')}
+            <LoadingButtonLabel loading={busy} label={t('common.loading')}>
+              {t('marketing.saveDraft')}
+            </LoadingButtonLabel>
           </button>
         </form>
         <ul className="mt-6 space-y-3">
@@ -270,9 +288,12 @@ export default function AdminMarketing() {
                   type="button"
                   onClick={() => sendCampaign(camp.id)}
                   disabled={busy}
-                  className="mt-2 rounded bg-green-600 px-3 py-1 text-xs font-bold text-white"
+                  aria-busy={busy}
+                  className="mt-2 inline-flex min-w-[7rem] items-center justify-center rounded bg-green-600 px-3 py-1 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-80"
                 >
-                  {t('marketing.sendCampaign')}
+                  <LoadingButtonLabel loading={busy} label={t('common.loading')}>
+                    {t('marketing.sendCampaign')}
+                  </LoadingButtonLabel>
                 </button>
               )}
             </li>

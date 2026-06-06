@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Header from '../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../components/PageShell'
 import LoadingImage from '../../components/LoadingImage'
+import LoadingButtonLabel from '../../components/LoadingButtonLabel'
 import { useI18n } from '../../components/LanguageProvider'
 import { formatMoney } from '../../lib/i18n/format'
 
@@ -71,10 +72,13 @@ export default function AffiliatePage() {
             <button
               type="button"
               disabled={registering}
+              aria-busy={registering}
               onClick={register}
-              className="mt-4 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+              className="mt-4 inline-flex min-w-[10rem] items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
             >
-              {registering ? t('common.working') : t('affiliate.become')}
+              <LoadingButtonLabel loading={registering} label={t('common.loading')}>
+                {t('affiliate.become')}
+              </LoadingButtonLabel>
             </button>
             <p className={`${siteMutedClass} mt-3 text-xs`}>{t('affiliate.roleNote')}</p>
           </div>

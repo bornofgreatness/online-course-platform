@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Header from '../../../components/Header'
 import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
 import PageLoading from '../../../components/PageLoading'
+import LoadingButtonLabel from '../../../components/LoadingButtonLabel'
 import { useI18n } from '../../../components/LanguageProvider'
 
 const inputClass =
@@ -89,9 +90,12 @@ function ResetPasswordInner() {
             <button
               type="submit"
               disabled={loading || !token}
-              className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+              aria-busy={loading}
+              className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
             >
-              {loading ? t('actions.updating') : t('auth.resetPasswordTitle')}
+              <LoadingButtonLabel loading={loading} label={t('common.loading')}>
+                {t('auth.resetPasswordTitle')}
+              </LoadingButtonLabel>
             </button>
 
             <p className="mt-4 text-center text-sm">

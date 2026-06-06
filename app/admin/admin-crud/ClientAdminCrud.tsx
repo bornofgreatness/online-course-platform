@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
+import LoadingImage from '../../../components/LoadingImage'
 import AdminMarketing from '../../../components/AdminMarketing'
 import { useI18n } from '../../../components/LanguageProvider'
 import { formatMoney } from '../../../lib/i18n/format'
@@ -155,6 +156,8 @@ export default function ClientAdminCrud() {
   const [quizBusy, setQuizBusy] = useState<string | null>(null)
 
   const [toast, setToast] = useState<Toast>(null)
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [tabLoading, setTabLoading] = useState(false)
   const [stats, setStats] = useState<{
     totalUsers: number
     revenueUsd: number
@@ -461,36 +464,69 @@ export default function ClientAdminCrud() {
   }
 
   useEffect(() => {
-    fetchCategories().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadCategories') }))
-    fetchCourses().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadCourses') }))
-    fetch('/api/admin/stats')
-      .then((r) => r.json())
-      .then((d) => {
-        if (d && typeof d.totalUsers === 'number') setStats(d)
-      })
-      .catch(() => {})
-  }, [])
-
-  useEffect(() => {
-    if (tab === 'users') {
-      fetchUsers().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadUsers') }))
-    } else if (tab === 'payments') {
-      fetchPayments().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadPayments') }))
-    } else if (tab === 'subscriptions') {
-      fetchSubscriptions().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadSubscriptions') }))
-    } else if (tab === 'certificates') {
-      fetchCertificates().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadCertificates') }))
-    } else if (tab === 'quizzes') {
-      fetchQuizzes().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadQuizzes') }))
-    } else if (tab === 'reports') {
+    Promise.all([
+      fetchCategories().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadCategories') })),
+      fetchCourses().catch(() => displayToast({ type: 'error', message: t('admin.failedLoadCourses') })),
       fetch('/api/admin/stats')
         .then((r) => r.json())
         .then((d) => {
           if (d && typeof d.totalUsers === 'number') setStats(d)
         })
-        .catch(() => displayToast({ type: 'error', message: t('admin.failedLoadUsers') }))
+        .catch(() => {}),
+    ]).finally(() => setInitialLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (initialLoading) return
+
+    const loadTab = async () => {
+      setTabLoading(true)
+      try {
+        if (tab === 'users') {
+          await fetchUsers()
+        } else if (tab === 'payments') {
+          await fetchPayments()
+        } else if (tab === 'subscriptions') {
+          await fetchSubscriptions()
+        } else if (tab === 'certificates') {
+          await fetchCertificates()
+        } else if (tab === 'quizzes') {
+          await fetchQuizzes()
+        } else if (tab === 'affiliates') {
+          await fetchCommissions()
+        } else if (tab === 'reports') {
+          const d = await fetch('/api/admin/stats')
+            .then((r) => r.json())
+            .catch(() => null)
+          if (d && typeof d.totalUsers === 'number') setStats(d)
+        }
+      } catch {
+        if (tab === 'users') displayToast({ type: 'error', message: t('admin.failedLoadUsers') })
+        else if (tab === 'payments') displayToast({ type: 'error', message: t('admin.failedLoadPayments') })
+        else if (tab === 'subscriptions') displayToast({ type: 'error', message: t('admin.failedLoadSubscriptions') })
+        else if (tab === 'certificates') displayToast({ type: 'error', message: t('admin.failedLoadCertificates') })
+        else if (tab === 'quizzes') displayToast({ type: 'error', message: t('admin.failedLoadQuizzes') })
+        else if (tab === 'affiliates') displayToast({ type: 'error', message: t('admin.noCommissions') })
+        else if (tab === 'reports') displayToast({ type: 'error', message: t('admin.failedLoadUsers') })
+      } finally {
+        setTabLoading(false)
+      }
     }
-  }, [tab])
+
+    if (
+      tab === 'users' ||
+      tab === 'payments' ||
+      tab === 'subscriptions' ||
+      tab === 'certificates' ||
+      tab === 'quizzes' ||
+      tab === 'affiliates' ||
+      tab === 'reports'
+    ) {
+      void loadTab()
+    } else {
+      setTabLoading(false)
+    }
+  }, [tab, initialLoading])
 
   async function createCategory() {
     if (!catName.trim()) {
@@ -853,6 +889,14 @@ export default function ClientAdminCrud() {
     }
   }
 
+  if (initialLoading) {
+    return (
+      <div className="mx-auto max-w-6xl">
+        <LoadingImage size="lg" label={t('common.loading')} className="py-24" />
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto max-w-6xl">
       {toast && (
@@ -947,12 +991,7 @@ export default function ClientAdminCrud() {
             {t('admin.tabMarketing')}
           </button>
           <button
-            onClick={() => {
-              setTab('affiliates')
-              fetchCommissions().catch(() =>
-                displayToast({ type: 'error', message: t('admin.noCommissions') })
-              )
-            }}
+            onClick={() => setTab('affiliates')}
             className={`rounded px-3 py-2 text-sm border ${
               tab === 'affiliates' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
             }`}
@@ -1010,6 +1049,10 @@ export default function ClientAdminCrud() {
         </div>
       </div>
 
+      {tabLoading ? (
+        <LoadingImage size="lg" label={t('common.loading')} className="py-16" />
+      ) : (
+        <>
       {tab === 'marketing' && <AdminMarketing />}
 
       {tab === 'affiliates' && (
@@ -1956,6 +1999,8 @@ export default function ClientAdminCrud() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   )

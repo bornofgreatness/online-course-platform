@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import EnrollButton from './EnrollButton'
 import CertificateLegalNotice from './CertificateLegalNotice'
 import { useI18n } from './LanguageProvider'
+import LoadingButtonLabel from './LoadingButtonLabel'
+import LoadingImage from './LoadingImage'
 import { CERTIFICATE_ISSUANCE_FEE_BRL, formatCertificateFeeBrl } from '../lib/certificatePolicy'
 
 interface CourseActionsProps {
@@ -193,6 +195,10 @@ export default function CourseActions({
         {progress.completed ? t('course.completed') : t('course.inProgress')}
       </div>
 
+      {loading && checkoutMessage ? (
+        <LoadingImage size="sm" label={t('common.loading')} className="py-2" />
+      ) : null}
+
       {checkoutMessage && (
         <p className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-900">
           {checkoutMessage}
@@ -220,11 +226,12 @@ export default function CourseActions({
             type="button"
             onClick={handleRequestCertificate}
             disabled={loading}
-            className="w-full rounded bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-busy={loading}
+            className="inline-flex w-full items-center justify-center rounded bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading
-              ? t('actions.generating')
-              : t('actions.requestCertificate', { fee: feeLabel })}
+            <LoadingButtonLabel loading={loading} label={t('common.loading')}>
+              {t('actions.requestCertificate', { fee: feeLabel })}
+            </LoadingButtonLabel>
           </button>
           <p className="text-center text-xs text-slate-500">
             {t('certificate.feeAmount', { fee: feeLabel, amount: String(CERTIFICATE_ISSUANCE_FEE_BRL) })}
@@ -235,9 +242,12 @@ export default function CourseActions({
           type="button"
           onClick={handleMarkComplete}
           disabled={loading || !canMarkComplete}
-          className="w-full rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-busy={loading}
+          className="inline-flex w-full items-center justify-center rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? t('actions.updating') : t('course.markComplete')}
+          <LoadingButtonLabel loading={loading} label={t('common.loading')}>
+            {t('course.markComplete')}
+          </LoadingButtonLabel>
         </button>
       )}
     </div>

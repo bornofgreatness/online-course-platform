@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { CourseCategorySidebarIcon } from './CourseCategorySidebarIcon'
 import LanguageSwitch from './LanguageSwitch'
 import LoadingImage from './LoadingImage'
+import LoadingButtonLabel from './LoadingButtonLabel'
 import { useI18n } from './LanguageProvider'
 import { canAccessAdminPanel } from '../lib/auth/rbac'
 
@@ -192,7 +193,9 @@ export default function Header() {
                     }}
                   >
                     {logoutLoading ? (
-                      <LoadingImage inline size="xs" label={t('common.loading')} />
+                      <LoadingButtonLabel loading label={t('common.loading')} color="default">
+                        {t('common.logout')}
+                      </LoadingButtonLabel>
                     ) : (
                       t('common.logout')
                     )}
@@ -240,7 +243,9 @@ export default function Header() {
                 className="inline-flex min-w-[5.5rem] items-center justify-center gap-2 rounded-full border border-black bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-80 sm:min-w-[6.5rem] sm:px-5 sm:text-sm"
               >
                 {logoutLoading ? (
-                  <LoadingImage inline size="xs" label={t('common.loading')} />
+                  <LoadingButtonLabel loading label={t('common.loading')} color="default">
+                    {t('common.logout')}
+                  </LoadingButtonLabel>
                 ) : (
                   t('common.logout')
                 )}

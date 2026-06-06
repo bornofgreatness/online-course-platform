@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useI18n } from './LanguageProvider'
+import LoadingButtonLabel from './LoadingButtonLabel'
 
 interface EnrollButtonProps {
   courseId: string
@@ -42,9 +43,11 @@ export default function EnrollButton({ courseId }: EnrollButtonProps) {
       type="button"
       onClick={handleEnroll}
       disabled={isLoading}
-      className="mt-6 inline-flex items-center justify-center rounded bg-blue-600 px-5 py-3 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+      className="mt-6 inline-flex min-w-[7rem] items-center justify-center rounded bg-blue-600 px-5 py-3 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300 disabled:opacity-80"
     >
-      {isLoading ? t('course.enrolling') : t('course.enroll')}
+      <LoadingButtonLabel loading={isLoading} label={t('common.loading')}>
+        {t('course.enroll')}
+      </LoadingButtonLabel>
     </button>
   )
 }

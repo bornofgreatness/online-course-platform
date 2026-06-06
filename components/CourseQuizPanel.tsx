@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useI18n } from './LanguageProvider'
+import LoadingButtonLabel from './LoadingButtonLabel'
 import LoadingImage from './LoadingImage'
 
 type QuizQuestion = { id: string; prompt: string; options: string[] }
@@ -167,10 +168,13 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
           <button
             type="button"
             disabled={submitting || exhausted}
+            aria-busy={submitting}
             onClick={submit}
-            className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {submitting ? t('quiz.submitting') : t('quiz.submit')}
+            <LoadingButtonLabel loading={submitting} label={t('common.loading')}>
+              {t('quiz.submit')}
+            </LoadingButtonLabel>
           </button>
         </div>
       )}

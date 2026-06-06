@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
 import PageShell, { siteCardClass, siteTitleClass } from '../../../components/PageShell'
-import LoadingImage from '../../../components/LoadingImage'
+import LoadingButtonLabel from '../../../components/LoadingButtonLabel'
 import { useI18n } from '../../../components/LanguageProvider'
 
 const inputClass =
@@ -21,6 +21,7 @@ export default function SignIn() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [needsVerification, setNeedsVerification] = useState(false)
   const [resendMessage, setResendMessage] = useState<string | null>(null)
+  const [resendLoading, setResendLoading] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -66,23 +67,28 @@ export default function SignIn() {
     }
 
     setResendMessage(t('common.saving'))
+    setResendLoading(true)
 
-    const res = await fetch('/api/auth/send-verification-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    })
+    try {
+      const res = await fetch('/api/auth/send-verification-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
 
-    const data = await res.json().catch(() => null)
+      const data = await res.json().catch(() => null)
 
-    if (res.ok) {
-      if (data?.verifyUrl) {
-        setResendMessage(`${t('auth.verificationDevLink')} ${data.verifyUrl}`)
+      if (res.ok) {
+        if (data?.verifyUrl) {
+          setResendMessage(`${t('auth.verificationDevLink')} ${data.verifyUrl}`)
+        } else {
+          setResendMessage(t('auth.verificationSent'))
+        }
       } else {
-        setResendMessage(t('auth.verificationSent'))
+        setResendMessage(data?.error || t('common.error'))
       }
-    } else {
-      setResendMessage(data?.error || t('common.error'))
+    } finally {
+      setResendLoading(false)
     }
   }
 
@@ -122,11 +128,9 @@ export default function SignIn() {
               aria-busy={loading}
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
             >
-              {loading ? (
-                <LoadingImage inline size="xs" color="white" label={t('common.loading')} />
-              ) : (
-                t('common.login')
-              )}
+              <LoadingButtonLabel loading={loading} label={t('common.loading')}>
+                {t('common.login')}
+              </LoadingButtonLabel>
             </button>
 
             {errorMessage && <div className="mt-4 text-center text-sm text-red-600">{errorMessage}</div>}
@@ -135,10 +139,14 @@ export default function SignIn() {
               <div className="mt-4 text-center">
                 <button
                   type="button"
+                  disabled={resendLoading}
+                  aria-busy={resendLoading}
                   onClick={handleResend}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                  className="inline-flex min-w-[10rem] items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
                 >
-                  {t('auth.resendVerification')}
+                  <LoadingButtonLabel loading={resendLoading} label={t('common.loading')}>
+                    {t('auth.resendVerification')}
+                  </LoadingButtonLabel>
                 </button>
               </div>
             )}

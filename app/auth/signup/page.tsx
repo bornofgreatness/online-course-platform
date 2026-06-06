@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
 import PageShell, { siteCardClass, siteTitleClass } from '../../../components/PageShell'
-import LoadingImage from '../../../components/LoadingImage'
+import LoadingButtonLabel from '../../../components/LoadingButtonLabel'
 import { useI18n } from '../../../components/LanguageProvider'
 
 const inputClass =
@@ -154,11 +154,9 @@ export default function SignUp() {
               aria-busy={loading}
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
             >
-              {loading ? (
-                <LoadingImage inline size="xs" color="white" label={t('common.loading')} />
-              ) : (
-                t('common.signupFreeCta')
-              )}
+              <LoadingButtonLabel loading={loading} label={t('common.loading')}>
+                {t('common.signupFreeCta')}
+              </LoadingButtonLabel>
             </button>
 
             {message && (

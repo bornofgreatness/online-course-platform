@@ -7,6 +7,8 @@ import type { BillingPlan } from '../lib/billingPlans'
 import { PLAN_MONTHS, PLAN_TOTAL_CENTS_BRL } from '../lib/billingPlans'
 import { formatMoney } from '../lib/i18n/format'
 import { useI18n } from './LanguageProvider'
+import LoadingButtonLabel from './LoadingButtonLabel'
+import LoadingImage from './LoadingImage'
 import type { TranslationKey } from '../lib/i18n/translations'
 
 const plans: BillingPlan[] = ['1m', '3m', '6m', '1y']
@@ -61,6 +63,7 @@ export default function PricingPlans({ showFeatures = false }: PricingPlansProps
   const { data: session, status } = useSession()
   const router = useRouter()
   const [busy, setBusy] = useState<BillingPlan | null>(null)
+  const [validatingCoupon, setValidatingCoupon] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [couponCode, setCouponCode] = useState('')
   const [couponPreview, setCouponPreview] = useState<{
@@ -75,11 +78,16 @@ export default function PricingPlans({ showFeatures = false }: PricingPlansProps
       setCouponPreview(null)
       return
     }
-    const res = await fetch(
-      `/api/coupons/validate?code=${encodeURIComponent(couponCode)}&plan=${plan}`
-    )
-    const data = await res.json()
-    setCouponPreview(data)
+    setValidatingCoupon(true)
+    try {
+      const res = await fetch(
+        `/api/coupons/validate?code=${encodeURIComponent(couponCode)}&plan=${plan}`
+      )
+      const data = await res.json()
+      setCouponPreview(data)
+    } finally {
+      setValidatingCoupon(false)
+    }
   }
 
   async function checkout(plan: BillingPlan) {
@@ -146,10 +154,14 @@ export default function PricingPlans({ showFeatures = false }: PricingPlansProps
           </div>
           <button
             type="button"
+            disabled={validatingCoupon}
+            aria-busy={validatingCoupon}
             onClick={() => validateCoupon('3m')}
-            className="shrink-0 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-900"
+            className="inline-flex min-w-[8rem] shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-900 disabled:cursor-not-allowed disabled:opacity-80"
           >
-            {t('pricing.validateCoupon')}
+            <LoadingButtonLabel loading={validatingCoupon} color="default" label={t('common.loading')}>
+              {t('pricing.validateCoupon')}
+            </LoadingButtonLabel>
           </button>
         </div>
         {couponPreview && (
@@ -236,13 +248,16 @@ export default function PricingPlans({ showFeatures = false }: PricingPlansProps
               <button
                 type="button"
                 disabled={busy !== null}
+                aria-busy={busy === plan}
                 onClick={() => checkout(plan)}
                 className={[
-                  'mt-6 w-full rounded-xl py-3 text-sm font-bold text-white shadow-md transition disabled:opacity-50',
+                  'mt-6 inline-flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-white shadow-md transition disabled:cursor-not-allowed disabled:opacity-50',
                   accent.button,
                 ].join(' ')}
               >
-                {busy === plan ? t('pricing.wait') : t('pricing.subscribeNow')}
+                <LoadingButtonLabel loading={busy === plan} label={t('common.loading')}>
+                  {t('pricing.subscribeNow')}
+                </LoadingButtonLabel>
               </button>
             </div>
           )
