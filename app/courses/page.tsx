@@ -32,6 +32,48 @@ interface Course {
   enrollments: Array<{ id: string }>
 }
 
+function CourseSearchInput({
+  id,
+  value,
+  onChange,
+  placeholder,
+  className = '',
+}: {
+  id?: string
+  value: string
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  placeholder: string
+  className?: string
+}) {
+  return (
+    <div className={`relative ${className}`}>
+      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-4 w-4 text-slate-400"
+          aria-hidden
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+      </span>
+      <input
+        id={id}
+        type="search"
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+      />
+    </div>
+  )
+}
+
 export default function Courses() {
   const { data: session, status } = useSession()
   const { t } = useI18n()
@@ -190,6 +232,26 @@ export default function Courses() {
             )}
           </div>
 
+          <div className="space-y-3 px-0 pb-3">
+            <Link
+              href="/certificates"
+              className="block w-full rounded-xl bg-blue-600 py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-blue-700"
+            >
+              {t('common.certificates')}
+            </Link>
+            <div>
+              <label htmlFor="courses-mobile-search" className="sr-only">
+                {t('course.search')}
+              </label>
+              <CourseSearchInput
+                id="courses-mobile-search"
+                placeholder={t('course.search')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div className="px-0 pb-2">
             <h2 className="mb-2 text-base font-bold text-slate-900">{t('common.categories')}</h2>
             <div className="overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-sm">
@@ -204,20 +266,6 @@ export default function Courses() {
                 onToggleCategory={toggleCategoryExpanded}
               />
             </div>
-          </div>
-
-          <div className="px-0 pb-3">
-            <label htmlFor="courses-mobile-search" className="sr-only">
-              {t('course.search')}
-            </label>
-            <input
-              id="courses-mobile-search"
-              type="search"
-              placeholder={t('course.search')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-            />
           </div>
         </div>
 
@@ -251,12 +299,11 @@ export default function Courses() {
                   })}
                 </p>
               </div>
-              <input
-                type="search"
+              <CourseSearchInput
                 placeholder={t('course.search')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 sm:max-w-xs md:max-w-sm"
+                className="w-full sm:max-w-xs md:max-w-sm"
               />
             </div>
 
