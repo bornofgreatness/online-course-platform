@@ -19,7 +19,7 @@ export default async function AdminCrudPage() {
   return (
     <>
       <Header />
-      <PageShell>
+      <PageShell className="overflow-x-hidden">
         <ClientAdminCrud />
       </PageShell>
     </>

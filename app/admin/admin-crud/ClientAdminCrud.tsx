@@ -2,9 +2,21 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
+import { siteMutedClass, siteTitleClass } from '../../../components/PageShell'
 import LoadingImage from '../../../components/LoadingImage'
 import AdminMarketing from '../../../components/AdminMarketing'
+import AdminTabs from '../../../components/admin/AdminTabs'
+import {
+  adminCardClass,
+  adminInputClass,
+  adminPrimaryBtnClass,
+  adminSecondaryBtnClass,
+  adminShellClass,
+  adminStatCardClass,
+  adminTableClass,
+  adminTableWrapClass,
+  type AdminTab,
+} from '../../../components/admin/adminStyles'
 import { useI18n } from '../../../components/LanguageProvider'
 import { formatMoney } from '../../../lib/i18n/format'
 import { canDeleteUser, canAssignRole } from '../../../lib/auth/rbac'
@@ -47,7 +59,7 @@ type Toast = { type: 'success' | 'error'; message: string } | null
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-sm text-gray-700">{label}</span>
+      <span className="text-sm font-medium text-slate-700">{label}</span>
       {children}
     </label>
   )
@@ -57,7 +69,24 @@ export default function ClientAdminCrud() {
   const { t, language } = useI18n()
   const { data: session } = useSession()
   const actorRole = session?.user?.role
-  const [tab, setTab] = useState<'categories' | 'courses' | 'marketing' | 'affiliates' | 'users' | 'payments' | 'subscriptions' | 'certificates' | 'quizzes' | 'reports'>('categories')
+
+  const adminTabs = useMemo(
+    () => [
+      { id: 'categories' as const, label: t('admin.tabCategories') },
+      { id: 'courses' as const, label: t('admin.tabCourses') },
+      { id: 'marketing' as const, label: t('admin.tabMarketing') },
+      { id: 'affiliates' as const, label: t('admin.tabAffiliates') },
+      { id: 'users' as const, label: t('admin.tabUsers') },
+      { id: 'payments' as const, label: t('admin.tabPayments') },
+      { id: 'subscriptions' as const, label: t('admin.tabSubscriptions') },
+      { id: 'certificates' as const, label: t('admin.tabCertificates') },
+      { id: 'quizzes' as const, label: t('admin.tabQuizzes') },
+      { id: 'reports' as const, label: t('admin.tabReports') },
+    ],
+    [t]
+  )
+
+  const [tab, setTab] = useState<AdminTab>('categories')
   const [commissions, setCommissions] = useState<
     Array<{
       id: string
@@ -891,53 +920,64 @@ export default function ClientAdminCrud() {
 
   if (initialLoading) {
     return (
-      <div className="mx-auto max-w-6xl">
+      <div className={adminShellClass}>
         <LoadingImage size="lg" label={t('common.loading')} className="py-24" />
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className={adminShellClass}>
       {toast && (
         <div
-          className={`mb-4 rounded border px-4 py-2 text-sm ${
-            toast.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'
+          className={`mb-4 rounded-xl border px-4 py-3 text-sm shadow-sm ${
+            toast.type === 'success'
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+              : 'border-red-200 bg-red-50 text-red-900'
           }`}
         >
           {toast.message}
         </div>
       )}
 
-      <div className="mb-4 flex flex-wrap gap-3">
-        <a
-          href="/api/admin/leads"
-          className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
-        >
-          {t('admin.exportLeads')}
-        </a>
+      <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-teal-900 p-5 text-white shadow-lg ring-1 ring-black/10 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-widest text-teal-200">{t('common.admin')}</p>
+            <h1 className={`${siteTitleClass} mt-1 text-white`}>{t('admin.panel')}</h1>
+            <p className="mt-2 max-w-2xl text-sm text-blue-100">{t('admin.panelSubtitle')}</p>
+          </div>
+          <a
+            href="/api/admin/leads"
+            className="inline-flex shrink-0 items-center justify-center rounded-xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/20"
+          >
+            {t('admin.exportLeads')}
+          </a>
+        </div>
       </div>
 
       {stats && (
-        <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.users')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums">{stats.totalUsers}</p>
+        <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className={adminStatCardClass}>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.users')}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{stats.totalUsers}</p>
           </div>
-          <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.revenue')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums">{formatMoney(stats.revenueUsd, language)}</p>
+          <div className={adminStatCardClass}>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.revenue')}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">
+              {formatMoney(stats.revenueUsd, language)}
+            </p>
           </div>
-          <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.activeSubscriptions')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums">{stats.activeSubscriptions}</p>
+          <div className={adminStatCardClass}>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.activeSubscriptions')}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{stats.activeSubscriptions}</p>
           </div>
-          <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.completionRate')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums">{stats.completionRatePercent}%</p>
+          <div className={adminStatCardClass}>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.completionRate')}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{stats.completionRatePercent}%</p>
           </div>
-          <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.enrollments')}</p>
+          <div className={`${adminStatCardClass} col-span-2 lg:col-span-1`}>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.enrollments')}</p>
             <p className="mt-1 text-sm text-slate-700">
               {t('admin.enrollmentsSummary', {
                 completed: stats.completedEnrollments,
@@ -946,107 +986,21 @@ export default function ClientAdminCrud() {
               })}
             </p>
           </div>
-          <div className={`${siteCardClass} p-4`}>
-            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.affiliateReferrals')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums">{stats.affiliateReferrals}</p>
+          <div className={adminStatCardClass}>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.affiliateReferrals')}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{stats.affiliateReferrals}</p>
           </div>
-          <div className={`${siteCardClass} p-4 sm:col-span-2`}>
-            <p className="text-xs font-bold uppercase text-blue-900">{t('admin.pendingCommissions')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums">
+          <div className={`${adminStatCardClass} col-span-2`}>
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.pendingCommissions')}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">
               {formatMoney(Math.round(stats.pendingCommissionUsd * 100), language)}
             </p>
           </div>
         </div>
       )}
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className={siteTitleClass}>{t('admin.panel')}</h1>
-          <p className={`${siteMutedClass} mt-2`}>{t('admin.panelSubtitle')}</p>
-        </div>
-
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => setTab('categories')}
-            className={`rounded px-3 py-2 text-sm border ${
-              tab === 'categories' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
-            }`}
-          >
-            {t('admin.tabCategories')}
-          </button>
-          <button
-            onClick={() => setTab('courses')}
-            className={`rounded px-3 py-2 text-sm border ${
-              tab === 'courses' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
-            }`}
-          >
-            {t('admin.tabCourses')}
-          </button>
-          <button
-            onClick={() => setTab('marketing')}
-            className={`rounded px-3 py-2 text-sm border ${
-              tab === 'marketing' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
-            }`}
-          >
-            {t('admin.tabMarketing')}
-          </button>
-          <button
-            onClick={() => setTab('affiliates')}
-            className={`rounded px-3 py-2 text-sm border ${
-              tab === 'affiliates' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
-            }`}
-          >
-            {t('admin.tabAffiliates')}
-          </button>
-          <button
-            onClick={() => setTab('users')}
-            className={`rounded px-3 py-2 text-sm border ${
-              tab === 'users' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
-            }`}
-          >
-            {t('admin.tabUsers')}
-          </button>
-          <button
-            onClick={() => setTab('payments')}
-            className={`rounded px-3 py-2 text-sm border ${
-              tab === 'payments' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
-            }`}
-          >
-            {t('admin.tabPayments')}
-          </button>
-          <button
-            onClick={() => setTab('subscriptions')}
-            className={`rounded px-3 py-2 text-sm border ${
-              tab === 'subscriptions' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
-            }`}
-          >
-            {t('admin.tabSubscriptions')}
-          </button>
-          <button
-            onClick={() => setTab('certificates')}
-            className={`rounded px-3 py-2 text-sm border ${
-              tab === 'certificates' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
-            }`}
-          >
-            {t('admin.tabCertificates')}
-          </button>
-          <button
-            onClick={() => setTab('quizzes')}
-            className={`rounded px-3 py-2 text-sm border ${
-              tab === 'quizzes' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
-            }`}
-          >
-            {t('admin.tabQuizzes')}
-          </button>
-          <button
-            onClick={() => setTab('reports')}
-            className={`rounded px-3 py-2 text-sm border ${
-              tab === 'reports' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200'
-            }`}
-          >
-            {t('admin.tabReports')}
-          </button>
-        </div>
+      <div className="mb-6">
+        <AdminTabs tabs={adminTabs} value={tab} onChange={setTab} mobileLabel={t('admin.panel')} />
       </div>
 
       {tabLoading ? (
@@ -1056,7 +1010,7 @@ export default function ClientAdminCrud() {
       {tab === 'marketing' && <AdminMarketing />}
 
       {tab === 'affiliates' && (
-        <div className={`${siteCardClass} p-6`}>
+        <div className={adminCardClass}>
           <h2 className="text-xl font-semibold mb-4">{t('admin.tabAffiliates')}</h2>
           {commissions.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noCommissions')}</p>
@@ -1091,7 +1045,7 @@ export default function ClientAdminCrud() {
       )}
 
       {tab === 'users' && (
-        <div className={`${siteCardClass} p-6`}>
+        <div className={adminCardClass}>
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold">{t('admin.allUsers')}</h2>
@@ -1100,7 +1054,7 @@ export default function ClientAdminCrud() {
               </p>
             </div>
             <form
-              className="flex gap-2"
+              className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
               onSubmit={(e) => {
                 e.preventDefault()
                 void fetchUsers(1, userSearch)
@@ -1110,11 +1064,11 @@ export default function ClientAdminCrud() {
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
                 placeholder="Search name, email, WhatsApp..."
-                className="w-full rounded border px-3 py-2 text-sm sm:w-72"
+                className={`${adminInputClass} sm:max-w-xs`}
               />
               <button
                 type="submit"
-                className="rounded border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+                className={adminSecondaryBtnClass}
               >
                 Search
               </button>
@@ -1124,8 +1078,8 @@ export default function ClientAdminCrud() {
             <p className={siteMutedClass}>{t('admin.noUsers')}</p>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
+              <div className={adminTableWrapClass}>
+                <table className={adminTableClass}>
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
@@ -1178,12 +1132,12 @@ export default function ClientAdminCrud() {
                   </tbody>
                 </table>
               </div>
-              <div className="mt-4 flex items-center justify-between text-sm">
+              <div className="mt-4 flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
                 <button
                   type="button"
                   disabled={userPage <= 1}
                   onClick={() => fetchUsers(userPage - 1, userSearch)}
-                  className="rounded border px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                  className={adminSecondaryBtnClass}
                 >
                   Previous
                 </button>
@@ -1194,7 +1148,7 @@ export default function ClientAdminCrud() {
                   type="button"
                   disabled={userPage >= Math.ceil(usersTotal / 25)}
                   onClick={() => fetchUsers(userPage + 1, userSearch)}
-                  className="rounded border px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                  className={adminSecondaryBtnClass}
                 >
                   Next
                 </button>
@@ -1205,13 +1159,13 @@ export default function ClientAdminCrud() {
       )}
 
       {tab === 'payments' && (
-        <div className={`${siteCardClass} p-6`}>
+        <div className={adminCardClass}>
           <h2 className="text-xl font-semibold mb-4">{t('admin.allPayments')}</h2>
           {payments.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noPayments')}</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
+            <div className={adminTableWrapClass}>
+              <table className={adminTableClass}>
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
@@ -1255,13 +1209,13 @@ export default function ClientAdminCrud() {
       )}
 
       {tab === 'subscriptions' && (
-        <div className={`${siteCardClass} p-6`}>
+        <div className={adminCardClass}>
           <h2 className="text-xl font-semibold mb-4">{t('admin.allSubscriptions')}</h2>
           {subscriptions.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noSubscriptions')}</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
+            <div className={adminTableWrapClass}>
+              <table className={adminTableClass}>
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
@@ -1309,13 +1263,13 @@ export default function ClientAdminCrud() {
       )}
 
       {tab === 'certificates' && (
-        <div className={`${siteCardClass} p-6`}>
+        <div className={adminCardClass}>
           <h2 className="text-xl font-semibold mb-4">{t('admin.allCertificates')}</h2>
           {certificates.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noCertificates')}</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
+            <div className={adminTableWrapClass}>
+              <table className={adminTableClass}>
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
@@ -1362,14 +1316,14 @@ export default function ClientAdminCrud() {
 
       {tab === 'quizzes' && (
         <div className="space-y-6">
-          <div className={`${siteCardClass} p-6`}>
+          <div className={adminCardClass}>
             <h2 className="text-xl font-semibold mb-4">{t('admin.createQuiz')}</h2>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <Field label={t('admin.selectCourse')}>
                 <select
                   value={quizCourseId}
                   onChange={(e) => setQuizCourseId(e.target.value)}
-                  className="mt-1 w-full min-w-[14rem] rounded border px-3 py-2 text-sm"
+                  className={adminInputClass}
                 >
                   <option value="">{t('admin.selectCourse')}</option>
                   {coursesWithoutQuiz.map((c) => (
@@ -1383,7 +1337,7 @@ export default function ClientAdminCrud() {
                 type="button"
                 disabled={quizBusy === 'create' || !quizCourseId}
                 onClick={createQuiz}
-                className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                className={adminPrimaryBtnClass}
               >
                 {quizBusy === 'create' ? t('common.working') : t('admin.createQuiz')}
               </button>
@@ -1397,13 +1351,13 @@ export default function ClientAdminCrud() {
             )}
           </div>
 
-          <div className={`${siteCardClass} p-6`}>
+          <div className={adminCardClass}>
             <h2 className="text-xl font-semibold mb-4">{t('admin.allQuizzes')}</h2>
             {quizzes.length === 0 ? (
               <p className={siteMutedClass}>{t('admin.noQuizzes')}</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
+              <div className={adminTableWrapClass}>
+                <table className={adminTableClass}>
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Course</th>
@@ -1457,7 +1411,7 @@ export default function ClientAdminCrud() {
       )}
 
       {tab === 'reports' && stats && (
-        <div className={`${siteCardClass} p-6`}>
+        <div className={adminCardClass}>
           <h2 className="text-xl font-semibold mb-4">{t('admin.tabReports')}</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
@@ -1502,7 +1456,7 @@ export default function ClientAdminCrud() {
 
       {tab === 'categories' && (
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-black/5 sm:p-6">
             <h2 className="text-xl font-semibold mb-4">{t('admin.createCategory')}</h2>
 
             <div className="space-y-3">
@@ -1510,7 +1464,7 @@ export default function ClientAdminCrud() {
                 <input
                   value={catName}
                   onChange={(e) => setCatName(e.target.value)}
-                  className="mt-1 w-full rounded border px-3 py-2"
+                  className={adminInputClass}
                   placeholder={t('admin.namePlaceholder')}
                 />
               </Field>
@@ -1518,7 +1472,7 @@ export default function ClientAdminCrud() {
                 <input
                   value={catIcon}
                   onChange={(e) => setCatIcon(e.target.value)}
-                  className="mt-1 w-full rounded border px-3 py-2"
+                  className={adminInputClass}
                   placeholder="Upload an icon, paste a URL, emoji, or icon key"
                 />
                 <input
@@ -1534,7 +1488,7 @@ export default function ClientAdminCrud() {
                 <input
                   value={catImageUrl}
                   onChange={(e) => setCatImageUrl(e.target.value)}
-                  className="mt-1 w-full rounded border px-3 py-2"
+                  className={adminInputClass}
                   placeholder="Upload an image or paste a URL"
                 />
                 <input
@@ -1550,14 +1504,14 @@ export default function ClientAdminCrud() {
               <button
                 disabled={catBusy}
                 onClick={createCategory}
-                className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                className={`${adminPrimaryBtnClass} w-full`}
               >
                 {catBusy ? t('admin.working') : t('admin.create')}
               </button>
             </div>
           </div>
 
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-black/5 sm:p-6">
             <h2 className="text-xl font-semibold mb-4">{t('admin.allCategories')}</h2>
             <div className="space-y-3">
               {categories.length === 0 ? (
@@ -1570,13 +1524,13 @@ export default function ClientAdminCrud() {
                         <input
                           value={editingCategoryName}
                           onChange={(e) => setEditingCategoryName(e.target.value)}
-                          className="w-full rounded border px-3 py-2"
+                          className={adminInputClass}
                           placeholder={t('admin.name')}
                         />
                         <input
                           value={editingCategoryIcon}
                           onChange={(e) => setEditingCategoryIcon(e.target.value)}
-                          className="w-full rounded border px-3 py-2"
+                          className={adminInputClass}
                           placeholder="Upload an icon, paste a URL, emoji, or icon key"
                         />
                         <input
@@ -1590,7 +1544,7 @@ export default function ClientAdminCrud() {
                         <input
                           value={editingCategoryImageUrl}
                           onChange={(e) => setEditingCategoryImageUrl(e.target.value)}
-                          className="w-full rounded border px-3 py-2"
+                          className={adminInputClass}
                           placeholder={t('admin.cardImageUrl')}
                         />
                         <input
@@ -1601,7 +1555,7 @@ export default function ClientAdminCrud() {
                           className="block w-full text-xs text-slate-600 file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
                         />
                         {categoryUploadBusy === 'edit-image' ? <p className="text-xs text-slate-500">Uploading image...</p> : null}
-                        <div className="flex gap-2">
+                        <div className="flex flex-col gap-2 sm:flex-row">
                           <button
                             disabled={catBusy}
                             onClick={updateCategory}
@@ -1625,8 +1579,8 @@ export default function ClientAdminCrud() {
                       </>
                     ) : (
                       <>
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0">
                             <div className="font-medium">{c.name}</div>
                             {(c.icon || c.imageUrl) && (
                               <div className="mt-1 text-xs text-gray-500">
@@ -1641,7 +1595,7 @@ export default function ClientAdminCrud() {
                             )}
                             <div className="text-xs text-gray-500">{c.id}</div>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex flex-col gap-2 sm:flex-row">
                             <button
                               disabled={catBusy}
                               onClick={() => {
@@ -1671,7 +1625,7 @@ export default function ClientAdminCrud() {
             </div>
           </div>
 
-          <div className="rounded-xl border bg-white p-6 shadow-sm lg:col-span-2">
+          <div className={`${adminCardClass} lg:col-span-2`}>
             <h2 className="mb-4 text-xl font-semibold">{t('admin.allSubcategories')}</h2>
             <div className="mb-6 grid gap-4 lg:grid-cols-2">
               <div className="space-y-3">
@@ -1679,7 +1633,7 @@ export default function ClientAdminCrud() {
                   <select
                     value={subCatParentId}
                     onChange={(e) => setSubCatParentId(e.target.value)}
-                    className="mt-1 w-full rounded border px-3 py-2"
+                    className={adminInputClass}
                   >
                     <option value="">{t('admin.selectParentCategory')}</option>
                     {categories.map((c) => (
@@ -1693,7 +1647,7 @@ export default function ClientAdminCrud() {
                   <input
                     value={subCatName}
                     onChange={(e) => setSubCatName(e.target.value)}
-                    className="mt-1 w-full rounded border px-3 py-2"
+                    className={adminInputClass}
                     placeholder={t('admin.namePlaceholder')}
                   />
                 </Field>
@@ -1701,7 +1655,7 @@ export default function ClientAdminCrud() {
                   type="button"
                   disabled={subCatBusy}
                   onClick={createSubcategory}
-                  className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                  className={`${adminPrimaryBtnClass} w-full`}
                 >
                   {subCatBusy ? t('admin.working') : t('admin.createSubcategory')}
                 </button>
@@ -1719,9 +1673,9 @@ export default function ClientAdminCrud() {
                         <input
                           value={editingSubcategoryName}
                           onChange={(e) => setEditingSubcategoryName(e.target.value)}
-                          className="w-full rounded border px-3 py-2"
+                          className={adminInputClass}
                         />
-                        <div className="flex gap-2">
+                        <div className="flex flex-col gap-2 sm:flex-row">
                           <button
                             type="button"
                             disabled={subCatBusy}
@@ -1752,7 +1706,7 @@ export default function ClientAdminCrud() {
                             {typeof s._count?.courses === 'number' ? ` · ${s._count.courses} courses` : ''}
                           </div>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col gap-2 sm:flex-row">
                           <button
                             type="button"
                             disabled={subCatBusy}
@@ -1785,7 +1739,7 @@ export default function ClientAdminCrud() {
 
       {tab === 'courses' && (
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-black/5 sm:p-6">
             <h2 className="text-xl font-semibold mb-4">
               {editingCourseId ? t('admin.editCourse') : t('admin.createCourse')}
             </h2>
@@ -1795,7 +1749,7 @@ export default function ClientAdminCrud() {
                 <input
                   value={courseForm.title}
                   onChange={(e) => setCourseForm((p) => ({ ...p, title: e.target.value }))}
-                  className="mt-1 w-full rounded border px-3 py-2"
+                  className={adminInputClass}
                 />
               </Field>
 
@@ -1803,7 +1757,7 @@ export default function ClientAdminCrud() {
                 <textarea
                   value={courseForm.description}
                   onChange={(e) => setCourseForm((p) => ({ ...p, description: e.target.value }))}
-                  className="mt-1 w-full rounded border px-3 py-2"
+                  className={adminInputClass}
                   rows={4}
                 />
               </Field>
@@ -1819,7 +1773,7 @@ export default function ClientAdminCrud() {
                         subcategoryId: '',
                       }))
                     }
-                    className="mt-1 w-full rounded border px-3 py-2"
+                    className={adminInputClass}
                   >
                     <option value="">{t('admin.selectCategory')}</option>
                     {categories.map((c) => (
@@ -1834,7 +1788,7 @@ export default function ClientAdminCrud() {
                   <select
                     value={courseForm.subcategoryId}
                     onChange={(e) => setCourseForm((p) => ({ ...p, subcategoryId: e.target.value }))}
-                    className="mt-1 w-full rounded border px-3 py-2"
+                    className={adminInputClass}
                     disabled={!courseForm.categoryId}
                   >
                     <option value="">{t('admin.subcategoryNone')}</option>
@@ -1853,7 +1807,7 @@ export default function ClientAdminCrud() {
                     step={1}
                     value={courseForm.workloadHours}
                     onChange={(e) => setCourseForm((p) => ({ ...p, workloadHours: Number(e.target.value) }))}
-                    className="mt-1 w-full rounded border px-3 py-2"
+                    className={adminInputClass}
                   />
                 </Field>
               </div>
@@ -1862,7 +1816,7 @@ export default function ClientAdminCrud() {
                 <input
                   value={courseForm.pdfUrl}
                   onChange={(e) => setCourseForm((p) => ({ ...p, pdfUrl: e.target.value }))}
-                  className="mt-1 w-full rounded border px-3 py-2"
+                  className={adminInputClass}
                   placeholder="Upload a PDF or paste a URL"
                 />
                 <input
@@ -1879,7 +1833,7 @@ export default function ClientAdminCrud() {
                 <input
                   value={courseForm.thumbnailUrl}
                   onChange={(e) => setCourseForm((p) => ({ ...p, thumbnailUrl: e.target.value }))}
-                  className="mt-1 w-full rounded border px-3 py-2"
+                  className={adminInputClass}
                   placeholder="Upload an image or paste a URL"
                 />
                 <input
@@ -1896,7 +1850,7 @@ export default function ClientAdminCrud() {
                 <input
                   value={courseForm.videoUrl}
                   onChange={(e) => setCourseForm((p) => ({ ...p, videoUrl: e.target.value }))}
-                  className="mt-1 w-full rounded border px-3 py-2"
+                  className={adminInputClass}
                   placeholder="Upload a video or paste a URL"
                 />
                 <input
@@ -1913,7 +1867,7 @@ export default function ClientAdminCrud() {
                 <textarea
                   value={courseForm.syllabus}
                   onChange={(e) => setCourseForm((p) => ({ ...p, syllabus: e.target.value }))}
-                  className="mt-1 w-full rounded border px-3 py-2"
+                  className={adminInputClass}
                   rows={3}
                 />
               </Field>
@@ -1923,7 +1877,7 @@ export default function ClientAdminCrud() {
                   <input
                     value={courseForm.seoTitle}
                     onChange={(e) => setCourseForm((p) => ({ ...p, seoTitle: e.target.value }))}
-                    className="mt-1 w-full rounded border px-3 py-2"
+                    className={adminInputClass}
                   />
                 </Field>
 
@@ -1931,16 +1885,16 @@ export default function ClientAdminCrud() {
                   <input
                     value={courseForm.seoDescription}
                     onChange={(e) => setCourseForm((p) => ({ ...p, seoDescription: e.target.value }))}
-                    className="mt-1 w-full rounded border px-3 py-2"
+                    className={adminInputClass}
                   />
                 </Field>
               </div>
 
-              <div className="flex gap-2">
+                          <div className="flex flex-col gap-2 sm:flex-row">
                 <button
                   disabled={courseBusy}
                   onClick={submitCourse}
-                  className="flex-1 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                  className={`${adminPrimaryBtnClass} flex-1`}
                 >
                   {courseBusy ? t('admin.saving') : editingCourseId ? t('admin.update') : t('admin.create')}
                 </button>
@@ -1959,7 +1913,7 @@ export default function ClientAdminCrud() {
             </div>
           </div>
 
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-black/5 sm:p-6">
             <h2 className="text-xl font-semibold mb-4">{t('admin.allCourses')}</h2>
             <div className="space-y-3">
               {courses.length === 0 ? (

@@ -1,7 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { siteCardClass } from './PageShell'
+import {
+  adminCardClass,
+  adminInputClass,
+  adminPrimaryBtnClass,
+} from './admin/adminStyles'
 import LoadingButtonLabel from './LoadingButtonLabel'
 import LoadingImage from './LoadingImage'
 import { useI18n } from './LanguageProvider'
@@ -151,14 +155,14 @@ export default function AdminMarketing() {
     <div className="space-y-8">
       {message && <p className="rounded-lg bg-blue-50 p-3 text-sm text-blue-900">{message}</p>}
 
-      <section className={`${siteCardClass} p-6`}>
+      <section className={`${adminCardClass} space-y-4`}>
         <h2 className="text-lg font-bold">{t('marketing.uploadTitle')}</h2>
         <p className="mt-1 text-sm text-slate-600">{t('marketing.uploadSubtitle')}</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <select
             value={uploadFolder}
             onChange={(e) => setUploadFolder(e.target.value)}
-            className="rounded border px-3 py-2 text-sm"
+            className={adminInputClass}
           >
             <option value="videos">videos</option>
             <option value="pdfs">pdfs</option>
@@ -177,41 +181,41 @@ export default function AdminMarketing() {
         )}
       </section>
 
-      <section className={`${siteCardClass} p-6`}>
+      <section className={`${adminCardClass} space-y-4`}>
         <h2 className="text-lg font-bold">{t('marketing.coupons')}</h2>
         <form onSubmit={createCoupon} className="mt-4 grid gap-3 sm:grid-cols-2">
           <input
             placeholder={t('marketing.couponCode')}
             value={couponForm.code}
             onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })}
-            className="rounded border px-3 py-2 text-sm uppercase"
+            className={`${adminInputClass} uppercase`}
             required
           />
           <input
             placeholder={t('marketing.description')}
             value={couponForm.description}
             onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
-            className="rounded border px-3 py-2 text-sm"
+            className={adminInputClass}
           />
           <input
             type="number"
             placeholder={t('marketing.discountPercent')}
             value={couponForm.discountPercent}
             onChange={(e) => setCouponForm({ ...couponForm, discountPercent: Number(e.target.value) })}
-            className="rounded border px-3 py-2 text-sm"
+            className={adminInputClass}
           />
           <input
             type="number"
             placeholder={t('marketing.maxUses')}
             value={couponForm.maxUses}
             onChange={(e) => setCouponForm({ ...couponForm, maxUses: Number(e.target.value) })}
-            className="rounded border px-3 py-2 text-sm"
+            className={adminInputClass}
           />
           <button
             type="submit"
             disabled={busy}
             aria-busy={busy}
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80 sm:col-span-2"
+            className={`${adminPrimaryBtnClass} sm:col-span-2`}
           >
             <LoadingButtonLabel loading={busy} label={t('common.loading')}>
               {t('marketing.createCoupon')}
@@ -220,7 +224,7 @@ export default function AdminMarketing() {
         </form>
         <ul className="mt-4 space-y-2 text-sm">
           {coupons.map((c) => (
-            <li key={c.id} className="flex justify-between rounded border px-3 py-2">
+            <li key={c.id} className="flex flex-col gap-2 rounded-xl border border-slate-200/80 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
               <span>
                 <strong>{c.code}</strong> — {c.discountPercent}% · {c.usedCount}/{c.maxUses ?? '∞'}{' '}
                 {t('marketing.uses')}
@@ -233,7 +237,7 @@ export default function AdminMarketing() {
         </ul>
       </section>
 
-      <section className={`${siteCardClass} p-6`}>
+      <section className={`${adminCardClass} space-y-4`}>
         <h2 className="text-lg font-bold">{t('marketing.campaigns')}</h2>
         <p className="text-sm text-slate-600">{t('marketing.campaignsHint')}</p>
         <form onSubmit={createCampaign} className="mt-4 space-y-3">
@@ -241,13 +245,13 @@ export default function AdminMarketing() {
             placeholder={t('marketing.subject')}
             value={campaignForm.subject}
             onChange={(e) => setCampaignForm({ ...campaignForm, subject: e.target.value })}
-            className="w-full rounded border px-3 py-2 text-sm"
+            className={adminInputClass}
             required
           />
           <select
             value={campaignForm.recipientFilter}
             onChange={(e) => setCampaignForm({ ...campaignForm, recipientFilter: e.target.value })}
-            className="w-full rounded border px-3 py-2 text-sm"
+            className={adminInputClass}
           >
             <option value="all_students">{t('marketing.recipientsAll')}</option>
             <option value="verified_students">{t('marketing.recipientsVerified')}</option>
@@ -257,14 +261,14 @@ export default function AdminMarketing() {
             rows={6}
             value={campaignForm.bodyHtml}
             onChange={(e) => setCampaignForm({ ...campaignForm, bodyHtml: e.target.value })}
-            className="w-full rounded border px-3 py-2 font-mono text-sm"
+            className={`${adminInputClass} font-mono`}
             required
           />
           <button
             type="submit"
             disabled={busy}
             aria-busy={busy}
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-80"
+            className={adminPrimaryBtnClass}
           >
             <LoadingButtonLabel loading={busy} label={t('common.loading')}>
               {t('marketing.saveDraft')}
@@ -273,7 +277,7 @@ export default function AdminMarketing() {
         </form>
         <ul className="mt-6 space-y-3">
           {campaigns.map((camp) => (
-            <li key={camp.id} className="rounded border p-3 text-sm">
+            <li key={camp.id} className="rounded-xl border border-slate-200/80 p-4 text-sm">
               <p className="font-semibold">{camp.subject}</p>
               <p className="text-slate-500">
                 {camp.status === 'sent'
@@ -289,7 +293,7 @@ export default function AdminMarketing() {
                   onClick={() => sendCampaign(camp.id)}
                   disabled={busy}
                   aria-busy={busy}
-                  className="mt-2 inline-flex min-w-[7rem] items-center justify-center rounded bg-green-600 px-3 py-1 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-80"
+                  className={`${adminPrimaryBtnClass} mt-2 min-w-[7rem] bg-emerald-600 hover:bg-emerald-700`}
                 >
                   <LoadingButtonLabel loading={busy} label={t('common.loading')}>
                     {t('marketing.sendCampaign')}
