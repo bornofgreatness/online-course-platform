@@ -8,6 +8,7 @@ import CertificateLegalNotice from './CertificateLegalNotice'
 import { useI18n } from './LanguageProvider'
 import LoadingButtonLabel from './LoadingButtonLabel'
 import LoadingImage from './LoadingImage'
+import { siteAccentBtnClass, sitePrimaryBtnClass } from '../lib/ui/siteStyles'
 import { CERTIFICATE_ISSUANCE_FEE_BRL, formatCertificateFeeBrl } from '../lib/certificatePolicy'
 
 interface CourseActionsProps {
@@ -214,7 +215,7 @@ export default function CourseActions({
           <div className="mb-2 font-semibold text-green-600">✓ {t('actions.certificateEarned')}</div>
           <a
             href="/certificates"
-            className="inline-block rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
+            className={`inline-block ${siteAccentBtnClass} px-4 py-2 text-sm`}
           >
             {t('actions.viewCertificate')}
           </a>
@@ -227,7 +228,7 @@ export default function CourseActions({
             onClick={handleRequestCertificate}
             disabled={loading}
             aria-busy={loading}
-            className="inline-flex w-full items-center justify-center rounded bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`w-full ${sitePrimaryBtnClass}`}
           >
             <LoadingButtonLabel loading={loading} label={t('common.loading')}>
               {t('actions.requestCertificate', { fee: feeLabel })}
@@ -243,7 +244,7 @@ export default function CourseActions({
           onClick={handleMarkComplete}
           disabled={loading || !canMarkComplete}
           aria-busy={loading}
-          className="inline-flex w-full items-center justify-center rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className={`w-full ${sitePrimaryBtnClass} disabled:cursor-not-allowed disabled:opacity-50`}
         >
           <LoadingButtonLabel loading={loading} label={t('common.loading')}>
             {t('course.markComplete')}

@@ -7,14 +7,24 @@ import LoadingImage from '../../../components/LoadingImage'
 import AdminMarketing from '../../../components/AdminMarketing'
 import AdminTabs from '../../../components/admin/AdminTabs'
 import {
+  AdminDesktopTable,
+  AdminMobileActions,
+  AdminMobileCard,
+  AdminMobileField,
+  AdminMobileHeader,
+  AdminMobileList,
+  AdminMobileStat,
+  AdminMobileStatGrid,
+  adminActionBtnClass,
+  adminDangerBtnClass,
+} from '../../../components/admin/AdminListLayout'
+import {
   adminCardClass,
   adminInputClass,
   adminPrimaryBtnClass,
   adminSecondaryBtnClass,
   adminShellClass,
   adminStatCardClass,
-  adminTableClass,
-  adminTableWrapClass,
   type AdminTab,
 } from '../../../components/admin/adminStyles'
 import { useI18n } from '../../../components/LanguageProvider'
@@ -957,7 +967,7 @@ export default function ClientAdminCrud() {
       </div>
 
       {stats && (
-        <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className={adminStatCardClass}>
             <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.users')}</p>
             <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{stats.totalUsers}</p>
@@ -990,7 +1000,7 @@ export default function ClientAdminCrud() {
             <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.affiliateReferrals')}</p>
             <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{stats.affiliateReferrals}</p>
           </div>
-          <div className={`${adminStatCardClass} col-span-2`}>
+          <div className={`${adminStatCardClass} sm:col-span-2 lg:col-span-1`}>
             <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.pendingCommissions')}</p>
             <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">
               {formatMoney(Math.round(stats.pendingCommissionUsd * 100), language)}
@@ -1068,7 +1078,7 @@ export default function ClientAdminCrud() {
               />
               <button
                 type="submit"
-                className={adminSecondaryBtnClass}
+                className={`${adminSecondaryBtnClass} w-full sm:w-auto`}
               >
                 Search
               </button>
@@ -1078,77 +1088,115 @@ export default function ClientAdminCrud() {
             <p className={siteMutedClass}>{t('admin.noUsers')}</p>
           ) : (
             <>
-              <div className={adminTableWrapClass}>
-                <table className={adminTableClass}>
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userEmail')}</th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userRole')}</th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">Enrollments</th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">Subscriptions</th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">Payments</th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">Certificates</th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
+              <AdminMobileList>
+                {users.map((u) => (
+                  <AdminMobileCard key={u.id}>
+                    <AdminMobileHeader title={u.name} subtitle={u.email} />
+                    <AdminMobileField label={t('admin.userRole')}>
+                      <select
+                        value={u.role}
+                        onChange={(e) => updateUserRole(u.id, e.target.value)}
+                        disabled={
+                          userBusy === u.id ||
+                          !assignableRoles.some((r) => canAssignRole(actorRole, u.role, r))
+                        }
+                        className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm disabled:opacity-50"
+                      >
+                        {Array.from(new Set([u.role, ...assignableRoles])).map((role) => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
+                      </select>
+                    </AdminMobileField>
+                    <AdminMobileStatGrid>
+                      <AdminMobileStat label="Enroll." value={u._count.enrollments} />
+                      <AdminMobileStat label="Subs." value={u._count.subscriptions} />
+                      <AdminMobileStat label="Pay." value={u._count.payments} />
+                      <AdminMobileStat label="Cert." value={u._count.certificates} />
+                    </AdminMobileStatGrid>
+                    <AdminMobileActions>
+                      <button
+                        disabled={userBusy === u.id || !canDeleteUser(actorRole, u.role)}
+                        onClick={() => deleteUser(u.id)}
+                        className={adminDangerBtnClass}
+                      >
+                        {t('admin.delete')}
+                      </button>
+                    </AdminMobileActions>
+                  </AdminMobileCard>
+                ))}
+              </AdminMobileList>
+
+              <AdminDesktopTable>
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userEmail')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userRole')}</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Enrollments</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Subscriptions</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Payments</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Certificates</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {users.map((u) => (
+                    <tr key={u.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2">{u.name}</td>
+                      <td className="px-4 py-2">{u.email}</td>
+                      <td className="px-4 py-2">
+                        <select
+                          value={u.role}
+                          onChange={(e) => updateUserRole(u.id, e.target.value)}
+                          disabled={
+                            userBusy === u.id ||
+                            !assignableRoles.some((r) => canAssignRole(actorRole, u.role, r))
+                          }
+                          className="rounded border px-2 py-1 text-xs disabled:opacity-50"
+                        >
+                          {Array.from(new Set([u.role, ...assignableRoles])).map((role) => (
+                            <option key={role} value={role}>
+                              {role}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-4 py-2">{u._count.enrollments}</td>
+                      <td className="px-4 py-2">{u._count.subscriptions}</td>
+                      <td className="px-4 py-2">{u._count.payments}</td>
+                      <td className="px-4 py-2">{u._count.certificates}</td>
+                      <td className="px-4 py-2">
+                        <button
+                          disabled={userBusy === u.id || !canDeleteUser(actorRole, u.role)}
+                          onClick={() => deleteUser(u.id)}
+                          className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
+                        >
+                          {t('admin.delete')}
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {users.map((u) => (
-                      <tr key={u.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-2">{u.name}</td>
-                        <td className="px-4 py-2">{u.email}</td>
-                        <td className="px-4 py-2">
-                          <select
-                            value={u.role}
-                            onChange={(e) => updateUserRole(u.id, e.target.value)}
-                            disabled={
-                              userBusy === u.id ||
-                              !assignableRoles.some((r) => canAssignRole(actorRole, u.role, r))
-                            }
-                            className="rounded border px-2 py-1 text-xs disabled:opacity-50"
-                          >
-                            {Array.from(new Set([u.role, ...assignableRoles])).map((role) => (
-                              <option key={role} value={role}>
-                                {role}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="px-4 py-2">{u._count.enrollments}</td>
-                        <td className="px-4 py-2">{u._count.subscriptions}</td>
-                        <td className="px-4 py-2">{u._count.payments}</td>
-                        <td className="px-4 py-2">{u._count.certificates}</td>
-                        <td className="px-4 py-2">
-                          <button
-                            disabled={userBusy === u.id || !canDeleteUser(actorRole, u.role)}
-                            onClick={() => deleteUser(u.id)}
-                            className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
-                          >
-                            {t('admin.delete')}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-4 flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+                  ))}
+                </tbody>
+              </AdminDesktopTable>
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <button
                   type="button"
                   disabled={userPage <= 1}
                   onClick={() => fetchUsers(userPage - 1, userSearch)}
-                  className={adminSecondaryBtnClass}
+                  className={`${adminSecondaryBtnClass} w-full sm:w-auto`}
                 >
                   Previous
                 </button>
-                <span className="text-slate-600">
+                <span className="text-center text-sm text-slate-600">
                   Page {userPage} of {Math.max(1, Math.ceil(usersTotal / 25))}
                 </span>
                 <button
                   type="button"
                   disabled={userPage >= Math.ceil(usersTotal / 25)}
                   onClick={() => fetchUsers(userPage + 1, userSearch)}
-                  className={adminSecondaryBtnClass}
+                  className={`${adminSecondaryBtnClass} w-full sm:w-auto`}
                 >
                   Next
                 </button>
@@ -1164,8 +1212,38 @@ export default function ClientAdminCrud() {
           {payments.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noPayments')}</p>
           ) : (
-            <div className={adminTableWrapClass}>
-              <table className={adminTableClass}>
+            <>
+              <AdminMobileList>
+                {payments.map((p) => (
+                  <AdminMobileCard key={p.id}>
+                    <AdminMobileHeader title={p.user.name} subtitle={p.user.email} />
+                    <div className="space-y-2">
+                      <AdminMobileField label={t('admin.paymentAmount')}>
+                        {formatMoney(Math.round(p.amount * 100), language)} {p.currency.toUpperCase()}
+                      </AdminMobileField>
+                      <AdminMobileField label={t('admin.paymentStatus')}>
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                            p.status === 'succeeded'
+                              ? 'bg-green-100 text-green-800'
+                              : p.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {p.status}
+                        </span>
+                      </AdminMobileField>
+                      <AdminMobileField label={t('admin.paymentProvider')}>{p.provider}</AdminMobileField>
+                      <AdminMobileField label={t('admin.paymentDate')}>
+                        {new Date(p.createdAt).toLocaleString()}
+                      </AdminMobileField>
+                    </div>
+                  </AdminMobileCard>
+                ))}
+              </AdminMobileList>
+
+              <AdminDesktopTable>
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
@@ -1202,8 +1280,8 @@ export default function ClientAdminCrud() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
+              </AdminDesktopTable>
+            </>
           )}
         </div>
       )}
@@ -1214,8 +1292,43 @@ export default function ClientAdminCrud() {
           {subscriptions.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noSubscriptions')}</p>
           ) : (
-            <div className={adminTableWrapClass}>
-              <table className={adminTableClass}>
+            <>
+              <AdminMobileList>
+                {subscriptions.map((s) => (
+                  <AdminMobileCard key={s.id}>
+                    <AdminMobileHeader title={s.user.name} subtitle={s.user.email} />
+                    <div className="space-y-2">
+                      <AdminMobileField label={t('admin.subscriptionPlan')}>{s.plan}</AdminMobileField>
+                      <AdminMobileField label={t('admin.subscriptionActive')}>
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                            s.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {s.active ? t('admin.subscriptionActive') : 'Inactive'}
+                        </span>
+                      </AdminMobileField>
+                      <AdminMobileField label={t('admin.subscriptionStartDate')}>
+                        {new Date(s.startDate).toLocaleDateString()}
+                      </AdminMobileField>
+                      <AdminMobileField label={t('admin.subscriptionEndDate')}>
+                        {new Date(s.endDate).toLocaleDateString()}
+                      </AdminMobileField>
+                    </div>
+                    <AdminMobileActions>
+                      <button
+                        disabled={subscriptionBusy === s.id}
+                        onClick={() => toggleSubscriptionActive(s.id, !s.active)}
+                        className={adminActionBtnClass}
+                      >
+                        {s.active ? 'Deactivate' : 'Activate'}
+                      </button>
+                    </AdminMobileActions>
+                  </AdminMobileCard>
+                ))}
+              </AdminMobileList>
+
+              <AdminDesktopTable>
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
@@ -1256,8 +1369,8 @@ export default function ClientAdminCrud() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
+              </AdminDesktopTable>
+            </>
           )}
         </div>
       )}
@@ -1268,8 +1381,42 @@ export default function ClientAdminCrud() {
           {certificates.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noCertificates')}</p>
           ) : (
-            <div className={adminTableWrapClass}>
-              <table className={adminTableClass}>
+            <>
+              <AdminMobileList>
+                {certificates.map((c) => (
+                  <AdminMobileCard key={c.id}>
+                    <AdminMobileHeader title={c.user.name} subtitle={c.user.email} />
+                    <div className="space-y-2">
+                      <AdminMobileField label="Course">{c.course.title}</AdminMobileField>
+                      <AdminMobileField label={t('admin.certificateNumber')}>
+                        <span className="font-mono text-xs">{c.certificateNumber}</span>
+                      </AdminMobileField>
+                      <AdminMobileField label={t('admin.certificateIssued')}>
+                        {new Date(c.issuedAt).toLocaleDateString()}
+                      </AdminMobileField>
+                    </div>
+                    <AdminMobileActions>
+                      <a
+                        href={c.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={adminActionBtnClass}
+                      >
+                        View PDF
+                      </a>
+                      <button
+                        disabled={certificateBusy === c.id}
+                        onClick={() => deleteCertificate(c.id)}
+                        className={adminDangerBtnClass}
+                      >
+                        {t('admin.delete')}
+                      </button>
+                    </AdminMobileActions>
+                  </AdminMobileCard>
+                ))}
+              </AdminMobileList>
+
+              <AdminDesktopTable>
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left font-medium text-gray-700">{t('admin.userName')}</th>
@@ -1308,8 +1455,8 @@ export default function ClientAdminCrud() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
+              </AdminDesktopTable>
+            </>
           )}
         </div>
       )}
@@ -1337,7 +1484,7 @@ export default function ClientAdminCrud() {
                 type="button"
                 disabled={quizBusy === 'create' || !quizCourseId}
                 onClick={createQuiz}
-                className={adminPrimaryBtnClass}
+                className={`${adminPrimaryBtnClass} w-full sm:w-auto`}
               >
                 {quizBusy === 'create' ? t('common.working') : t('admin.createQuiz')}
               </button>
@@ -1356,8 +1503,45 @@ export default function ClientAdminCrud() {
             {quizzes.length === 0 ? (
               <p className={siteMutedClass}>{t('admin.noQuizzes')}</p>
             ) : (
-              <div className={adminTableWrapClass}>
-                <table className={adminTableClass}>
+              <>
+                <AdminMobileList>
+                  {quizzes.map((q) => (
+                    <AdminMobileCard key={q.id}>
+                      <AdminMobileHeader title={q.courseTitle} subtitle={q.categoryName} />
+                      <AdminMobileStatGrid>
+                        <AdminMobileStat label={t('admin.quizQuestions')} value={q.questionCount} />
+                        <AdminMobileStat label={t('admin.quizAttempts')} value={q.attemptCount} />
+                      </AdminMobileStatGrid>
+                      <div className="mt-3">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                            q.valid ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          {q.valid ? 'OK' : t('admin.quizInvalid')}
+                        </span>
+                      </div>
+                      <AdminMobileActions>
+                        <button
+                          disabled={quizBusy === q.id}
+                          onClick={() => resetQuizDefault(q.id)}
+                          className={adminActionBtnClass}
+                        >
+                          {t('admin.quizResetDefault')}
+                        </button>
+                        <button
+                          disabled={quizBusy === q.id}
+                          onClick={() => deleteQuiz(q.id)}
+                          className={adminDangerBtnClass}
+                        >
+                          {t('admin.delete')}
+                        </button>
+                      </AdminMobileActions>
+                    </AdminMobileCard>
+                  ))}
+                </AdminMobileList>
+
+                <AdminDesktopTable>
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Course</th>
@@ -1403,8 +1587,8 @@ export default function ClientAdminCrud() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
-              </div>
+                </AdminDesktopTable>
+              </>
             )}
           </div>
         </div>
@@ -1739,8 +1923,8 @@ export default function ClientAdminCrud() {
 
       {tab === 'courses' && (
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-black/5 sm:p-6">
-            <h2 className="text-xl font-semibold mb-4">
+          <div className={adminCardClass}>
+            <h2 className="mb-4 text-xl font-semibold">
               {editingCourseId ? t('admin.editCourse') : t('admin.createCourse')}
             </h2>
 
@@ -1901,7 +2085,7 @@ export default function ClientAdminCrud() {
                 <button
                   disabled={courseBusy}
                   onClick={resetCourseForm}
-                  className="rounded border px-4 py-2 hover:bg-gray-50"
+                  className={adminSecondaryBtnClass}
                 >
                   {t('admin.reset')}
                 </button>
@@ -1913,41 +2097,36 @@ export default function ClientAdminCrud() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-black/5 sm:p-6">
-            <h2 className="text-xl font-semibold mb-4">{t('admin.allCourses')}</h2>
+          <div className={adminCardClass}>
+            <h2 className="mb-4 text-xl font-semibold">{t('admin.allCourses')}</h2>
             <div className="space-y-3">
               {courses.length === 0 ? (
-                <p className="text-gray-600">{t('admin.noCourses')}</p>
+                <p className={siteMutedClass}>{t('admin.noCourses')}</p>
               ) : (
                 courses.map((c) => (
-                  <div key={c.id} className="rounded border p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="font-semibold truncate">{c.title}</div>
-                        <div className="text-sm text-gray-500 mt-1">
-                          {c.category?.name}
-                          {c.subcategory?.name ? ` / ${c.subcategory.name}` : ''} • {c.workloadHours}h
-                        </div>
-                        <div className="text-xs text-gray-400 mt-2 break-all">{c.pdfUrl}</div>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <button
-                          disabled={courseBusy}
-                          onClick={() => beginEditCourse(c)}
-                          className="rounded border px-3 py-2 text-sm hover:bg-gray-50"
-                        >
-                          {t('admin.edit')}
-                        </button>
-                        <button
-                          disabled={courseBusy}
-                          onClick={() => deleteCourse(c.id)}
-                          className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100"
-                        >
-                          {t('admin.delete')}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <AdminMobileCard key={c.id}>
+                    <AdminMobileHeader
+                      title={c.title}
+                      subtitle={`${c.category?.name}${c.subcategory?.name ? ` / ${c.subcategory.name}` : ''} • ${c.workloadHours}h`}
+                    />
+                    <p className="mt-2 break-all text-xs text-slate-500">{c.pdfUrl}</p>
+                    <AdminMobileActions>
+                      <button
+                        disabled={courseBusy}
+                        onClick={() => beginEditCourse(c)}
+                        className={adminActionBtnClass}
+                      >
+                        {t('admin.edit')}
+                      </button>
+                      <button
+                        disabled={courseBusy}
+                        onClick={() => deleteCourse(c.id)}
+                        className={adminDangerBtnClass}
+                      >
+                        {t('admin.delete')}
+                      </button>
+                    </AdminMobileActions>
+                  </AdminMobileCard>
                 ))
               )}
             </div>

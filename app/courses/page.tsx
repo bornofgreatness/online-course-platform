@@ -5,6 +5,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import Header from '../../components/Header'
 import PageShell from '../../components/PageShell'
+import {
+  siteAccentBtnClass,
+  siteDarkBtnClass,
+  siteMobileActionClass,
+  sitePanelClass,
+  sitePrimaryBtnClass,
+} from '../../lib/ui/siteStyles'
 import PageLoading from '../../components/PageLoading'
 import CourseListCard from '../../components/CourseListCard'
 import CatalogSidebar, { type CatalogCategoryItem } from '../../components/CatalogSidebar'
@@ -69,7 +76,7 @@ function CourseSearchInput({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+        className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
       />
     </div>
   )
@@ -218,21 +225,21 @@ export default function Courses() {
             <button
               type="button"
               onClick={scrollToCourses}
-              className="w-full rounded-xl bg-black py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-gray-900"
+              className={`${siteMobileActionClass} ${siteDarkBtnClass}`}
             >
               {t('course.available')}
             </button>
             {status !== 'loading' && session ? (
               <Link
                 href="/dashboard"
-                className="block w-full rounded-xl bg-emerald-600 py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-emerald-700"
+                className={`${siteMobileActionClass} ${siteAccentBtnClass}`}
               >
                 {t('common.dashboard')}
               </Link>
             ) : (
               <Link
                 href="/auth/signin"
-                className="block w-full rounded-xl bg-emerald-600 py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-emerald-700"
+                className={`${siteMobileActionClass} ${siteAccentBtnClass}`}
               >
                 {t('common.loginSignup')}
               </Link>
@@ -242,7 +249,7 @@ export default function Courses() {
           <div className="space-y-3 px-0 pb-3">
             <Link
               href="/certificates"
-              className="block w-full rounded-xl bg-blue-600 py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-blue-700"
+              className={`${siteMobileActionClass} ${sitePrimaryBtnClass}`}
             >
               {t('common.certificates')}
             </Link>
@@ -261,7 +268,7 @@ export default function Courses() {
 
           <div className="px-0 pb-2">
             <h2 className="mb-2 text-base font-bold text-slate-900">{t('common.categories')}</h2>
-            <div className="overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-sm">
+            <div className={`overflow-y-auto p-2 ${sitePanelClass}`}>
               <CatalogSidebar
                 categories={catalogCategories}
                 selectedCategoryId={selectedCategoryId}
@@ -277,7 +284,7 @@ export default function Courses() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
-          <aside className="hidden h-fit max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl bg-white p-5 shadow-md ring-1 ring-black/5 lg:block lg:sticky lg:top-24">
+          <aside className={`hidden h-fit max-h-[calc(100vh-8rem)] overflow-y-auto lg:block lg:sticky lg:top-24 ${sitePanelClass}`}>
             <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-blue-900">
               {t('common.categories')}
             </h2>

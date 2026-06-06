@@ -78,7 +78,7 @@ export default function Header() {
   const navText = (active: boolean) =>
     [
       'text-sm font-bold uppercase tracking-wide transition-colors',
-      active ? 'text-teal-700' : 'text-black hover:text-teal-700',
+      active ? 'text-teal-700' : 'text-slate-800 hover:text-teal-700',
     ].join(' ')
 
   const categoriesActive = pathname.startsWith('/categories')
@@ -91,12 +91,13 @@ export default function Header() {
   const aboutActive = pathname.startsWith('/about')
   const dashboardActive = pathname.startsWith('/dashboard')
 
-  const drawerLinkClass = 'rounded-lg px-3 py-2.5 text-slate-800 hover:bg-gray-50'
+  const drawerLinkClass =
+    'rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-100'
 
   return (
     <>
       {/* Mobile: matches courses page top bar */}
-      <div className="sticky top-0 z-50 border-b border-black/10 bg-white lg:hidden">
+      <div className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-md lg:hidden">
         <div className="flex items-center justify-between px-4 py-3.5">
           <Link href="/" className="block shrink-0">
             <Image
@@ -113,7 +114,7 @@ export default function Header() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="rounded-lg border border-black p-2 text-black hover:bg-black/10"
+              className="rounded-xl border border-slate-200 bg-white p-2 text-slate-800 shadow-sm transition hover:bg-slate-50"
               aria-expanded={mobileMenuOpen}
               aria-label="Open menu"
             >
@@ -135,7 +136,7 @@ export default function Header() {
             aria-label={t('common.close')}
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="absolute right-0 top-0 flex h-full w-[min(100%,20rem)] flex-col bg-white shadow-xl">
+          <div className="absolute right-0 top-0 flex h-full w-[min(100%,20rem)] flex-col rounded-l-2xl bg-white shadow-2xl ring-1 ring-black/5">
             <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
               <span className="text-sm font-bold text-slate-900">{t('common.menu')}</span>
               <button
@@ -216,8 +217,8 @@ export default function Header() {
         </div>
       )}
 
-      <header className="hidden bg-white lg:block">
-        <div className="flex items-center justify-between gap-4 border-b border-gray-200 px-4 py-3 md:px-6 md:py-4">
+      <header className="sticky top-0 z-40 hidden border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-md lg:block">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4">
           <Link href="/" className="block shrink-0 hover:opacity-90">
             <Image
               src="/logo.jpg"
@@ -240,7 +241,7 @@ export default function Header() {
                 }}
                 disabled={logoutLoading}
                 aria-busy={logoutLoading}
-                className="inline-flex min-w-[5.5rem] items-center justify-center gap-2 rounded-full border border-black bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-80 sm:min-w-[6.5rem] sm:px-5 sm:text-sm"
+                className="inline-flex min-w-[5.5rem] items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-slate-900 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-80 sm:min-w-[6.5rem] sm:px-5 sm:text-sm"
               >
                 {logoutLoading ? (
                   <LoadingButtonLabel loading label={t('common.loading')} color="default">
@@ -254,13 +255,13 @@ export default function Header() {
               <>
                 <Link
                   href="/auth/signin"
-                  className="rounded-full border border-black bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-gray-50 sm:px-5 sm:text-sm"
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-slate-900 shadow-sm transition hover:bg-slate-50 sm:px-5 sm:text-sm"
                 >
                   {t('common.login')}
                 </Link>
                 <Link
                   href="/auth/signup"
-                  className="rounded-full bg-black px-4 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-gray-900 sm:px-5 sm:text-sm"
+                  className="rounded-full bg-gradient-to-r from-slate-900 to-slate-800 px-4 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-md transition hover:from-slate-800 hover:to-slate-700 sm:px-5 sm:text-sm"
                 >
                   {t('common.signupFreeCta')}
                 </Link>
@@ -268,7 +269,7 @@ export default function Header() {
             )}
           </div>
         </div>
-        <div className="border-b border-gray-200 px-4 py-3 md:px-6">
+        <div className="border-t border-slate-200/80 px-4 py-3 md:px-6">
           <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 md:gap-x-8">
             <div className="relative" ref={categoriesRef}>
               <button

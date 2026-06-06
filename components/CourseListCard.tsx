@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { courseDisplayTitle } from '../lib/courseDisplay'
+import { siteCardClass, siteCardHoverClass, sitePrimaryBtnClass } from '../lib/ui/siteStyles'
 import { useI18n } from './LanguageProvider'
 
 export type CourseListCardCourse = {
@@ -19,7 +20,7 @@ export default function CourseListCard({ course }: { course: CourseListCardCours
   const hours = course.workloadHours
 
   return (
-    <article className="flex h-32 flex-row overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-black/5 transition hover:shadow-lg sm:h-40">
+    <article className={`flex h-32 flex-row overflow-hidden sm:h-40 ${siteCardClass} ${siteCardHoverClass}`}>
       <div
         className="flex flex-shrink-0 items-center justify-center"
         style={{ width: '60%', minWidth: '120px', maxWidth: '180px' }}
@@ -45,7 +46,7 @@ export default function CourseListCard({ course }: { course: CourseListCardCours
         <div className="mt-2 flex items-center justify-end gap-1.5">
           <Link
             href={`/courses/${course.id}`}
-            className="shrink-0 rounded-lg bg-blue-600 px-2.5 py-1 text-center text-[10px] font-bold uppercase tracking-wide text-white transition hover:bg-blue-700 sm:px-3 sm:py-1.5 sm:text-xs"
+            className={`shrink-0 px-2.5 py-1 text-center text-[10px] font-bold uppercase tracking-wide sm:px-3 sm:py-1.5 sm:text-xs ${sitePrimaryBtnClass}`}
           >
             {t('common.access')}
           </Link>

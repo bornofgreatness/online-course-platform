@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { CourseCategorySidebarIcon } from './CourseCategorySidebarIcon'
 import { useI18n } from './LanguageProvider'
 import { translateCategoryName } from '../lib/i18n/translations'
+import { siteCardClass, siteCardHoverClass, sitePrimaryBtnClass } from '../lib/ui/siteStyles'
 
 type Category = {
   id: string
@@ -36,7 +37,7 @@ export default function CategoryListCard({ category }: { category: Category }) {
       : t('category.browseUnder', { name: displayName })
 
   return (
-    <article className="flex h-32 flex-row overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-black/5 transition hover:shadow-lg sm:h-40">
+    <article className={`flex h-32 flex-row overflow-hidden sm:h-40 ${siteCardClass} ${siteCardHoverClass}`}>
       <div className="flex flex-shrink-0 items-center justify-center" style={{ width: '60%', minWidth: '120px', maxWidth: '180px' }}>
         <div className="ml-1.5 mr-3 h-[calc(100%-16px)] w-[calc(100%-18px)] overflow-hidden rounded-lg sm:rounded-xl">
           {imageUrl ? (
@@ -65,7 +66,7 @@ export default function CategoryListCard({ category }: { category: Category }) {
           <span className="truncate text-[10px] font-semibold text-slate-600 sm:text-xs">{footerLabel}</span>
           <Link
             href={`/categories/${category.id}`}
-            className="shrink-0 rounded-lg bg-blue-600 px-2.5 py-1 text-center text-[10px] font-bold uppercase tracking-wide text-white transition hover:bg-blue-700 sm:px-3 sm:py-1.5 sm:text-xs"
+            className={`shrink-0 px-2.5 py-1 text-center text-[10px] font-bold uppercase tracking-wide sm:px-3 sm:py-1.5 sm:text-xs ${sitePrimaryBtnClass}`}
           >
             {t('category.viewCategory')}
           </Link>

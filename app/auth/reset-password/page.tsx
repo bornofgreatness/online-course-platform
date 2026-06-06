@@ -4,14 +4,17 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
-import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
+import PageShell, {
+  siteCardClass,
+  siteInputClass,
+  siteLabelClass,
+  sitePrimaryBtnClass,
+  siteMutedClass,
+  siteTitleClass,
+} from '../../../components/PageShell'
 import PageLoading from '../../../components/PageLoading'
 import LoadingButtonLabel from '../../../components/LoadingButtonLabel'
 import { useI18n } from '../../../components/LanguageProvider'
-
-const inputClass =
-  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30'
-const labelClass = 'block text-sm font-medium text-slate-700'
 
 function ResetPasswordInner() {
   const { t } = useI18n()
@@ -76,12 +79,12 @@ function ResetPasswordInner() {
             {error && <div className="mb-4 text-sm text-red-600">{error}</div>}
 
             <div className="mb-4">
-              <label className={labelClass}>{t('auth.newPassword')}</label>
+              <label className={siteLabelClass}>{t('auth.newPassword')}</label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className={inputClass}
+                className={siteInputClass}
                 required
                 minLength={8}
               />
@@ -91,7 +94,7 @@ function ResetPasswordInner() {
               type="submit"
               disabled={loading || !token}
               aria-busy={loading}
-              className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
+              className={`w-full ${sitePrimaryBtnClass} disabled:cursor-not-allowed disabled:opacity-80`}
             >
               <LoadingButtonLabel loading={loading} label={t('common.loading')}>
                 {t('auth.resetPasswordTitle')}

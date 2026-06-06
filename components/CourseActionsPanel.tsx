@@ -3,12 +3,13 @@
 import { Suspense, type ComponentProps } from 'react'
 import CourseActions from './CourseActions'
 import LoadingImage from './LoadingImage'
+import { sitePanelClass } from '../lib/ui/siteStyles'
 
 type Props = ComponentProps<typeof CourseActions>
 
 function CourseActionsFallback() {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className={sitePanelClass}>
       <LoadingImage size="sm" className="py-4" />
     </div>
   )

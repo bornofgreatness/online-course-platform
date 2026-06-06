@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useI18n } from './LanguageProvider'
 import LoadingButtonLabel from './LoadingButtonLabel'
 import LoadingImage from './LoadingImage'
+import { sitePanelClass, sitePrimaryBtnClass } from '../lib/ui/siteStyles'
 
 type QuizQuestion = { id: string; prompt: string; options: string[] }
 
@@ -84,7 +85,7 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
 
   if (loading) {
     return (
-      <div id="course-quiz" className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div id="course-quiz" className={`${sitePanelClass}`}>
         <LoadingImage size="sm" label={t('quiz.loading')} className="py-6" />
       </div>
     )
@@ -106,7 +107,7 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
   const labels = ['A', 'B', 'C', 'D'] as const
 
   return (
-    <div id="course-quiz" className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <div id="course-quiz" className={`sm:p-6 ${sitePanelClass}`}>
       <h2 className="text-lg font-bold uppercase tracking-wide text-blue-900 sm:text-xl">{t('quiz.courseQuiz')}</h2>
       <p className="mt-1 text-sm text-slate-600">
         {t('quiz.passingScore')}: 7/10 · {t('quiz.attemptsUsed')}: {data.attemptsUsed}/{data.maxAttempts}
@@ -170,7 +171,7 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
             disabled={submitting || exhausted}
             aria-busy={submitting}
             onClick={submit}
-            className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`w-full ${sitePrimaryBtnClass} disabled:cursor-not-allowed disabled:opacity-50`}
           >
             <LoadingButtonLabel loading={submitting} label={t('common.loading')}>
               {t('quiz.submit')}

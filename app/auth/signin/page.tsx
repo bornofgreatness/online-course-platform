@@ -5,13 +5,15 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
-import PageShell, { siteCardClass, siteTitleClass } from '../../../components/PageShell'
+import PageShell, {
+  siteCardClass,
+  siteInputClass,
+  siteLabelClass,
+  sitePrimaryBtnClass,
+  siteTitleClass,
+} from '../../../components/PageShell'
 import LoadingButtonLabel from '../../../components/LoadingButtonLabel'
 import { useI18n } from '../../../components/LanguageProvider'
-
-const inputClass =
-  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30'
-const labelClass = 'block text-sm font-medium text-slate-700'
 
 export default function SignIn() {
   const { t } = useI18n()
@@ -101,23 +103,23 @@ export default function SignIn() {
             <h1 className={`${siteTitleClass} mb-6 text-center`}>{t('common.login')}</h1>
 
             <div className="mb-4">
-              <label className={labelClass}>{t('common.email')}</label>
+              <label className={siteLabelClass}>{t('common.email')}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={inputClass}
+                className={siteInputClass}
                 required
               />
             </div>
 
             <div className="mb-6">
-              <label className={labelClass}>{t('common.password')}</label>
+              <label className={siteLabelClass}>{t('common.password')}</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={inputClass}
+                className={siteInputClass}
                 required
               />
             </div>
@@ -126,7 +128,7 @@ export default function SignIn() {
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
+              className={`w-full ${sitePrimaryBtnClass} disabled:cursor-not-allowed disabled:opacity-80`}
             >
               <LoadingButtonLabel loading={loading} label={t('common.loading')}>
                 {t('common.login')}
@@ -142,7 +144,7 @@ export default function SignIn() {
                   disabled={resendLoading}
                   aria-busy={resendLoading}
                   onClick={handleResend}
-                  className="inline-flex min-w-[10rem] items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
+                  className={`min-w-[10rem] ${sitePrimaryBtnClass} disabled:cursor-not-allowed disabled:opacity-80`}
                 >
                   <LoadingButtonLabel loading={resendLoading} label={t('common.loading')}>
                     {t('auth.resendVerification')}

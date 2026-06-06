@@ -4,7 +4,12 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
-import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../../../components/PageShell'
+import PageShell, {
+  siteCardClass,
+  sitePrimaryBtnClass,
+  siteMutedClass,
+  siteTitleClass,
+} from '../../../components/PageShell'
 import PageLoading from '../../../components/PageLoading'
 import LoadingButtonLabel from '../../../components/LoadingButtonLabel'
 import { useI18n } from '../../../components/LanguageProvider'
@@ -73,7 +78,7 @@ function VerifyEmailInner() {
               type="submit"
               disabled={loading || !token}
               aria-busy={loading}
-              className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
+              className={`w-full ${sitePrimaryBtnClass} disabled:cursor-not-allowed disabled:opacity-80`}
             >
               <LoadingButtonLabel loading={loading} label={t('common.loading')}>
                 {t('auth.verifyEmailButton')}

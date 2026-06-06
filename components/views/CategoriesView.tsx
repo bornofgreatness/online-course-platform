@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo } from 'react'
-import PageShell, { siteCardClass, siteMutedClass, siteTitleClass } from '../PageShell'
+import PageShell, { siteCardClass, siteLinkClass, siteMutedClass, siteTitleClass } from '../PageShell'
 import CategoryListCard from '../CategoryListCard'
 import { useI18n } from '../LanguageProvider'
 
@@ -41,7 +41,7 @@ export default function CategoriesView({ categories }: { categories: Category[] 
       )}
 
       <p className="mt-10">
-        <Link href="/courses" className="text-sm font-semibold text-blue-600 hover:underline">
+        <Link href="/courses" className={siteLinkClass}>
           ← {t('common.allCourses')}
         </Link>
       </p>

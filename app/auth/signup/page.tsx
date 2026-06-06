@@ -4,13 +4,15 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../../components/Header'
-import PageShell, { siteCardClass, siteTitleClass } from '../../../components/PageShell'
+import PageShell, {
+  siteCardClass,
+  siteInputClass,
+  siteLabelClass,
+  sitePrimaryBtnClass,
+  siteTitleClass,
+} from '../../../components/PageShell'
 import LoadingButtonLabel from '../../../components/LoadingButtonLabel'
 import { useI18n } from '../../../components/LanguageProvider'
-
-const inputClass =
-  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30'
-const labelClass = 'block text-sm font-medium text-slate-700'
 
 const BRAZIL_STATES = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
@@ -97,27 +99,27 @@ export default function SignUp() {
                 {t('auth.personalData')}
               </legend>
               <div>
-                <label className={labelClass}>{t('auth.fullName')}</label>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputClass} required />
+                <label className={siteLabelClass}>{t('auth.fullName')}</label>
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={siteInputClass} required />
               </div>
               <div>
-                <label className={labelClass}>{t('auth.whatsapp')}</label>
+                <label className={siteLabelClass}>{t('auth.whatsapp')}</label>
                 <input
                   type="tel"
                   value={whatsapp}
                   onChange={(e) => setWhatsapp(e.target.value)}
-                  className={inputClass}
+                  className={siteInputClass}
                   placeholder="(11) 99999-9999"
                   required
                 />
               </div>
               <div>
-                <label className={labelClass}>{t('common.email')}</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} required />
+                <label className={siteLabelClass}>{t('common.email')}</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={siteInputClass} required />
               </div>
               <div>
-                <label className={labelClass}>{t('common.password')}</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} required minLength={6} />
+                <label className={siteLabelClass}>{t('common.password')}</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={siteInputClass} required minLength={6} />
               </div>
             </fieldset>
 
@@ -126,17 +128,17 @@ export default function SignUp() {
                 {t('auth.addressSection')}
               </legend>
               <div>
-                <label className={labelClass}>{t('auth.fullAddress')}</label>
-                <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} required />
+                <label className={siteLabelClass}>{t('auth.fullAddress')}</label>
+                <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className={siteInputClass} required />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className={labelClass}>{t('auth.city')}</label>
-                  <input type="text" value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} required />
+                  <label className={siteLabelClass}>{t('auth.city')}</label>
+                  <input type="text" value={city} onChange={(e) => setCity(e.target.value)} className={siteInputClass} required />
                 </div>
                 <div>
-                  <label className={labelClass}>{t('auth.state')}</label>
-                  <select value={state} onChange={(e) => setState(e.target.value)} className={inputClass} required>
+                  <label className={siteLabelClass}>{t('auth.state')}</label>
+                  <select value={state} onChange={(e) => setState(e.target.value)} className={siteInputClass} required>
                     <option value="">{t('common.select')}</option>
                     {BRAZIL_STATES.map((uf) => (
                       <option key={uf} value={uf}>
@@ -152,7 +154,7 @@ export default function SignUp() {
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-80"
+              className={`w-full ${sitePrimaryBtnClass} disabled:cursor-not-allowed disabled:opacity-80`}
             >
               <LoadingButtonLabel loading={loading} label={t('common.loading')}>
                 {t('common.signupFreeCta')}

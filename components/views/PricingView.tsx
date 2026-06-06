@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import PricingPlans from '../PricingPlans'
 import { useI18n } from '../LanguageProvider'
+import { siteCardClass, siteHeroBtnPrimary, siteHeroBtnSecondary, siteHeroGradient, sitePageBg } from '../../lib/ui/siteStyles'
 import type { TranslationKey } from '../../lib/i18n/translations'
 
 const FEATURE_KEYS: TranslationKey[] = [
@@ -19,8 +20,8 @@ export default function PricingView() {
   const needsSignIn = status === 'unauthenticated'
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-900 to-teal-800 text-white">
+    <div className={sitePageBg}>
+      <section className={`relative overflow-hidden ${siteHeroGradient}`}>
         <div
           className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-teal-400/20 blur-3xl"
           aria-hidden
@@ -40,17 +41,11 @@ export default function PricingView() {
             {t('pricing.intro')}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/courses"
-              className="rounded-full border-2 border-white/70 px-7 py-3 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-white/10"
-            >
+            <Link href="/courses" className={siteHeroBtnSecondary}>
               {t('common.browseCourses')}
             </Link>
             {needsSignIn && (
-              <Link
-                href="/auth/signup"
-                className="rounded-full bg-white px-7 py-3 text-sm font-bold uppercase tracking-wide text-blue-950 shadow-lg transition hover:bg-teal-50"
-              >
+              <Link href="/auth/signup" className={siteHeroBtnPrimary}>
                 {t('common.signupFreeCta')}
               </Link>
             )}
@@ -66,7 +61,7 @@ export default function PricingView() {
           {FEATURE_KEYS.map((key) => (
             <li
               key={key}
-              className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3.5 shadow-sm ring-1 ring-black/5"
+              className={`flex items-start gap-3 px-4 py-3.5 ${siteCardClass}`}
             >
               <span
                 className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white"

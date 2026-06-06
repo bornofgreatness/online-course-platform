@@ -33,7 +33,9 @@ export function catalogNavRowClass(active: boolean, indented = false) {
   return [
     'flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left transition',
     indented ? 'pl-9' : '',
-    active ? 'border-l-4 border-teal-700 bg-teal-50 pl-2' : 'border-l-4 border-transparent hover:bg-gray-50',
+    active
+      ? 'border-l-4 border-teal-600 bg-teal-50/90 pl-2 shadow-sm'
+      : 'border-l-4 border-transparent hover:bg-slate-50',
   ].join(' ')
 }
 

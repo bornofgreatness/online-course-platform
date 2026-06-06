@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation'
 import type { BillingPlan } from '../lib/billingPlans'
 import { PLAN_MONTHS, PLAN_TOTAL_CENTS_BRL } from '../lib/billingPlans'
 import { formatMoney } from '../lib/i18n/format'
-import { useI18n } from './LanguageProvider'
+import { siteInputClass, sitePrimaryBtnClass, siteSecondaryBtnClass } from './PageShell'
 import LoadingButtonLabel from './LoadingButtonLabel'
-import LoadingImage from './LoadingImage'
+import { useI18n } from './LanguageProvider'
 import type { TranslationKey } from '../lib/i18n/translations'
 
 const plans: BillingPlan[] = ['1m', '3m', '6m', '1y']
@@ -149,7 +149,7 @@ export default function PricingPlans({ showFeatures = false }: PricingPlansProps
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
               placeholder={t('pricing.couponPlaceholder')}
-              className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm font-medium uppercase tracking-wide text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+              className={`${siteInputClass} uppercase`}
             />
           </div>
           <button
@@ -157,7 +157,7 @@ export default function PricingPlans({ showFeatures = false }: PricingPlansProps
             disabled={validatingCoupon}
             aria-busy={validatingCoupon}
             onClick={() => validateCoupon('3m')}
-            className="inline-flex min-w-[8rem] shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-900 disabled:cursor-not-allowed disabled:opacity-80"
+            className={`min-w-[8rem] shrink-0 ${siteSecondaryBtnClass}`}
           >
             <LoadingButtonLabel loading={validatingCoupon} color="default" label={t('common.loading')}>
               {t('pricing.validateCoupon')}

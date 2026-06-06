@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useI18n } from './LanguageProvider'
 import LoadingButtonLabel from './LoadingButtonLabel'
+import { sitePrimaryBtnClass } from '../lib/ui/siteStyles'
 
 interface EnrollButtonProps {
   courseId: string
@@ -43,7 +44,7 @@ export default function EnrollButton({ courseId }: EnrollButtonProps) {
       type="button"
       onClick={handleEnroll}
       disabled={isLoading}
-      className="mt-6 inline-flex min-w-[7rem] items-center justify-center rounded bg-blue-600 px-5 py-3 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300 disabled:opacity-80"
+      className={`mt-6 min-w-[7rem] ${sitePrimaryBtnClass}`}
     >
       <LoadingButtonLabel loading={isLoading} label={t('common.loading')}>
         {t('course.enroll')}
