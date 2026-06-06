@@ -26,6 +26,7 @@ export default function Header() {
   const [categories, setCategories] = useState<NavCategory[]>([])
   const [categoriesOpen, setCategoriesOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [logoutLoading, setLogoutLoading] = useState(false)
   const categoriesRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -57,8 +58,10 @@ export default function Header() {
     }
   }, [mobileMenuOpen])
 
-  const handleLogout = () => {
-    signOut({ callbackUrl: '/' })
+  const handleLogout = async () => {
+    if (logoutLoading) return
+    setLogoutLoading(true)
+    await signOut({ callbackUrl: '/' })
   }
 
   const pathname = usePathname()
@@ -181,13 +184,18 @@ export default function Header() {
                   )}
                   <button
                     type="button"
-                    className="mt-auto rounded-lg px-3 py-2.5 text-left text-red-600 hover:bg-red-50"
+                    disabled={logoutLoading}
+                    aria-busy={logoutLoading}
+                    className="mt-auto inline-flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-80"
                     onClick={() => {
-                      setMobileMenuOpen(false)
-                      signOut({ callbackUrl: '/' })
+                      void handleLogout()
                     }}
                   >
-                    {t('common.logout')}
+                    {logoutLoading ? (
+                      <LoadingImage inline size="xs" label={t('common.loading')} />
+                    ) : (
+                      t('common.logout')
+                    )}
                   </button>
                 </>
               ) : (
@@ -224,10 +232,18 @@ export default function Header() {
             ) : session ? (
               <button
                 type="button"
-                onClick={handleLogout}
-                className="rounded-full border border-black bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-gray-50 sm:px-5 sm:text-sm"
+                onClick={() => {
+                  void handleLogout()
+                }}
+                disabled={logoutLoading}
+                aria-busy={logoutLoading}
+                className="inline-flex min-w-[5.5rem] items-center justify-center gap-2 rounded-full border border-black bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-80 sm:min-w-[6.5rem] sm:px-5 sm:text-sm"
               >
-                {t('common.logout')}
+                {logoutLoading ? (
+                  <LoadingImage inline size="xs" label={t('common.loading')} />
+                ) : (
+                  t('common.logout')
+                )}
               </button>
             ) : (
               <>
