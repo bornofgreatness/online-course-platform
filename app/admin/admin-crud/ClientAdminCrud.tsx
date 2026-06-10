@@ -1665,13 +1665,13 @@ export default function ClientAdminCrud() {
       )}
 
       {tab === 'quizzes' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {(quizzes.length > 0 || coursesWithoutQuiz.length > 0) && (
             <AdminSearchBar
               value={quizSearch}
               onChange={setQuizSearch}
               placeholder={t('admin.searchQuizzes')}
-              className="max-w-xl"
+              className="w-full sm:max-w-xl"
             />
           )}
 
@@ -1688,7 +1688,7 @@ export default function ClientAdminCrud() {
           ) : null}
 
           <div className={adminCardClass}>
-            <h2 className="text-xl font-semibold mb-4">{t('admin.createQuiz')}</h2>
+            <h2 className={`${adminSectionTitleClass} mb-4`}>{t('admin.createQuiz')}</h2>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <Field label={t('admin.selectCourse')}>
                 <select
@@ -1726,7 +1726,7 @@ export default function ClientAdminCrud() {
           </div>
 
           <div className={adminCardClass}>
-            <h2 className="mb-4 text-xl font-semibold">{t('admin.allQuizzes')}</h2>
+            <h2 className={`${adminSectionTitleClass} mb-4`}>{t('admin.allQuizzes')}</h2>
             {quizzes.length === 0 ? (
               <p className={siteMutedClass}>{t('admin.noQuizzes')}</p>
             ) : filteredQuizzes.length === 0 ? (
@@ -2108,7 +2108,7 @@ export default function ClientAdminCrud() {
                 value={subcategorySearch}
                 onChange={setSubcategorySearch}
                 placeholder={t('admin.searchSubcategories')}
-                className="mb-4 max-w-xl"
+                className="mb-4 w-full sm:max-w-xl"
               />
             ) : null}
 
@@ -2190,9 +2190,9 @@ export default function ClientAdminCrud() {
       )}
 
       {tab === 'courses' && (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
           <div className={adminCardClass}>
-            <h2 className="mb-4 text-xl font-semibold">
+            <h2 className={`${adminSectionTitleClass} mb-4`}>
               {editingCourseId ? t('admin.editCourse') : t('admin.createCourse')}
             </h2>
 
@@ -2342,18 +2342,18 @@ export default function ClientAdminCrud() {
                 </Field>
               </div>
 
-                          <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <button
                   disabled={courseBusy}
                   onClick={submitCourse}
-                  className={`${adminPrimaryBtnClass} flex-1`}
+                  className={`${adminPrimaryBtnClass} w-full flex-1`}
                 >
                   {courseBusy ? t('admin.saving') : editingCourseId ? t('admin.update') : t('admin.create')}
                 </button>
                 <button
                   disabled={courseBusy}
                   onClick={resetCourseForm}
-                  className={adminSecondaryBtnClass}
+                  className={`${adminSecondaryBtnClass} w-full sm:w-auto`}
                 >
                   {t('admin.reset')}
                 </button>
@@ -2366,8 +2366,8 @@ export default function ClientAdminCrud() {
           </div>
 
           <div className={adminCardClass}>
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <h2 className="text-xl font-semibold">{t('admin.allCourses')}</h2>
+            <div className={adminSectionHeaderClass}>
+              <h2 className={adminSectionTitleClass}>{t('admin.allCourses')}</h2>
               {courses.length > 0 ? (
                 <AdminSearchBar
                   value={courseSearch}

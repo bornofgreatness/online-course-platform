@@ -6,6 +6,7 @@ import {
   adminCardClass,
   adminInputClass,
   adminPrimaryBtnClass,
+  adminSectionTitleClass,
 } from './admin/adminStyles'
 import LoadingButtonLabel from './LoadingButtonLabel'
 import LoadingImage from './LoadingImage'
@@ -170,24 +171,29 @@ export default function AdminMarketing() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       {message && <p className="rounded-lg bg-blue-50 p-3 text-sm text-blue-900">{message}</p>}
 
       <section className={`${adminCardClass} space-y-4`}>
-        <h2 className="text-lg font-bold">{t('marketing.uploadTitle')}</h2>
+        <h2 className={adminSectionTitleClass}>{t('marketing.uploadTitle')}</h2>
         <p className="mt-1 text-sm text-slate-600">{t('marketing.uploadSubtitle')}</p>
-        <div className="mt-4 flex flex-wrap gap-3">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <select
             value={uploadFolder}
             onChange={(e) => setUploadFolder(e.target.value)}
-            className={adminInputClass}
+            className={`${adminInputClass} w-full sm:w-auto sm:min-w-[10rem]`}
           >
             <option value="videos">videos</option>
             <option value="pdfs">pdfs</option>
             <option value="thumbnails">thumbnails</option>
             <option value="materials">materials</option>
           </select>
-          <input type="file" onChange={uploadFile} disabled={busy} className="text-sm" />
+          <input
+            type="file"
+            onChange={uploadFile}
+            disabled={busy}
+            className="w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-blue-700"
+          />
         </div>
         {uploadResult && (
           <p className="mt-3 break-all text-sm text-green-700">
@@ -200,7 +206,7 @@ export default function AdminMarketing() {
       </section>
 
       <section className={`${adminCardClass} space-y-4`}>
-        <h2 className="text-lg font-bold">{t('marketing.coupons')}</h2>
+        <h2 className={adminSectionTitleClass}>{t('marketing.coupons')}</h2>
         <form onSubmit={createCoupon} className="mt-4 grid gap-3 sm:grid-cols-2">
           <input
             placeholder={t('marketing.couponCode')}
@@ -233,7 +239,7 @@ export default function AdminMarketing() {
             type="submit"
             disabled={busy}
             aria-busy={busy}
-            className={`${adminPrimaryBtnClass} sm:col-span-2`}
+            className={`${adminPrimaryBtnClass} w-full sm:col-span-2`}
           >
             <LoadingButtonLabel loading={busy} label={t('common.loading')}>
               {t('marketing.createCoupon')}
@@ -268,7 +274,7 @@ export default function AdminMarketing() {
       </section>
 
       <section className={`${adminCardClass} space-y-4`}>
-        <h2 className="text-lg font-bold">{t('marketing.campaigns')}</h2>
+        <h2 className={adminSectionTitleClass}>{t('marketing.campaigns')}</h2>
         <p className="text-sm text-slate-600">{t('marketing.campaignsHint')}</p>
         <form onSubmit={createCampaign} className="mt-4 space-y-3">
           <input
@@ -298,7 +304,7 @@ export default function AdminMarketing() {
             type="submit"
             disabled={busy}
             aria-busy={busy}
-            className={adminPrimaryBtnClass}
+            className={`${adminPrimaryBtnClass} w-full sm:w-auto`}
           >
             <LoadingButtonLabel loading={busy} label={t('common.loading')}>
               {t('marketing.saveDraft')}
@@ -334,7 +340,7 @@ export default function AdminMarketing() {
                   onClick={() => sendCampaign(camp.id)}
                   disabled={busy}
                   aria-busy={busy}
-                  className={`${adminPrimaryBtnClass} mt-2 min-w-[7rem] bg-emerald-600 hover:bg-emerald-700`}
+                  className={`${adminPrimaryBtnClass} mt-3 w-full bg-emerald-600 hover:bg-emerald-700 sm:mt-2 sm:w-auto sm:min-w-[7rem]`}
                 >
                   <LoadingButtonLabel loading={busy} label={t('common.loading')}>
                     {t('marketing.sendCampaign')}
