@@ -181,6 +181,9 @@ export default function ClientAdminCrud() {
     }>
   >([])
   const [certificateBusy, setCertificateBusy] = useState<string | null>(null)
+  const [certificateIssuanceCity, setCertificateIssuanceCity] = useState('')
+  const [certificateIssuanceState, setCertificateIssuanceState] = useState('')
+  const [certificateSettingsBusy, setCertificateSettingsBusy] = useState(false)
 
   // Quizzes
   const [quizzes, setQuizzes] = useState<
@@ -431,6 +434,40 @@ export default function ClientAdminCrud() {
     setCertificates(data.certificates || [])
   }
 
+  async function fetchCertificateSettings() {
+    const res = await fetch('/api/admin/certificate-settings')
+    if (!res.ok) throw new Error('Failed to load certificate settings')
+    const data = await res.json()
+    setCertificateIssuanceCity(data.city || '')
+    setCertificateIssuanceState(data.state || '')
+  }
+
+  async function saveCertificateSettings() {
+    setCertificateSettingsBusy(true)
+    try {
+      const res = await fetch('/api/admin/certificate-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          city: certificateIssuanceCity,
+          state: certificateIssuanceState,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'Failed to save certificate settings')
+      setCertificateIssuanceCity(data.city || certificateIssuanceCity)
+      setCertificateIssuanceState(data.state || certificateIssuanceState)
+      displayToast({ type: 'success', message: t('admin.certificateSettingsSaved') })
+    } catch (e: unknown) {
+      displayToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('admin.failedSaveCertificateSettings'),
+      })
+    } finally {
+      setCertificateSettingsBusy(false)
+    }
+  }
+
   async function fetchQuizzes() {
     const res = await fetch('/api/admin/quizzes')
     if (!res.ok) throw new Error('Failed to load quizzes')
@@ -652,7 +689,7 @@ export default function ClientAdminCrud() {
         } else if (tab === 'subscriptions') {
           await fetchSubscriptions()
         } else if (tab === 'certificates') {
-          await fetchCertificates()
+          await Promise.all([fetchCertificates(), fetchCertificateSettings()])
         } else if (tab === 'quizzes') {
           await fetchQuizzes()
         } else if (tab === 'affiliates') {
@@ -1567,7 +1604,46 @@ export default function ClientAdminCrud() {
       )}
 
       {tab === 'certificates' && (
-        <div className={adminCardClass}>
+        <div className="space-y-6">
+          <div className={adminCardClass}>
+            <h2 className={`${adminSectionTitleClass} mb-1`}>{t('admin.certificateSettingsTitle')}</h2>
+            <p className={`${siteMutedClass} mb-4 text-sm`}>{t('admin.certificateSettingsHint')}</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label={t('admin.certificateIssuanceCity')}>
+                <input
+                  value={certificateIssuanceCity}
+                  onChange={(e) => setCertificateIssuanceCity(e.target.value)}
+                  className={adminInputClass}
+                  placeholder={t('admin.certificateIssuanceCityPlaceholder')}
+                />
+              </Field>
+              <Field label={t('admin.certificateIssuanceState')}>
+                <input
+                  value={certificateIssuanceState}
+                  onChange={(e) => setCertificateIssuanceState(e.target.value.toUpperCase().slice(0, 2))}
+                  className={adminInputClass}
+                  placeholder="BA"
+                  maxLength={2}
+                />
+              </Field>
+            </div>
+            <p className={`${siteMutedClass} mt-3 text-xs`}>
+              {t('admin.certificateIssuancePreview', {
+                city: certificateIssuanceCity || '—',
+                state: certificateIssuanceState || '—',
+              })}
+            </p>
+            <button
+              type="button"
+              disabled={certificateSettingsBusy}
+              onClick={() => void saveCertificateSettings()}
+              className={`${adminPrimaryBtnClass} mt-4 w-full sm:w-auto`}
+            >
+              {certificateSettingsBusy ? t('admin.working') : t('admin.saveCertificateSettings')}
+            </button>
+          </div>
+
+          <div className={adminCardClass}>
           <div className={adminSectionHeaderClass}>
             <h2 className={adminSectionTitleClass}>{t('admin.allCertificates')}</h2>
             {certificates.length > 0 ? (
@@ -1661,6 +1737,7 @@ export default function ClientAdminCrud() {
               </AdminDesktopTable>
             </>
           )}
+          </div>
         </div>
       )}
 

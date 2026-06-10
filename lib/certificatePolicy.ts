@@ -2,6 +2,13 @@
 
 export const BRAND_NAME = 'CONECT CURSOS'
 
+/** Shown on certificate PDF: "Cidade - UF, dia de mês de ano." */
+export const CERTIFICATE_ISSUANCE_CITY =
+  process.env.CERTIFICATE_ISSUANCE_CITY?.trim() || 'Juazeiro'
+
+export const CERTIFICATE_ISSUANCE_STATE =
+  process.env.CERTIFICATE_ISSUANCE_STATE?.trim() || 'BA'
+
 /** R$ 9.00 per certificate (BRL; charged via Mercado Pago). */
 export const CERTIFICATE_ISSUANCE_FEE_CENTS = 900
 

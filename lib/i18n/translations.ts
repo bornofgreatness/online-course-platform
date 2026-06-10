@@ -693,6 +693,16 @@ export const translations = {
     'admin.failedLoadCertificates': 'Could not load certificates',
     'admin.failedDeleteCertificate': 'Failed to delete certificate',
     'admin.confirmDeleteCertificate': 'Delete this certificate?',
+    'admin.certificateSettingsTitle': 'Certificate issuance location',
+    'admin.certificateSettingsHint':
+      'City and state (UF) printed on certificate PDFs under “Local e Data de Emissão”.',
+    'admin.certificateIssuanceCity': 'Issuance city',
+    'admin.certificateIssuanceCityPlaceholder': 'e.g. Juazeiro',
+    'admin.certificateIssuanceState': 'State (UF)',
+    'admin.certificateIssuancePreview': 'PDF line preview: {city} - {state}, [date]',
+    'admin.saveCertificateSettings': 'Save certificate location',
+    'admin.certificateSettingsSaved': 'Certificate location saved.',
+    'admin.failedSaveCertificateSettings': 'Could not save certificate location',
 
     'whatsapp.ariaLabel': 'Chat on WhatsApp',
     'whatsapp.title': 'WhatsApp',
@@ -1394,6 +1404,16 @@ export const translations = {
     'admin.failedLoadCertificates': 'Não foi possível carregar certificados',
     'admin.failedDeleteCertificate': 'Falha ao excluir certificado',
     'admin.confirmDeleteCertificate': 'Excluir este certificado?',
+    'admin.certificateSettingsTitle': 'Local de emissão do certificado',
+    'admin.certificateSettingsHint':
+      'Cidade e UF exibidas no PDF do certificado em “Local e Data de Emissão”.',
+    'admin.certificateIssuanceCity': 'Cidade de emissão',
+    'admin.certificateIssuanceCityPlaceholder': 'ex.: Juazeiro',
+    'admin.certificateIssuanceState': 'Estado (UF)',
+    'admin.certificateIssuancePreview': 'Prévia no PDF: {city} - {state}, [data]',
+    'admin.saveCertificateSettings': 'Salvar local de emissão',
+    'admin.certificateSettingsSaved': 'Local de emissão salvo.',
+    'admin.failedSaveCertificateSettings': 'Não foi possível salvar o local de emissão',
 
     'whatsapp.ariaLabel': 'Falar no WhatsApp',
     'whatsapp.title': 'WhatsApp',

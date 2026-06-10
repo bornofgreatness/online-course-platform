@@ -272,5 +272,12 @@ model PasswordResetToken {
   createdAt   DateTime @default(now())
 }
 
+/// Key-value platform settings (e.g. certificate issuance city/state).
+model PlatformSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 
 

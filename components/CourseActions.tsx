@@ -8,7 +8,7 @@ import CertificateLegalNotice from './CertificateLegalNotice'
 import { useI18n } from './LanguageProvider'
 import LoadingButtonLabel from './LoadingButtonLabel'
 import LoadingImage from './LoadingImage'
-import { siteAccentBtnClass, sitePrimaryBtnClass } from '../lib/ui/siteStyles'
+import { sitePrimaryBtnClass } from '../lib/ui/siteStyles'
 import { CERTIFICATE_ISSUANCE_FEE_BRL, formatCertificateFeeBrl } from '../lib/certificatePolicy'
 
 interface CourseActionsProps {
@@ -211,14 +211,11 @@ export default function CourseActions({
       )}
 
       {hasCertificate ? (
-        <div className="text-center">
-          <div className="mb-2 font-semibold text-green-600">✓ {t('actions.certificateEarned')}</div>
-          <a
-            href="/certificates?tab=mine"
-            className={`inline-block ${siteAccentBtnClass} px-4 py-2 text-sm`}
-          >
+        <div className="space-y-3 text-center">
+          <div className="font-semibold text-emerald-700">✓ {t('actions.certificateEarned')}</div>
+          <Link href="/certificates?tab=mine" className={`w-full ${sitePrimaryBtnClass}`}>
             {t('actions.viewCertificate')}
-          </a>
+          </Link>
         </div>
       ) : progress.completed ? (
         <div className="space-y-3">

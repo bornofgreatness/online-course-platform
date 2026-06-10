@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { authErrorResponse, requireSession } from '@/lib/auth/session'
 import { canDownloadCertificates } from '@/lib/auth/rbac'
 import { buildCertificatePdf } from '../../../../../lib/buildCertificatePdf'
+import { getCertificateIssuanceLocation } from '../../../../../lib/certificateSettings'
 import { getPrisma } from '../../../../../lib/prisma'
 import { getActiveSubscription } from '../../../../../lib/subscription'
 
@@ -40,6 +41,8 @@ export async function GET(
       return NextResponse.json({ error: 'Certificate not found' }, { status: 404 })
     }
 
+    const issuanceLocation = await getCertificateIssuanceLocation(prisma)
+
     const pdfBytes = await buildCertificatePdf({
       holderName: certificate.holderName || certificate.user.name,
       courseTitle: certificate.courseTitle || certificate.course.title,
@@ -47,6 +50,8 @@ export async function GET(
       certificateNumber: certificate.certificateNumber,
       issuedAt: certificate.issuedAt,
       holderEmail: certificate.user.email,
+      issuanceCity: issuanceLocation.city,
+      issuanceState: issuanceLocation.state,
     })
 
     const filename = `certificate-${certificate.certificateNumber.replace(/[^a-zA-Z0-9-_]/g, '_')}.pdf`
