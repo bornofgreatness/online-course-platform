@@ -41,6 +41,14 @@ export const siteDarkBtnClass =
 export const siteMobileActionClass =
   'block w-full rounded-xl py-3.5 text-center text-sm font-bold uppercase tracking-wide shadow-md transition'
 
+export const siteMobileQuickGridClass = 'grid grid-cols-2 gap-2.5'
+
+export const siteMobileQuickPrimaryClass =
+  'col-span-2 flex min-h-[3rem] w-full items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-blue-600/20 transition active:scale-[0.98] hover:from-blue-700 hover:to-blue-800'
+
+export const siteMobileQuickSecondaryClass =
+  'flex min-h-[3rem] items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-center text-xs font-semibold leading-snug text-slate-800 shadow-sm transition active:scale-[0.98] hover:border-blue-200 hover:bg-blue-50 hover:text-blue-900 sm:text-sm'
+
 export const siteLinkClass =
   'text-sm font-semibold text-blue-600 transition hover:text-blue-800 hover:underline'
 

@@ -162,7 +162,7 @@ function DashboardContent() {
         </header>
 
         <nav
-          className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden"
+          className="mt-4 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:gap-3"
           aria-label={t('common.dashboard')}
         >
           {quickLinks.map((link) => (
@@ -171,8 +171,8 @@ function DashboardContent() {
               href={link.href}
               className={
                 link.primary
-                  ? `${sitePrimaryBtnClass} shrink-0 whitespace-nowrap`
-                  : `${siteSecondaryBtnClass} shrink-0 whitespace-nowrap`
+                  ? `${sitePrimaryBtnClass} col-span-2 min-h-[3rem] w-full px-4 py-3 sm:col-span-1 sm:w-auto`
+                  : `${siteSecondaryBtnClass} min-h-[3rem] px-3 py-3 text-xs font-semibold sm:px-5 sm:text-sm`
               }
             >
               {link.label}

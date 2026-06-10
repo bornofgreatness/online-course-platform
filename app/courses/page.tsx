@@ -6,11 +6,10 @@ import Link from 'next/link'
 import Header from '../../components/Header'
 import PageShell from '../../components/PageShell'
 import {
-  siteAccentBtnClass,
-  siteDarkBtnClass,
-  siteMobileActionClass,
+  siteMobileQuickGridClass,
+  siteMobileQuickPrimaryClass,
+  siteMobileQuickSecondaryClass,
   sitePanelClass,
-  sitePrimaryBtnClass,
 } from '../../lib/ui/siteStyles'
 import PageLoading from '../../components/PageLoading'
 import CourseListCard from '../../components/CourseListCard'
@@ -221,39 +220,25 @@ export default function Courses() {
 
       <PageShell className="pt-2 lg:pt-6">
         <div className="lg:hidden">
-          <div className="space-y-3 px-0 py-4">
-            <button
-              type="button"
-              onClick={scrollToCourses}
-              className={`${siteMobileActionClass} ${siteDarkBtnClass}`}
-            >
+          <div className="px-0 py-4">
+            <button type="button" onClick={scrollToCourses} className={siteMobileQuickPrimaryClass}>
               {t('course.available')}
             </button>
-            {status !== 'loading' && session ? (
-              <Link
-                href="/dashboard"
-                className={`${siteMobileActionClass} ${siteAccentBtnClass}`}
-              >
-                {t('common.dashboard')}
+            <div className={`${siteMobileQuickGridClass} mt-2.5`}>
+              {status !== 'loading' && session ? (
+                <Link href="/dashboard" className={siteMobileQuickSecondaryClass}>
+                  {t('common.dashboard')}
+                </Link>
+              ) : (
+                <Link href="/auth/signin" className={siteMobileQuickSecondaryClass}>
+                  {t('common.loginSignup')}
+                </Link>
+              )}
+              <Link href="/certificates" className={siteMobileQuickSecondaryClass}>
+                {t('common.certificates')}
               </Link>
-            ) : (
-              <Link
-                href="/auth/signin"
-                className={`${siteMobileActionClass} ${siteAccentBtnClass}`}
-              >
-                {t('common.loginSignup')}
-              </Link>
-            )}
-          </div>
-
-          <div className="space-y-3 px-0 pb-3">
-            <Link
-              href="/certificates"
-              className={`${siteMobileActionClass} ${sitePrimaryBtnClass}`}
-            >
-              {t('common.certificates')}
-            </Link>
-            <div>
+            </div>
+            <div className="mt-3">
               <label htmlFor="courses-mobile-search" className="sr-only">
                 {t('course.search')}
               </label>
