@@ -6,9 +6,10 @@ import Link from 'next/link'
 import Header from '../../components/Header'
 import PageShell from '../../components/PageShell'
 import {
-  siteMobileQuickGridClass,
+  siteMobileQuickAccentClass,
+  siteMobileQuickOutlineClass,
   siteMobileQuickPrimaryClass,
-  siteMobileQuickSecondaryClass,
+  siteMobileQuickStackClass,
   sitePanelClass,
 } from '../../lib/ui/siteStyles'
 import PageLoading from '../../components/PageLoading'
@@ -220,23 +221,37 @@ export default function Courses() {
 
       <PageShell className="pt-2 lg:pt-6">
         <div className="lg:hidden">
-          <div className="px-0 py-4">
-            <button type="button" onClick={scrollToCourses} className={siteMobileQuickPrimaryClass}>
-              {t('course.available')}
-            </button>
-            <div className={`${siteMobileQuickGridClass} mt-2.5`}>
-              {status !== 'loading' && session ? (
-                <Link href="/dashboard" className={siteMobileQuickSecondaryClass}>
-                  {t('common.dashboard')}
+          <div className="py-4">
+            <div className={`${sitePanelClass} !p-3`}>
+              <nav className={siteMobileQuickStackClass} aria-label={t('course.available')}>
+                <button type="button" onClick={scrollToCourses} className={siteMobileQuickPrimaryClass}>
+                  <svg className="h-4 w-4 shrink-0 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                  {t('course.available')}
+                </button>
+                {status !== 'loading' && session ? (
+                  <Link href="/dashboard" className={siteMobileQuickAccentClass}>
+                    <svg className="h-4 w-4 shrink-0 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    {t('common.dashboard')}
+                  </Link>
+                ) : (
+                  <Link href="/auth/signin" className={siteMobileQuickAccentClass}>
+                    <svg className="h-4 w-4 shrink-0 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    {t('common.loginSignup')}
+                  </Link>
+                )}
+                <Link href="/certificates" className={siteMobileQuickOutlineClass}>
+                  <svg className="h-4 w-4 shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  </svg>
+                  {t('common.certificates')}
                 </Link>
-              ) : (
-                <Link href="/auth/signin" className={siteMobileQuickSecondaryClass}>
-                  {t('common.loginSignup')}
-                </Link>
-              )}
-              <Link href="/certificates" className={siteMobileQuickSecondaryClass}>
-                {t('common.certificates')}
-              </Link>
+              </nav>
             </div>
             <div className="mt-3">
               <label htmlFor="courses-mobile-search" className="sr-only">
