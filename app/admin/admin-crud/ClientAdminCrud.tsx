@@ -2119,7 +2119,7 @@ export default function ClientAdminCrud() {
                 <p className={siteMutedClass}>{t('admin.noSearchResults')}</p>
               ) : (
                 filteredSubcategories.map((s) => (
-                  <div key={s.id} className="flex flex-col gap-2 rounded border p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <AdminMobileCard key={s.id}>
                     {editingSubcategoryId === s.id ? (
                       <>
                         <input
@@ -2127,12 +2127,12 @@ export default function ClientAdminCrud() {
                           onChange={(e) => setEditingSubcategoryName(e.target.value)}
                           className={adminInputClass}
                         />
-                        <div className="flex flex-col gap-2 sm:flex-row">
+                        <AdminMobileActions>
                           <button
                             type="button"
                             disabled={subCatBusy}
                             onClick={updateSubcategory}
-                            className="rounded bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700 disabled:opacity-50"
+                            className={`${adminPrimaryBtnClass} bg-emerald-600 hover:bg-emerald-700`}
                           >
                             {t('admin.save')}
                           </button>
@@ -2143,11 +2143,11 @@ export default function ClientAdminCrud() {
                               setEditingSubcategoryId(null)
                               setEditingSubcategoryName('')
                             }}
-                            className="rounded border px-3 py-2 text-sm hover:bg-gray-50"
+                            className={adminSecondaryBtnClass}
                           >
                             {t('admin.cancel')}
                           </button>
-                        </div>
+                        </AdminMobileActions>
                       </>
                     ) : (
                       <>
@@ -2158,7 +2158,7 @@ export default function ClientAdminCrud() {
                             {typeof s._count?.courses === 'number' ? ` · ${s._count.courses} courses` : ''}
                           </div>
                         </div>
-                        <div className="flex flex-col gap-2 sm:flex-row">
+                        <AdminMobileActions>
                           <button
                             type="button"
                             disabled={subCatBusy}
@@ -2166,7 +2166,7 @@ export default function ClientAdminCrud() {
                               setEditingSubcategoryId(s.id)
                               setEditingSubcategoryName(s.name)
                             }}
-                            className="rounded border px-3 py-2 text-sm hover:bg-gray-50"
+                            className={adminActionBtnClass}
                           >
                             {t('admin.edit')}
                           </button>
@@ -2174,14 +2174,14 @@ export default function ClientAdminCrud() {
                             type="button"
                             disabled={subCatBusy}
                             onClick={() => deleteSubcategory(s.id)}
-                            className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100"
+                            className={adminDangerBtnClass}
                           >
                             {t('admin.delete')}
                           </button>
-                        </div>
+                        </AdminMobileActions>
                       </>
                     )}
-                  </div>
+                  </AdminMobileCard>
                 ))
               )}
             </div>
