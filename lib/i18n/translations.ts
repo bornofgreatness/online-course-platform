@@ -188,6 +188,7 @@ export const translations = {
     'certificate.courseHours': '{hours} course hours',
     'certificate.holderName': 'Certificate holder',
 
+    'quiz.answerAll': 'Please answer every question before submitting.',
     'quiz.attemptsUsed': 'Attempts used',
     'quiz.attemptsLeft': '{count} attempt(s) left.',
     'quiz.courseQuiz': 'Course quiz',
@@ -880,6 +881,7 @@ export const translations = {
     'certificate.courseHours': '{hours} horas de curso',
     'certificate.holderName': 'Titular do certificado',
 
+    'quiz.answerAll': 'Responda todas as perguntas antes de enviar.',
     'quiz.attemptsUsed': 'Tentativas usadas',
     'quiz.attemptsLeft': '{count} tentativa(s) restante(s).',
     'quiz.courseQuiz': 'Quiz do curso',

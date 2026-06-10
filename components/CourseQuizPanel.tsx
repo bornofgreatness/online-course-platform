@@ -17,6 +17,8 @@ type QuizPayload = {
   history: Array<{ id: string; score: number; passed: boolean; attemptedAt: string }>
 }
 
+const UNANSWERED = -1
+
 export default function CourseQuizPanel({ courseId }: { courseId: string }) {
   const { language, t } = useI18n()
   const [data, setData] = useState<QuizPayload | null>(null)
@@ -26,6 +28,7 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<{ score: number; passed: boolean; attemptsRemaining: number } | null>(null)
   const resultRef = useRef<HTMLParagraphElement>(null)
+  const pendingScrollRef = useRef(false)
 
   const scrollToQuizScore = useCallback(() => {
     if (typeof window === 'undefined') return
@@ -34,40 +37,55 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
     }, 100)
   }, [])
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch(`/api/courses/${courseId}/quiz?lang=${language}`)
-      const json = await res.json().catch(() => null)
-      if (!res.ok) throw new Error(json?.error || t('quiz.failedLoad'))
-      if (!json.quiz) {
-        setData(null)
-        return
+  const load = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!opts?.silent) setLoading(true)
+      setError(null)
+      try {
+        const res = await fetch(`/api/courses/${courseId}/quiz?lang=${language}`)
+        const json = await res.json().catch(() => null)
+        if (!res.ok) throw new Error(json?.error || t('quiz.failedLoad'))
+        if (!json.quiz) {
+          setData(null)
+          return
+        }
+        setData({
+          quiz: json.quiz,
+          attemptsUsed: json.attemptsUsed,
+          maxAttempts: json.maxAttempts,
+          bestScore: json.bestScore,
+          passed: json.passed,
+          history: json.history || [],
+        })
+        if (!opts?.silent) {
+          setAnswers(new Array(json.quiz.questions.length).fill(UNANSWERED))
+        }
+      } catch (e: any) {
+        setError(e?.message || t('quiz.failedLoad'))
+        if (!opts?.silent) setData(null)
+      } finally {
+        if (!opts?.silent) setLoading(false)
       }
-      setData({
-        quiz: json.quiz,
-        attemptsUsed: json.attemptsUsed,
-        maxAttempts: json.maxAttempts,
-        bestScore: json.bestScore,
-        passed: json.passed,
-        history: json.history || [],
-      })
-      setAnswers(new Array(json.quiz.questions.length).fill(0))
-    } catch (e: any) {
-      setError(e?.message || t('quiz.failedLoad'))
-      setData(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [courseId, language, t])
+    },
+    [courseId, language, t]
+  )
 
   useEffect(() => {
     load()
   }, [load])
 
+  useEffect(() => {
+    if (!pendingScrollRef.current || !result) return
+    pendingScrollRef.current = false
+    scrollToQuizScore()
+  }, [result, scrollToQuizScore])
+
   const submit = async () => {
     if (!data?.quiz) return
+    if (answers.some((a) => a < 0)) {
+      setError(t('quiz.answerAll'))
+      return
+    }
     setSubmitting(true)
     setError(null)
     try {
@@ -78,13 +96,19 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
       })
       const json = await res.json().catch(() => null)
       if (!res.ok) throw new Error(json?.error || t('quiz.submitFailed'))
+
       setResult({ score: json.score, passed: json.passed, attemptsRemaining: json.attemptsRemaining })
-      // Dispatch custom event to notify other components (like CourseActions) that quiz state changed
+      pendingScrollRef.current = true
+
       if (json.passed) {
         window.dispatchEvent(new CustomEvent('quiz-passed', { detail: { courseId } }))
       }
-      await load()
-      scrollToQuizScore()
+
+      if (!json.passed && json.attemptsRemaining > 0) {
+        setAnswers(new Array(data.quiz.questions.length).fill(UNANSWERED))
+      }
+
+      await load({ silent: true })
     } catch (e: any) {
       setError(e?.message || t('quiz.submitFailed'))
     } finally {
@@ -116,7 +140,7 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
   const labels = ['A', 'B', 'C', 'D'] as const
 
   return (
-    <div id="course-quiz" className={`scroll-mt-20 sm:p-6 sm:scroll-mt-24 ${sitePanelClass}`}>
+    <div id="course-quiz" className={`scroll-mt-20 sm:scroll-mt-24 sm:p-6 ${sitePanelClass}`}>
       <h2 className="text-lg font-bold uppercase tracking-wide text-blue-900 sm:text-xl">{t('quiz.courseQuiz')}</h2>
       <p className="mt-1 text-sm text-slate-600">
         {t('quiz.passingScore')}: 7/10 · {t('quiz.attemptsUsed')}: {data.attemptsUsed}/{data.maxAttempts}
@@ -127,7 +151,8 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
         <ul className="mt-3 space-y-1 text-xs text-slate-600">
           {data.history.slice(0, 3).map((h) => (
             <li key={h.id}>
-              {new Date(h.attemptedAt).toLocaleString()}: {h.score}/10 {h.passed ? `(${t('quiz.passed').toLowerCase()})` : ''}
+              {new Date(h.attemptedAt).toLocaleString()}: {h.score}/10{' '}
+              {h.passed ? `(${t('quiz.passed').toLowerCase()})` : ''}
             </li>
           ))}
         </ul>
@@ -137,10 +162,14 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
         <p
           ref={resultRef}
           id="quiz-result"
-          className={`scroll-mt-20 mt-3 rounded-lg px-3 py-2 text-sm font-semibold ${result.passed ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-100 text-slate-800'}`}
+          className={`mt-3 scroll-mt-20 rounded-lg px-3 py-2 text-sm font-semibold ${
+            result.passed ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-100 text-slate-800'
+          }`}
         >
           {t('quiz.score', { score: result.score })} - {result.passed ? t('quiz.passed') : t('quiz.notPassed')}.
-          {result.attemptsRemaining > 0 && !result.passed ? ` ${t('quiz.attemptsLeft', { count: result.attemptsRemaining })}` : null}
+          {result.attemptsRemaining > 0 && !result.passed
+            ? ` ${t('quiz.attemptsLeft', { count: result.attemptsRemaining })}`
+            : null}
         </p>
       )}
 
@@ -149,7 +178,7 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
       ) : data.passed ? (
         <p className="mt-4 text-sm text-emerald-800">{t('quiz.youPassed')}</p>
       ) : (
-        <div className="mt-4 space-y-5">
+        <div className={`mt-4 space-y-5 ${submitting ? 'pointer-events-none opacity-70' : ''}`}>
           {data.quiz.questions.map((q, qi) => (
             <fieldset key={q.id} className="rounded-lg border border-slate-100 p-3">
               <legend className="px-1 text-sm font-semibold text-slate-900">
@@ -163,6 +192,7 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
                       className="mt-1"
                       name={q.id}
                       checked={answers[qi] === oi}
+                      disabled={submitting}
                       onChange={() => {
                         setAnswers((prev) => {
                           const next = [...prev]
@@ -186,7 +216,7 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
             onClick={submit}
             className={`w-full ${sitePrimaryBtnClass} disabled:cursor-not-allowed disabled:opacity-50`}
           >
-            <LoadingButtonLabel loading={submitting} label={t('common.loading')}>
+            <LoadingButtonLabel loading={submitting} label={t('quiz.submitting')}>
               {t('quiz.submit')}
             </LoadingButtonLabel>
           </button>
