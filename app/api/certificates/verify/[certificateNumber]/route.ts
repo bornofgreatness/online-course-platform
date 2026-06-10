@@ -30,9 +30,9 @@ export async function GET(_request: Request, { params }: { params: { certificate
   return NextResponse.json({
     valid: true,
     certificateNumber: cert.certificateNumber,
-    courseName: cert.course.title,
-    workloadHours: cert.course.workloadHours,
+    courseName: cert.courseTitle || cert.course.title,
+    workloadHours: cert.workloadHours ?? cert.course.workloadHours,
     issuedAt: cert.issuedAt.toISOString(),
-    holderName: cert.user.name,
+    holderName: cert.holderName || cert.user.name,
   })
 }

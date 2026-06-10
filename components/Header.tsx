@@ -26,9 +26,11 @@ export default function Header() {
   const { t } = useI18n()
   const [categories, setCategories] = useState<NavCategory[]>([])
   const [categoriesOpen, setCategoriesOpen] = useState(false)
+  const [certificatesOpen, setCertificatesOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [logoutLoading, setLogoutLoading] = useState(false)
   const categoriesRef = useRef<HTMLDivElement>(null)
+  const certificatesRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch('/api/categories')
@@ -40,15 +42,18 @@ export default function Header() {
   }, [])
 
   useEffect(() => {
-    if (!categoriesOpen) return
+    if (!categoriesOpen && !certificatesOpen) return
     const onDoc = (e: MouseEvent) => {
       if (categoriesRef.current && !categoriesRef.current.contains(e.target as Node)) {
         setCategoriesOpen(false)
       }
+      if (certificatesRef.current && !certificatesRef.current.contains(e.target as Node)) {
+        setCertificatesOpen(false)
+      }
     }
     document.addEventListener('mousedown', onDoc)
     return () => document.removeEventListener('mousedown', onDoc)
-  }, [categoriesOpen])
+  }, [categoriesOpen, certificatesOpen])
 
   useEffect(() => {
     if (!mobileMenuOpen) return
@@ -162,9 +167,38 @@ export default function Header() {
               <Link href="/categories" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
                 {t('common.categories')}
               </Link>
-              <Link href="/certificates" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                {t('common.certificates')}
-              </Link>
+              {session ? (
+                <>
+                  <p className="px-3 pt-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+                    {t('common.certificates')}
+                  </p>
+                  <Link
+                    href="/certificates?tab=mine"
+                    className={drawerLinkClass}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {t('certificate.tabMine')}
+                  </Link>
+                  <Link
+                    href="/certificates?tab=completed"
+                    className={drawerLinkClass}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {t('certificate.tabCompleted')}
+                  </Link>
+                  <Link
+                    href="/certificates?tab=progress"
+                    className={drawerLinkClass}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {t('certificate.tabInProgress')}
+                  </Link>
+                </>
+              ) : (
+                <Link href="/certificates" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
+                  {t('common.certificates')}
+                </Link>
+              )}
               <Link href="/pricing" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
                 {t('common.prices')}
               </Link>
@@ -345,9 +379,57 @@ export default function Header() {
               </Link>
             )}
 
-            <Link href="/certificates" className={navText(certificatesActive)}>
-              {t('common.certificates')}
-            </Link>
+            {session ? (
+              <div className="relative" ref={certificatesRef}>
+                <button
+                  type="button"
+                  onClick={() => setCertificatesOpen((o) => !o)}
+                  className={`inline-flex items-center gap-1 ${navText(certificatesActive || certificatesOpen)}`}
+                  aria-expanded={certificatesOpen}
+                  aria-haspopup="true"
+                >
+                  {t('common.certificates')}
+                  <span className="text-[0.65rem] font-bold" aria-hidden>
+                    ▾
+                  </span>
+                </button>
+                {certificatesOpen && (
+                  <div
+                    className="absolute left-0 top-full z-50 mt-1 min-w-[14rem] rounded-lg border border-gray-200 bg-white py-1 shadow-lg normal-case font-normal"
+                    role="menu"
+                  >
+                    <Link
+                      href="/certificates?tab=mine"
+                      className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-50"
+                      role="menuitem"
+                      onClick={() => setCertificatesOpen(false)}
+                    >
+                      {t('certificate.tabMine')}
+                    </Link>
+                    <Link
+                      href="/certificates?tab=completed"
+                      className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-50"
+                      role="menuitem"
+                      onClick={() => setCertificatesOpen(false)}
+                    >
+                      {t('certificate.tabCompleted')}
+                    </Link>
+                    <Link
+                      href="/certificates?tab=progress"
+                      className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-50"
+                      role="menuitem"
+                      onClick={() => setCertificatesOpen(false)}
+                    >
+                      {t('certificate.tabInProgress')}
+                    </Link>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/certificates" className={navText(certificatesActive)}>
+                {t('common.certificates')}
+              </Link>
+            )}
 
             <Link href="/pricing" className={navText(pricingActive)}>
               {t('common.prices')}

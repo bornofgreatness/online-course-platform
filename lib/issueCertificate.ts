@@ -10,6 +10,15 @@ async function createCertificateRecord(
   userId: string,
   courseId: string
 ) {
+  const [user, course] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { name: true } }),
+    prisma.course.findUnique({ where: { id: courseId }, select: { title: true, workloadHours: true } }),
+  ])
+
+  if (!user || !course) {
+    throw new Error('User or course not found')
+  }
+
   const certificateNumber = `CERT-${Date.now()}-${Math.random().toString(36).slice(2, 11).toUpperCase()}`
   const pdfPath = `/api/certificates/pdf/${encodeURIComponent(certificateNumber)}`
   const base =
@@ -25,6 +34,9 @@ async function createCertificateRecord(
       certificateNumber,
       pdfUrl: pdfPath,
       qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}`,
+      holderName: user.name,
+      courseTitle: course.title,
+      workloadHours: course.workloadHours,
     },
   })
 }

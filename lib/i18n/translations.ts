@@ -170,6 +170,16 @@ export const translations = {
     'certificate.howToEarnStep3': 'Request your digital certificate and pay the issuance fee ({fee}).',
     'certificate.verifyHint':
       'To verify an existing certificate, use the verification link or QR code on the certificate (URL: /verify/certificate/[number]).',
+    'certificate.tabMine': 'My certificates',
+    'certificate.tabCompleted': 'Completed courses',
+    'certificate.tabInProgress': 'Courses in progress',
+    'certificate.hubIntro': 'Manage your certificates and track course completion.',
+    'certificate.noIssuedYet': 'Complete a course and pay the issuance fee to receive your CONECT CURSOS certificate.',
+    'certificate.noCompletedPending': 'No completed courses waiting for a certificate.',
+    'certificate.noInProgress': 'You have no courses in progress.',
+    'certificate.subscriptionRequired': 'An active subscription is required to request certificates.',
+    'certificate.courseHours': '{hours} course hours',
+    'certificate.holderName': 'Certificate holder',
 
     'quiz.attemptsUsed': 'Attempts used',
     'quiz.attemptsLeft': '{count} attempt(s) left.',
@@ -845,6 +855,16 @@ export const translations = {
     'certificate.howToEarnStep3': 'Solicite o certificado digital e pague a taxa de emissão ({fee}).',
     'certificate.verifyHint':
       'Para verificar um certificado existente, use o link ou QR code no documento (URL: /verify/certificate/[número]).',
+    'certificate.tabMine': 'Meus certificados',
+    'certificate.tabCompleted': 'Cursos concluídos',
+    'certificate.tabInProgress': 'Cursos em andamento',
+    'certificate.hubIntro': 'Gerencie seus certificados e acompanhe a conclusão dos cursos.',
+    'certificate.noIssuedYet': 'Conclua um curso e pague a taxa de emissão para receber seu certificado CONECT CURSOS.',
+    'certificate.noCompletedPending': 'Nenhum curso concluído aguardando certificado.',
+    'certificate.noInProgress': 'Você não tem cursos em andamento.',
+    'certificate.subscriptionRequired': 'É necessária uma assinatura ativa para solicitar certificados.',
+    'certificate.courseHours': '{hours} horas de curso',
+    'certificate.holderName': 'Titular do certificado',
 
     'quiz.attemptsUsed': 'Tentativas usadas',
     'quiz.attemptsLeft': '{count} tentativa(s) restante(s).',

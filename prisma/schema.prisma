@@ -191,6 +191,10 @@ model Certificate {
   issuedAt          DateTime @default(now())
   pdfUrl            String
   qrCode            String
+  /// Snapshot at issuance (Conect Cursos certificate data).
+  holderName        String?
+  courseTitle       String?
+  workloadHours     Int?
 
   @@unique([userId, courseId])
 }

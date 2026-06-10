@@ -214,7 +214,7 @@ export default function CourseActions({
         <div className="text-center">
           <div className="mb-2 font-semibold text-green-600">✓ {t('actions.certificateEarned')}</div>
           <a
-            href="/certificates"
+            href="/certificates?tab=mine"
             className={`inline-block ${siteAccentBtnClass} px-4 py-2 text-sm`}
           >
             {t('actions.viewCertificate')}

@@ -1,5 +1,9 @@
-import LandingPage from '../components/LandingPage'
+import Header from '../components/Header'
+import CategoriesView from '../components/views/CategoriesView'
+import { getBrowseCategories } from '../lib/categories/getBrowseCategories'
 import { buildPageMetadata } from '../lib/seo/metadata'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata = buildPageMetadata({
   title: 'Cursos online com certificado rápido | Online courses with certificate',
@@ -9,6 +13,13 @@ export const metadata = buildPageMetadata({
   seoAlternates: true,
 })
 
-export default function Home() {
-  return <LandingPage />
+export default async function Home() {
+  const categories = await getBrowseCategories()
+
+  return (
+    <>
+      <Header />
+      <CategoriesView categories={categories} />
+    </>
+  )
 }

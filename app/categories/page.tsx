@@ -1,36 +1,20 @@
 import Header from '../../components/Header'
 import CategoriesView from '../../components/views/CategoriesView'
-import { getPrisma } from '../../lib/prisma'
+import { getBrowseCategories } from '../../lib/categories/getBrowseCategories'
+import { buildPageMetadata } from '../../lib/seo/metadata'
 
 export const dynamic = 'force-dynamic'
 
-export default async function CategoriesPage() {
-  let categories: {
-    id: string
-    name: string
-    icon: string | null
-    imageUrl: string | null
-    _count: { courses: number }
-    subcategories: { id: string; name: string; _count: { courses: number } }[]
-  }[] = []
+export const metadata = buildPageMetadata({
+  title: 'Categorias de cursos | Course categories',
+  description:
+    'Navegue por categorias de cursos online com certificado. Browse online course categories with digital certificates.',
+  path: '/categories',
+  seoAlternates: true,
+})
 
-  if (process.env.DATABASE_URL) {
-    try {
-      const prisma = getPrisma()
-      categories = await prisma.category.findMany({
-        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-        include: {
-          _count: { select: { courses: true } },
-          subcategories: {
-            orderBy: { name: 'asc' },
-            include: { _count: { select: { courses: true } } },
-          },
-        },
-      })
-    } catch {
-      categories = []
-    }
-  }
+export default async function CategoriesPage() {
+  const categories = await getBrowseCategories()
 
   return (
     <>
