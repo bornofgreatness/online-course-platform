@@ -10,7 +10,12 @@ export function whatsappLink(phone: string, message?: string): string {
 }
 
 export const PLATFORM_WHATSAPP =
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5511999999999'
+  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5574981045147'
+
+export const PLATFORM_WHATSAPP_DISPLAY = '(74) 98104-5147'
+
+export const PLATFORM_CONTACT_EMAIL =
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'conect736@gmail.com'
 
 export const PROMO_WHATSAPP_MESSAGE =
   'Olá! Vim pelo site da plataforma de cursos e gostaria de saber mais sobre os planos de assinatura.'

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useI18n } from './LanguageProvider'
 import LoadingButtonLabel from './LoadingButtonLabel'
 import LoadingImage from './LoadingImage'
@@ -25,6 +25,14 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
   const [answers, setAnswers] = useState<number[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<{ score: number; passed: boolean; attemptsRemaining: number } | null>(null)
+  const resultRef = useRef<HTMLParagraphElement>(null)
+
+  const scrollToQuizScore = useCallback(() => {
+    if (typeof window === 'undefined') return
+    window.setTimeout(() => {
+      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
+  }, [])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -76,6 +84,7 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
         window.dispatchEvent(new CustomEvent('quiz-passed', { detail: { courseId } }))
       }
       await load()
+      scrollToQuizScore()
     } catch (e: any) {
       setError(e?.message || t('quiz.submitFailed'))
     } finally {
@@ -107,7 +116,7 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
   const labels = ['A', 'B', 'C', 'D'] as const
 
   return (
-    <div id="course-quiz" className={`sm:p-6 ${sitePanelClass}`}>
+    <div id="course-quiz" className={`scroll-mt-20 sm:p-6 sm:scroll-mt-24 ${sitePanelClass}`}>
       <h2 className="text-lg font-bold uppercase tracking-wide text-blue-900 sm:text-xl">{t('quiz.courseQuiz')}</h2>
       <p className="mt-1 text-sm text-slate-600">
         {t('quiz.passingScore')}: 7/10 · {t('quiz.attemptsUsed')}: {data.attemptsUsed}/{data.maxAttempts}
@@ -125,7 +134,11 @@ export default function CourseQuizPanel({ courseId }: { courseId: string }) {
       )}
 
       {result && (
-        <p className={`mt-3 rounded-lg px-3 py-2 text-sm font-semibold ${result.passed ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-100 text-slate-800'}`}>
+        <p
+          ref={resultRef}
+          id="quiz-result"
+          className={`scroll-mt-20 mt-3 rounded-lg px-3 py-2 text-sm font-semibold ${result.passed ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-100 text-slate-800'}`}
+        >
           {t('quiz.score', { score: result.score })} - {result.passed ? t('quiz.passed') : t('quiz.notPassed')}.
           {result.attemptsRemaining > 0 && !result.passed ? ` ${t('quiz.attemptsLeft', { count: result.attemptsRemaining })}` : null}
         </p>

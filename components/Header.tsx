@@ -11,6 +11,11 @@ import LoadingImage from './LoadingImage'
 import LoadingButtonLabel from './LoadingButtonLabel'
 import { useI18n } from './LanguageProvider'
 import { canAccessAdminPanel } from '../lib/auth/rbac'
+import {
+  PLATFORM_WHATSAPP,
+  PLATFORM_WHATSAPP_DISPLAY,
+  whatsappLink,
+} from '../lib/whatsapp'
 
 type NavCategory = {
   id: string
@@ -28,6 +33,9 @@ export default function Header() {
   const [categoriesOpen, setCategoriesOpen] = useState(false)
   const [certificatesOpen, setCertificatesOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileMenuVisible, setMobileMenuVisible] = useState(false)
+  const [mobilePagesOpen, setMobilePagesOpen] = useState(false)
+  const [mobileCursosOpen, setMobileCursosOpen] = useState(false)
   const [logoutLoading, setLogoutLoading] = useState(false)
   const categoriesRef = useRef<HTMLDivElement>(null)
   const certificatesRef = useRef<HTMLDivElement>(null)
@@ -56,13 +64,38 @@ export default function Header() {
   }, [categoriesOpen, certificatesOpen])
 
   useEffect(() => {
-    if (!mobileMenuOpen) return
+    if (!mobileMenuVisible) return
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = prev
     }
-  }, [mobileMenuOpen])
+  }, [mobileMenuVisible])
+
+  useEffect(() => {
+    if (!mobileMenuOpen || !mobileMenuVisible) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeMobileMenu()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [mobileMenuOpen, mobileMenuVisible])
+
+  const openMobileMenu = () => {
+    setMobileMenuVisible(true)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setMobileMenuOpen(true))
+    })
+  }
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false)
+    window.setTimeout(() => {
+      setMobileMenuVisible(false)
+      setMobilePagesOpen(false)
+      setMobileCursosOpen(false)
+    }, 300)
+  }
 
   const handleLogout = async () => {
     if (logoutLoading) return
@@ -96,157 +129,264 @@ export default function Header() {
   const aboutActive = pathname.startsWith('/about')
   const dashboardActive = pathname.startsWith('/dashboard')
 
-  const drawerLinkClass =
-    'rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-100'
+  const mobileNavItem =
+    'block border-b border-white/10 px-5 py-4 text-base font-medium text-white transition hover:bg-white/5'
+  const mobileSubItem =
+    'block border-b border-white/5 px-8 py-3 text-sm text-white/90 transition hover:bg-white/5'
 
   return (
     <>
-      {/* Mobile: matches courses page top bar */}
-      <div className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-md lg:hidden">
-        <div className="flex items-center justify-between px-4 py-3.5">
+      <div className="sticky top-0 z-50 border-b border-slate-200 bg-white lg:hidden">
+        <div className="flex items-center px-3 py-2.5">
           <Link href="/" className="block shrink-0">
             <Image
               src="/logo.jpg"
               alt={t('certificate.brandName')}
               width={140}
               height={56}
-              className="h-8 w-auto rounded bg-white px-1.5 object-contain"
+              className="h-9 w-auto object-contain"
               priority
             />
           </Link>
-          <div className="flex items-center gap-2">
-            <LanguageSwitch compact />
+          <div className="mx-3 h-9 w-px shrink-0 bg-slate-200" aria-hidden />
+          <div className="flex flex-1 items-center justify-end gap-0.5">
+            <Link
+              href="/courses"
+              className="rounded-lg p-2.5 text-slate-900 transition hover:bg-slate-50"
+              aria-label={t('header.search')}
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"
+                />
+              </svg>
+            </Link>
+            <Link
+              href="/pricing"
+              className="rounded-lg p-2.5 text-slate-900 transition hover:bg-slate-50"
+              aria-label={t('header.cart')}
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 3h2l.4 2M7 13h10l3-8H6.4M7 13L5.4 5M7 13l-1.5 6h12M10 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"
+                />
+              </svg>
+            </Link>
             <button
               type="button"
-              onClick={() => setMobileMenuOpen(true)}
-              className="rounded-xl border border-slate-200 bg-white p-2 text-slate-800 shadow-sm transition hover:bg-slate-50"
+              onClick={openMobileMenu}
+              className="rounded-lg p-2.5 text-slate-900 transition hover:bg-slate-50"
               aria-expanded={mobileMenuOpen}
-              aria-label="Open menu"
+              aria-label={t('common.menu')}
             >
-              <span className="flex h-4 w-5 flex-col justify-center gap-1">
-                <span className="h-0.5 w-full rounded-full bg-black" />
-                <span className="h-0.5 w-full rounded-full bg-black" />
-                <span className="h-0.5 w-full rounded-full bg-black" />
-              </span>
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
             </button>
           </div>
         </div>
       </div>
 
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] lg:hidden" role="dialog" aria-modal="true">
+      {mobileMenuVisible && (
+        <div
+          className={`fixed inset-0 z-[100] lg:hidden ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
+          role="dialog"
+          aria-modal="true"
+        >
           <button
             type="button"
-            className="absolute inset-0 bg-black/50"
+            className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ease-out ${
+              mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+            }`}
             aria-label={t('common.close')}
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={closeMobileMenu}
           />
-          <div className="absolute right-0 top-0 flex h-full w-[min(100%,20rem)] flex-col rounded-l-2xl bg-white shadow-2xl ring-1 ring-black/5">
-            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-              <span className="text-sm font-bold text-slate-900">{t('common.menu')}</span>
+          <div
+            className={`absolute right-0 top-0 flex h-full w-[min(88%,20rem)] flex-col bg-[#1c1c1c] shadow-2xl transition-transform duration-300 ease-out ${
+              mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
+              <Link href="/" onClick={closeMobileMenu} className="block shrink-0">
+                <Image
+                  src="/logo.jpg"
+                  alt={t('certificate.brandName')}
+                  width={140}
+                  height={56}
+                  className="h-9 w-auto object-contain"
+                  priority
+                />
+              </Link>
               <button
                 type="button"
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-lg p-2 text-slate-600 hover:bg-gray-100"
+                onClick={closeMobileMenu}
+                className="rounded-lg p-2 text-white transition hover:bg-white/10"
                 aria-label={t('common.close')}
               >
-                ✕
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                  <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+                </svg>
               </button>
             </div>
-            <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3 text-sm font-semibold">
-              <Link href="/" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
+
+            <nav className="flex flex-1 flex-col overflow-y-auto">
+              <Link href="/" className={mobileNavItem} onClick={closeMobileMenu}>
                 {t('common.home')}
               </Link>
-              <Link
-                href="/courses"
-                className={`${drawerLinkClass} ${coursesActive ? 'text-teal-700' : ''}`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t('common.courses')}
-              </Link>
-              <Link href="/categories" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                {t('common.categories')}
-              </Link>
-              {session ? (
-                <>
-                  <p className="px-3 pt-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-                    {t('common.certificates')}
-                  </p>
-                  <Link
-                    href="/certificates?tab=mine"
-                    className={drawerLinkClass}
-                    onClick={() => setMobileMenuOpen(false)}
+
+              <div>
+                <button
+                  type="button"
+                  className={`flex w-full items-center justify-between ${mobileNavItem}`}
+                  onClick={() => setMobilePagesOpen((o) => !o)}
+                  aria-expanded={mobilePagesOpen}
+                >
+                  {t('header.pages')}
+                  <svg
+                    className={`h-4 w-4 shrink-0 transition-transform ${mobilePagesOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
                   >
-                    {t('certificate.tabMine')}
-                  </Link>
-                  <Link
-                    href="/certificates?tab=completed"
-                    className={drawerLinkClass}
-                    onClick={() => setMobileMenuOpen(false)}
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {mobilePagesOpen && (
+                  <div className="bg-black/20">
+                    <Link href="/about" className={mobileSubItem} onClick={closeMobileMenu}>
+                      {t('common.about')}
+                    </Link>
+                    <Link href="/pricing" className={mobileSubItem} onClick={closeMobileMenu}>
+                      {t('common.prices')}
+                    </Link>
+                    <Link href="/blog" className={mobileSubItem} onClick={closeMobileMenu}>
+                      {t('common.blog')}
+                    </Link>
+                    <Link href="/certificates" className={mobileSubItem} onClick={closeMobileMenu}>
+                      {t('common.certificates')}
+                    </Link>
+                    {showStudentNav && (
+                      <>
+                        <Link href="/dashboard" className={mobileSubItem} onClick={closeMobileMenu}>
+                          {t('common.dashboard')}
+                        </Link>
+                        <Link href="/affiliate" className={mobileSubItem} onClick={closeMobileMenu}>
+                          {t('common.affiliate')}
+                        </Link>
+                        {isAdmin && (
+                          <Link href="/admin" className={mobileSubItem} onClick={closeMobileMenu}>
+                            {t('common.admin')}
+                          </Link>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  className={`flex w-full items-center justify-between ${mobileNavItem}`}
+                  onClick={() => setMobileCursosOpen((o) => !o)}
+                  aria-expanded={mobileCursosOpen}
+                >
+                  {t('common.courses')}
+                  <svg
+                    className={`h-4 w-4 shrink-0 transition-transform ${mobileCursosOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
                   >
-                    {t('certificate.tabCompleted')}
-                  </Link>
-                  <Link
-                    href="/certificates?tab=progress"
-                    className={drawerLinkClass}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {t('certificate.tabInProgress')}
-                  </Link>
-                </>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {mobileCursosOpen && (
+                  <div className="bg-black/20">
+                    <Link href="/courses" className={mobileSubItem} onClick={closeMobileMenu}>
+                      {t('common.courses')}
+                    </Link>
+                    <Link href="/categories" className={mobileSubItem} onClick={closeMobileMenu}>
+                      {t('common.allCategories')}
+                    </Link>
+                    {orderedCategories.map((c) => (
+                      <Link
+                        key={c.id}
+                        href={`/categories/${c.id}`}
+                        className={`${mobileSubItem} flex items-center gap-2`}
+                        onClick={closeMobileMenu}
+                      >
+                        <span className="flex shrink-0 text-teal-400">
+                          <CourseCategorySidebarIcon categoryName={c.name} icon={c.icon} />
+                        </span>
+                        <span>
+                          {c.name}
+                          <span className="ml-1 text-xs text-white/50">({c.courseCount})</span>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {showStudentNav ? (
+                <button
+                  type="button"
+                  disabled={logoutLoading}
+                  aria-busy={logoutLoading}
+                  className={`${mobileNavItem} text-left disabled:cursor-not-allowed disabled:opacity-80`}
+                  onClick={() => {
+                    void handleLogout()
+                  }}
+                >
+                  {logoutLoading ? (
+                    <LoadingButtonLabel loading label={t('common.loading')} color="default">
+                      {t('common.logout')}
+                    </LoadingButtonLabel>
+                  ) : (
+                    t('common.logout')
+                  )}
+                </button>
               ) : (
-                <Link href="/certificates" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                  {t('common.certificates')}
+                <Link href="/auth/signin" className={mobileNavItem} onClick={closeMobileMenu}>
+                  {t('common.login')}
                 </Link>
               )}
-              <Link href="/pricing" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                {t('common.prices')}
-              </Link>
-              <Link href="/about" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                {t('common.about')}
-              </Link>
-              {showStudentNav ? (
-                <>
-                  <Link href="/dashboard" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                    {t('common.dashboard')}
-                  </Link>
-                  <Link href="/affiliate" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                    {t('common.affiliate')}
-                  </Link>
-                  {isAdmin && (
-                    <Link href="/admin" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                      {t('common.admin')}
-                    </Link>
-                  )}
-                  <button
-                    type="button"
-                    disabled={logoutLoading}
-                    aria-busy={logoutLoading}
-                    className="mt-auto inline-flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-80"
-                    onClick={() => {
-                      void handleLogout()
-                    }}
-                  >
-                    {logoutLoading ? (
-                      <LoadingButtonLabel loading label={t('common.loading')} color="default">
-                        {t('common.logout')}
-                      </LoadingButtonLabel>
-                    ) : (
-                      t('common.logout')
-                    )}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link href="/auth/signin" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                    {t('common.login')}
-                  </Link>
-                  <Link href="/auth/signup" className={drawerLinkClass} onClick={() => setMobileMenuOpen(false)}>
-                    {t('common.signupFreeCta')}
-                  </Link>
-                </>
-              )}
             </nav>
+
+            <div className="mt-auto space-y-5 border-t border-white/10 px-5 py-6">
+              <div className="flex gap-3">
+                <span className="mt-0.5 shrink-0 text-teal-400">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                    />
+                  </svg>
+                </span>
+                <div>
+                  <p className="text-[0.65rem] font-bold uppercase tracking-wider text-white/50">
+                    {t('contact.whatsapp')}
+                  </p>
+                  <a
+                    href={whatsappLink(PLATFORM_WHATSAPP)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-semibold text-white hover:text-teal-400"
+                  >
+                    {PLATFORM_WHATSAPP_DISPLAY}
+                  </a>
+                </div>
+              </div>
+              <LanguageSwitch compact />
+            </div>
           </div>
         </div>
       )}
