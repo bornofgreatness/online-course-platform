@@ -361,6 +361,25 @@ export default function Header() {
             </nav>
 
             <div className="mt-auto space-y-5 border-t border-white/10 px-5 py-6">
+              {session?.user?.email ? (
+                <div className="flex gap-3">
+                  <span className="mt-0.5 shrink-0 text-teal-400">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[0.65rem] font-bold uppercase tracking-wider text-white/50">
+                      {t('common.email')}
+                    </p>
+                    <p className="break-all text-sm font-semibold text-white">{session.user.email}</p>
+                  </div>
+                </div>
+              ) : null}
               <div className="flex gap-3">
                 <span className="mt-0.5 shrink-0 text-teal-400">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>

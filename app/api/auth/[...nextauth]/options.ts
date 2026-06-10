@@ -67,18 +67,23 @@ export const authOptions: AuthOptions = {
     async session({ session, token }: { session: any; token: any }) {
       if (token?.sub) {
         session.user.id = token.sub
-        const prisma = getPrisma()
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.sub },
-          select: {
-            role: true,
-            affiliate: { select: { id: true } },
-          },
-        })
-        if (dbUser) {
-          session.user.role = dbUser.role
-          session.user.isAffiliate = !!dbUser.affiliate
-        } else {
+        try {
+          const prisma = getPrisma()
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: {
+              role: true,
+              affiliate: { select: { id: true } },
+            },
+          })
+          if (dbUser) {
+            session.user.role = dbUser.role
+            session.user.isAffiliate = !!dbUser.affiliate
+          } else {
+            session.user.role = token.role
+          }
+        } catch (err) {
+          console.error('[next-auth] session callback failed:', err)
           session.user.role = token.role
         }
       }

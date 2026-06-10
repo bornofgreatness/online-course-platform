@@ -42,6 +42,7 @@ export const translations = {
     'common.enrolled': 'Enrolled',
     'common.enrolledCourses': 'Enrolled courses',
     'common.error': 'Something went wrong',
+    'common.tryAgain': 'Try again',
     'common.home': 'Home',
     'common.inProgress': 'In progress',
     'common.issued': 'Issued',
@@ -99,6 +100,7 @@ export const translations = {
     'common.working': 'Working…',
 
     'course.about': 'About this course',
+    'course.loadFailed': 'We could not load this course. Please try again in a moment.',
     'course.available': 'Available courses',
     'course.complete': 'Completed',
     'course.completed': 'Completed',
@@ -734,6 +736,7 @@ export const translations = {
     'common.enrolled': 'Inscrito',
     'common.enrolledCourses': 'Cursos inscritos',
     'common.error': 'Algo deu errado',
+    'common.tryAgain': 'Tentar novamente',
     'common.home': 'Início',
     'common.inProgress': 'Em andamento',
     'common.issued': 'Emitido',
@@ -791,6 +794,7 @@ export const translations = {
     'common.working': 'Processando…',
 
     'course.about': 'Sobre este curso',
+    'course.loadFailed': 'Não foi possível carregar este curso. Tente novamente em instantes.',
     'course.available': 'Cursos disponíveis',
     'course.complete': 'Concluído',
     'course.completed': 'Concluído',
