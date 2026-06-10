@@ -62,7 +62,13 @@ export default function CatalogSidebar({
         onClick={onSelectAll}
         className={catalogNavRowClass(!selectedCategoryId && !selectedSubcategoryId)}
       >
-        <CourseCategorySidebarIcon categoryName={null} />
+        <span
+          className={
+            !selectedCategoryId && !selectedSubcategoryId ? 'text-teal-600' : 'text-slate-500'
+          }
+        >
+          <CourseCategorySidebarIcon categoryName={null} />
+        </span>
         <span className="text-sm font-bold leading-tight text-black">{t('common.allCategories')}</span>
       </button>
 
@@ -103,7 +109,9 @@ export default function CatalogSidebar({
                 onClick={handleCategoryClick}
                 className={`${catalogNavRowClass(categoryOnlyActive)} min-w-0 flex-1`}
               >
-                <CourseCategorySidebarIcon categoryName={cat.name} icon={cat.icon} />
+                <span className={categoryOnlyActive ? 'text-teal-600' : 'text-slate-500'}>
+                  <CourseCategorySidebarIcon categoryName={cat.name} icon={cat.icon} />
+                </span>
                 <span className="truncate text-sm font-bold leading-tight text-black">{displayName}</span>
               </button>
             </div>

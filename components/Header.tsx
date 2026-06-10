@@ -322,7 +322,7 @@ export default function Header() {
                         className={`${mobileSubItem} flex items-center gap-2`}
                         onClick={closeMobileMenu}
                       >
-                        <span className="flex shrink-0 text-teal-400">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-500/15 text-teal-300">
                           <CourseCategorySidebarIcon categoryName={c.name} icon={c.icon} />
                         </span>
                         <span>

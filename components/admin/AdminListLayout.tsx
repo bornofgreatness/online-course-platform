@@ -29,8 +29,8 @@ export function AdminMobileCard({ children }: { children: ReactNode }) {
 export function AdminMobileHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="mb-3 border-b border-slate-100 pb-3">
-      <h3 className="font-semibold leading-snug text-slate-900">{title}</h3>
-      {subtitle ? <p className="mt-0.5 break-all text-sm text-slate-600">{subtitle}</p> : null}
+      <h3 className="text-base font-semibold leading-snug text-slate-900">{title}</h3>
+      {subtitle ? <p className="mt-1 break-all text-xs text-slate-600 sm:text-sm">{subtitle}</p> : null}
     </div>
   )
 }
@@ -45,8 +45,8 @@ export function AdminMobileField({
   className?: string
 }) {
   return (
-    <div className={`grid grid-cols-1 gap-1 sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:gap-x-3 ${className}`}>
-      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</dt>
+    <div className={`grid grid-cols-1 gap-1 md:grid-cols-[minmax(0,7.5rem)_1fr] md:gap-x-3 ${className}`}>
+      <dt className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500 sm:text-xs">{label}</dt>
       <dd className="min-w-0 text-sm text-slate-900">{children}</dd>
     </div>
   )
@@ -54,7 +54,7 @@ export function AdminMobileField({
 
 export function AdminMobileActions({ children }: { children: ReactNode }) {
   return (
-    <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-3 sm:flex-row sm:flex-wrap">
+    <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-3 md:flex-row md:flex-wrap">
       {children}
     </div>
   )

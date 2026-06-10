@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 const base = {
-  className: 'h-6 w-6 shrink-0 text-black',
+  className: 'h-6 w-6 shrink-0',
   width: 24,
   height: 24,
   viewBox: '0 0 24 24',
@@ -160,40 +160,47 @@ function heuristicFromName(categoryName: string): ReactNode {
   return <IconFolder />
 }
 
+function IconShell({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <span className={`inline-flex shrink-0 items-center justify-center text-current ${className}`}>
+      {children}
+    </span>
+  )
+}
+
 /** Monochrome sidebar icon; empty / null name means “all categories”. Stored `icon` overrides name heuristics. */
 export function CourseCategorySidebarIcon({
   categoryName,
   icon,
+  className,
 }: {
   categoryName?: string | null
   icon?: string | null
+  className?: string
 }) {
   const rawIcon = (icon ?? '').trim()
   if (rawIcon) {
     if (/^https?:\/\//i.test(rawIcon)) {
       return (
-        <img
-          src={rawIcon}
-          alt=""
-          className="h-6 w-6 shrink-0 object-contain"
-        />
+        <IconShell className={className}>
+          <img src={rawIcon} alt="" className="h-6 w-6 shrink-0 object-contain" />
+        </IconShell>
       )
     }
     const fromKey = IconFromStoredKey(rawIcon)
-    if (fromKey) return fromKey
+    if (fromKey) return <IconShell className={className}>{fromKey}</IconShell>
     if (!/^[a-z_]+$/i.test(rawIcon)) {
       return (
-        <span
-          className="flex h-6 w-6 shrink-0 items-center justify-center text-lg leading-none text-black"
-          aria-hidden
-        >
-          {rawIcon}
-        </span>
+        <IconShell className={className}>
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center text-lg leading-none" aria-hidden>
+            {rawIcon}
+          </span>
+        </IconShell>
       )
     }
   }
 
   const c = (categoryName ?? '').trim()
-  if (!c) return <IconAllCategories />
-  return heuristicFromName(c)
+  if (!c) return <IconShell className={className}><IconAllCategories /></IconShell>
+  return <IconShell className={className}>{heuristicFromName(c)}</IconShell>
 }

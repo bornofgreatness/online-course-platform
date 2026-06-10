@@ -3,6 +3,7 @@
 import { Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import Header from '../../components/Header'
+import PageShell from '../../components/PageShell'
 import PageLoading from '../../components/PageLoading'
 import CertificateShowcase from '../../components/CertificateShowcase'
 import CertificatesHub from '../../components/CertificatesHub'
@@ -22,9 +23,9 @@ function CertificatesContent() {
       {isAuthenticated ? (
         <CertificatesHub />
       ) : (
-        <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50/90 to-slate-100 px-4 pb-10 pt-4 lg:px-8">
+        <PageShell className="mx-auto max-w-6xl">
           <CertificateShowcase />
-        </div>
+        </PageShell>
       )}
     </>
   )

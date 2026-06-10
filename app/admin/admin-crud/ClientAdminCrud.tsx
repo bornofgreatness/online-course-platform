@@ -22,9 +22,13 @@ import {
 } from '../../../components/admin/AdminListLayout'
 import {
   adminCardClass,
+  adminHeroClass,
   adminInputClass,
   adminPrimaryBtnClass,
   adminSecondaryBtnClass,
+  adminReportCardClass,
+  adminSectionHeaderClass,
+  adminSectionTitleClass,
   adminShellClass,
   adminStatCardClass,
   type AdminTab,
@@ -1070,16 +1074,17 @@ export default function ClientAdminCrud() {
         </div>
       )}
 
-      <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-teal-900 p-5 text-white shadow-lg ring-1 ring-black/10 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className={adminHeroClass}>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.12),transparent_55%)]" />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-widest text-teal-200">{t('common.admin')}</p>
-            <h1 className={`${siteTitleClass} mt-1 text-white`}>{t('admin.panel')}</h1>
-            <p className="mt-2 max-w-2xl text-sm text-blue-100">{t('admin.panelSubtitle')}</p>
+            <p className="text-[0.65rem] font-bold uppercase tracking-widest text-teal-200 sm:text-xs">{t('common.admin')}</p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl">{t('admin.panel')}</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-blue-100">{t('admin.panelSubtitle')}</p>
           </div>
           <a
             href="/api/admin/leads"
-            className="inline-flex shrink-0 items-center justify-center rounded-xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/20"
+            className="inline-flex w-full shrink-0 items-center justify-center rounded-xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/20 sm:w-auto"
           >
             {t('admin.exportLeads')}
           </a>
@@ -1087,28 +1092,28 @@ export default function ClientAdminCrud() {
       </div>
 
       {stats && (
-        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-5 grid grid-cols-2 gap-2 sm:mb-6 sm:gap-3 lg:grid-cols-4">
           <div className={adminStatCardClass}>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.users')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{stats.totalUsers}</p>
+            <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.users')}</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-slate-900 sm:text-2xl">{stats.totalUsers}</p>
           </div>
           <div className={adminStatCardClass}>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.revenue')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">
+            <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.revenue')}</p>
+            <p className="mt-1 text-lg font-bold tabular-nums text-slate-900 sm:text-2xl">
               {formatMoney(stats.revenueUsd, language)}
             </p>
           </div>
           <div className={adminStatCardClass}>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.activeSubscriptions')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{stats.activeSubscriptions}</p>
+            <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.activeSubscriptions')}</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-slate-900 sm:text-2xl">{stats.activeSubscriptions}</p>
           </div>
           <div className={adminStatCardClass}>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.completionRate')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{stats.completionRatePercent}%</p>
+            <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.completionRate')}</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-slate-900 sm:text-2xl">{stats.completionRatePercent}%</p>
           </div>
-          <div className={`${adminStatCardClass} col-span-2 lg:col-span-1`}>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.enrollments')}</p>
-            <p className="mt-1 text-sm text-slate-700">
+          <div className={`${adminStatCardClass} col-span-2 border-t-teal-600 lg:col-span-1`}>
+            <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.enrollments')}</p>
+            <p className="mt-1 text-xs leading-snug text-slate-700 sm:text-sm">
               {t('admin.enrollmentsSummary', {
                 completed: stats.completedEnrollments,
                 total: stats.totalEnrollments,
@@ -1117,12 +1122,12 @@ export default function ClientAdminCrud() {
             </p>
           </div>
           <div className={adminStatCardClass}>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.affiliateReferrals')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{stats.affiliateReferrals}</p>
+            <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.affiliateReferrals')}</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-slate-900 sm:text-2xl">{stats.affiliateReferrals}</p>
           </div>
-          <div className={`${adminStatCardClass} sm:col-span-2 lg:col-span-1`}>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-900">{t('admin.pendingCommissions')}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">
+          <div className={`${adminStatCardClass} col-span-2 border-t-emerald-600 lg:col-span-1`}>
+            <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.pendingCommissions')}</p>
+            <p className="mt-1 text-lg font-bold tabular-nums text-slate-900 sm:text-2xl">
               {formatMoney(Math.round(stats.pendingCommissionUsd * 100), language)}
             </p>
           </div>
@@ -1141,8 +1146,8 @@ export default function ClientAdminCrud() {
 
       {tab === 'affiliates' && (
         <div className={adminCardClass}>
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <h2 className="text-xl font-semibold">{t('admin.tabAffiliates')}</h2>
+          <div className={adminSectionHeaderClass}>
+            <h2 className={adminSectionTitleClass}>{t('admin.tabAffiliates')}</h2>
             {commissions.length > 0 ? (
               <AdminSearchBar
                 value={affiliateSearch}
@@ -1157,40 +1162,81 @@ export default function ClientAdminCrud() {
           ) : filteredCommissions.length === 0 ? (
             <p className={siteMutedClass}>{t('admin.noSearchResults')}</p>
           ) : (
-            <ul className="divide-y divide-slate-100 text-sm">
-              {filteredCommissions.map((c) => (
-                <li key={c.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="font-medium text-slate-900">
-                      {c.affiliate.user.name} → {c.referredUser.name}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {formatMoney(Math.round(c.amount * 100), language)} · {c.status} ·{' '}
+            <>
+              <AdminMobileList>
+                {filteredCommissions.map((c) => (
+                  <AdminMobileCard key={c.id}>
+                    <AdminMobileHeader
+                      title={`${c.affiliate.user.name} → ${c.referredUser.name}`}
+                      subtitle={c.referredUser.email}
+                    />
+                    <AdminMobileField label={t('admin.revenue')}>
+                      {formatMoney(Math.round(c.amount * 100), language)}
+                    </AdminMobileField>
+                    <AdminMobileField label="Status">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          c.status === 'PENDING'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-emerald-100 text-emerald-800'
+                        }`}
+                      >
+                        {c.status}
+                      </span>
+                    </AdminMobileField>
+                    <AdminMobileField label={t('admin.paymentDate')}>
                       {new Date(c.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                  {c.status === 'PENDING' ? (
-                    <button
-                      type="button"
-                      disabled={commissionBusy === c.id}
-                      onClick={() => approveCommission(c.id)}
-                      className="rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
-                    >
-                      {t('admin.approveCommission')}
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+                    </AdminMobileField>
+                    {c.status === 'PENDING' ? (
+                      <AdminMobileActions>
+                        <button
+                          type="button"
+                          disabled={commissionBusy === c.id}
+                          onClick={() => approveCommission(c.id)}
+                          className={`${adminPrimaryBtnClass} w-full bg-emerald-600 hover:bg-emerald-700`}
+                        >
+                          {t('admin.approveCommission')}
+                        </button>
+                      </AdminMobileActions>
+                    ) : null}
+                  </AdminMobileCard>
+                ))}
+              </AdminMobileList>
+              <ul className="hidden divide-y divide-slate-100 text-sm md:block">
+                {filteredCommissions.map((c) => (
+                  <li key={c.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="font-medium text-slate-900">
+                        {c.affiliate.user.name} → {c.referredUser.name}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {formatMoney(Math.round(c.amount * 100), language)} · {c.status} ·{' '}
+                        {new Date(c.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    {c.status === 'PENDING' ? (
+                      <button
+                        type="button"
+                        disabled={commissionBusy === c.id}
+                        onClick={() => approveCommission(c.id)}
+                        className="rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                      >
+                        {t('admin.approveCommission')}
+                      </button>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
       )}
 
       {tab === 'users' && (
         <div className={adminCardClass}>
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className={adminSectionHeaderClass}>
             <div>
-              <h2 className="text-xl font-semibold">{t('admin.allUsers')}</h2>
+              <h2 className={adminSectionTitleClass}>{t('admin.allUsers')}</h2>
               <p className={`${siteMutedClass} mt-1 text-sm`}>
                 {usersTotal} total
               </p>
@@ -1329,8 +1375,8 @@ export default function ClientAdminCrud() {
 
       {tab === 'payments' && (
         <div className={adminCardClass}>
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <h2 className="text-xl font-semibold">{t('admin.allPayments')}</h2>
+          <div className={adminSectionHeaderClass}>
+            <h2 className={adminSectionTitleClass}>{t('admin.allPayments')}</h2>
             {payments.length > 0 ? (
               <AdminSearchBar
                 value={paymentSearch}
@@ -1421,8 +1467,8 @@ export default function ClientAdminCrud() {
 
       {tab === 'subscriptions' && (
         <div className={adminCardClass}>
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <h2 className="text-xl font-semibold">{t('admin.allSubscriptions')}</h2>
+          <div className={adminSectionHeaderClass}>
+            <h2 className={adminSectionTitleClass}>{t('admin.allSubscriptions')}</h2>
             {subscriptions.length > 0 ? (
               <AdminSearchBar
                 value={subscriptionSearch}
@@ -1522,8 +1568,8 @@ export default function ClientAdminCrud() {
 
       {tab === 'certificates' && (
         <div className={adminCardClass}>
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <h2 className="text-xl font-semibold">{t('admin.allCertificates')}</h2>
+          <div className={adminSectionHeaderClass}>
+            <h2 className={adminSectionTitleClass}>{t('admin.allCertificates')}</h2>
             {certificates.length > 0 ? (
               <AdminSearchBar
                 value={certificateSearch}
@@ -1795,27 +1841,27 @@ export default function ClientAdminCrud() {
 
       {tab === 'reports' && stats && (
         <div className={adminCardClass}>
-          <h2 className="text-xl font-semibold mb-4">{t('admin.tabReports')}</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.tabUsers')}</p>
-              <p className="mt-2 text-2xl font-bold tabular-nums">{stats.totalUsers}</p>
+          <h2 className={`${adminSectionTitleClass} mb-4`}>{t('admin.tabReports')}</h2>
+          <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-3">
+            <div className={adminReportCardClass}>
+              <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.tabUsers')}</p>
+              <p className="mt-1 text-xl font-bold tabular-nums sm:mt-2 sm:text-2xl">{stats.totalUsers}</p>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.revenue')}</p>
-              <p className="mt-2 text-2xl font-bold tabular-nums">{formatMoney(stats.revenueUsd, language)}</p>
+            <div className={adminReportCardClass}>
+              <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.revenue')}</p>
+              <p className="mt-1 text-lg font-bold tabular-nums sm:mt-2 sm:text-2xl">{formatMoney(stats.revenueUsd, language)}</p>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.activeSubscriptions')}</p>
-              <p className="mt-2 text-2xl font-bold tabular-nums">{stats.activeSubscriptions}</p>
+            <div className={adminReportCardClass}>
+              <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.activeSubscriptions')}</p>
+              <p className="mt-1 text-xl font-bold tabular-nums sm:mt-2 sm:text-2xl">{stats.activeSubscriptions}</p>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.completionRate')}</p>
-              <p className="mt-2 text-2xl font-bold tabular-nums">{stats.completionRatePercent}%</p>
+            <div className={adminReportCardClass}>
+              <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.completionRate')}</p>
+              <p className="mt-1 text-xl font-bold tabular-nums sm:mt-2 sm:text-2xl">{stats.completionRatePercent}%</p>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.enrollments')}</p>
-              <p className="mt-2 text-sm text-slate-700">
+            <div className={`${adminReportCardClass} col-span-2 lg:col-span-1`}>
+              <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.enrollments')}</p>
+              <p className="mt-1 text-xs leading-snug text-slate-700 sm:mt-2 sm:text-sm">
                 {t('admin.enrollmentsSummary', {
                   completed: stats.completedEnrollments,
                   total: stats.totalEnrollments,
@@ -1823,13 +1869,13 @@ export default function ClientAdminCrud() {
                 })}
               </p>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.affiliateReferrals')}</p>
-              <p className="mt-2 text-2xl font-bold tabular-nums">{stats.affiliateReferrals}</p>
+            <div className={adminReportCardClass}>
+              <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.affiliateReferrals')}</p>
+              <p className="mt-1 text-xl font-bold tabular-nums sm:mt-2 sm:text-2xl">{stats.affiliateReferrals}</p>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4 sm:col-span-2 lg:col-span-3">
-              <p className="text-xs font-bold uppercase text-blue-900">{t('admin.pendingCommissions')}</p>
-              <p className="mt-2 text-2xl font-bold tabular-nums">
+            <div className={`${adminReportCardClass} col-span-2 lg:col-span-3`}>
+              <p className="text-[0.65rem] font-bold uppercase tracking-wide text-blue-900 sm:text-xs">{t('admin.pendingCommissions')}</p>
+              <p className="mt-1 text-lg font-bold tabular-nums sm:mt-2 sm:text-2xl">
                 {formatMoney(Math.round(stats.pendingCommissionUsd * 100), language)}
               </p>
             </div>
@@ -1838,9 +1884,9 @@ export default function ClientAdminCrud() {
       )}
 
       {tab === 'categories' && (
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-black/5 sm:p-6">
-            <h2 className="text-xl font-semibold mb-4">{t('admin.createCategory')}</h2>
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+          <div className={adminCardClass}>
+            <h2 className={`${adminSectionTitleClass} mb-4`}>{t('admin.createCategory')}</h2>
 
             <div className="space-y-3">
               <Field label={t('admin.name')}>
@@ -1895,8 +1941,8 @@ export default function ClientAdminCrud() {
           </div>
 
           <div className={adminCardClass}>
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <h2 className="text-xl font-semibold">{t('admin.allCategories')}</h2>
+            <div className={adminSectionHeaderClass}>
+              <h2 className={adminSectionTitleClass}>{t('admin.allCategories')}</h2>
               {categories.length > 0 ? (
                 <AdminSearchBar
                   value={categorySearch}
@@ -1913,7 +1959,7 @@ export default function ClientAdminCrud() {
                 <p className={siteMutedClass}>{t('admin.noSearchResults')}</p>
               ) : (
                 filteredCategories.map((c) => (
-                  <div key={c.id} className="flex flex-col gap-2 rounded border p-3">
+                  <AdminMobileCard key={c.id}>
                     {editingCategoryId === c.id ? (
                       <>
                         <input
@@ -1950,11 +1996,11 @@ export default function ClientAdminCrud() {
                           className="block w-full text-xs text-slate-600 file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
                         />
                         {categoryUploadBusy === 'edit-image' ? <p className="text-xs text-slate-500">Uploading image...</p> : null}
-                        <div className="flex flex-col gap-2 sm:flex-row">
+                        <AdminMobileActions>
                           <button
                             disabled={catBusy}
                             onClick={updateCategory}
-                            className="flex-1 rounded bg-green-600 px-3 py-2 text-white hover:bg-green-700 disabled:opacity-50"
+                            className={`${adminPrimaryBtnClass} bg-emerald-600 hover:bg-emerald-700`}
                           >
                             {t('admin.save')}
                           </button>
@@ -1966,11 +2012,11 @@ export default function ClientAdminCrud() {
                               setEditingCategoryIcon('')
                               setEditingCategoryImageUrl('')
                             }}
-                            className="rounded border px-3 py-2 hover:bg-gray-50"
+                            className={adminSecondaryBtnClass}
                           >
                             {t('admin.cancel')}
                           </button>
-                        </div>
+                        </AdminMobileActions>
                       </>
                     ) : (
                       <>
@@ -1990,7 +2036,7 @@ export default function ClientAdminCrud() {
                             )}
                             <div className="text-xs text-gray-500">{c.id}</div>
                           </div>
-                          <div className="flex flex-col gap-2 sm:flex-row">
+                          <AdminMobileActions>
                             <button
                               disabled={catBusy}
                               onClick={() => {
@@ -1999,29 +2045,29 @@ export default function ClientAdminCrud() {
                                 setEditingCategoryIcon(c.icon ?? '')
                                 setEditingCategoryImageUrl(c.imageUrl ?? '')
                               }}
-                              className="rounded border px-3 py-2 text-sm hover:bg-gray-50"
+                              className={adminActionBtnClass}
                             >
                               {t('admin.edit')}
                             </button>
                             <button
                               disabled={catBusy}
                               onClick={() => deleteCategory(c.id)}
-                              className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100"
+                              className={adminDangerBtnClass}
                             >
                               {t('admin.delete')}
                             </button>
-                          </div>
+                          </AdminMobileActions>
                         </div>
                       </>
                     )}
-                  </div>
+                  </AdminMobileCard>
                 ))
               )}
             </div>
           </div>
 
           <div className={`${adminCardClass} lg:col-span-2`}>
-            <h2 className="mb-4 text-xl font-semibold">{t('admin.allSubcategories')}</h2>
+            <h2 className={`${adminSectionTitleClass} mb-4`}>{t('admin.allSubcategories')}</h2>
             <div className="mb-6 grid gap-4 lg:grid-cols-2">
               <div className="space-y-3">
                 <Field label={t('admin.parentCategory')}>

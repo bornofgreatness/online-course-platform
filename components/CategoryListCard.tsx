@@ -44,7 +44,7 @@ export default function CategoryListCard({ category }: { category: Category }) {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={imageUrl} alt={displayName} className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-black">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-teal-50 to-blue-50 text-teal-700">
               <CourseCategorySidebarIcon categoryName={category.name} icon={category.icon} />
             </div>
           )}
