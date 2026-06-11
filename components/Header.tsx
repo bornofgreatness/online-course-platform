@@ -240,7 +240,7 @@ export default function Header() {
 
             <nav className="flex flex-1 flex-col overflow-y-auto">
               <Link href="/" className={mobileNavItem} onClick={closeMobileMenu}>
-                {t('common.home')}
+                {t('common.categories')}
               </Link>
 
               <div>
