@@ -4,7 +4,8 @@ import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import MobileQuickNav from './MobileQuickNav'
 import { CourseCategorySidebarIcon } from './CourseCategorySidebarIcon'
 import LanguageSwitch from './LanguageSwitch'
 import LoadingImage from './LoadingImage'
@@ -190,6 +191,10 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      <Suspense fallback={null}>
+        <MobileQuickNav />
+      </Suspense>
 
       {mobileMenuVisible && (
         <div

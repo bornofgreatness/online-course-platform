@@ -39,7 +39,16 @@ export const siteDarkBtnClass =
   'inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-slate-900/20 transition hover:from-slate-800 hover:to-slate-700 disabled:cursor-not-allowed disabled:opacity-60'
 
 export const siteMobileActionClass =
-  'block w-full rounded-xl py-3.5 text-center text-sm font-bold uppercase tracking-wide shadow-md transition'
+  'block w-full appearance-none border-0 rounded-xl py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white shadow-sm transition active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
+
+export const siteMobileQuickBlackClass =
+  `${siteMobileActionClass} bg-black hover:bg-neutral-900 focus-visible:ring-black/40`
+
+export const siteMobileQuickGreenClass =
+  `${siteMobileActionClass} bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-600/40`
+
+export const siteMobileQuickBlueClass =
+  `${siteMobileActionClass} bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-600/40`
 
 const siteMobileQuickBtnBase =
   'flex min-h-[3rem] w-full items-center justify-center gap-2.5 rounded-xl px-4 py-3 text-sm font-semibold transition active:scale-[0.98]'
