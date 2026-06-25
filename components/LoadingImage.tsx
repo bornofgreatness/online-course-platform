@@ -22,9 +22,11 @@ export function LoadingSpinner({
   size = 'md',
   color = 'default',
   className = '',
-}: Pick<LoadingImageProps, 'size' | 'color' | 'className'>) {
+  as = 'div',
+}: Pick<LoadingImageProps, 'size' | 'color' | 'className'> & { as?: 'div' | 'span' }) {
+  const Component = as
   return (
-    <div
+    <Component
       className={`${sizeMap[size]} animate-spin rounded-full ${colorMap[color]} ${className}`}
       aria-hidden
     />
@@ -38,7 +40,7 @@ export default function LoadingImage({
   label = 'Loading…',
   inline = false,
 }: LoadingImageProps) {
-  const spinner = <LoadingSpinner size={size} color={color} />
+  const spinner = <LoadingSpinner size={size} color={color} as={inline ? 'span' : 'div'} />
 
   if (inline) {
     return (
